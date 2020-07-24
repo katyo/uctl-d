@@ -11,6 +11,8 @@ import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
    TODO:
  */
 struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
+  static assert(rmin_ <= rmax_, "Invalid range: minimum should be less than or equals to maximum.");
+
   /// Real minimum
   static const real rmin = rmin_;
   /// Real maximum
