@@ -263,17 +263,18 @@ T raw_to_exp(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
 
 /// Selects appropriate mantissa type by width in bits
 template raw_type(uint bits) {
-  static if (bits <= 8) {
+  static if (bits <= 8 && is(byte)) {
     alias raw_type = byte;
-  } else static if (bits <= 16) {
+  } else static if (bits <= 16 && is(short)) {
     alias raw_type = short;
-  } else static if (bits <= 32) {
+  } else static if (bits <= 32 && is(int)) {
     alias raw_type = int;
-  } else static if (bits <= 64) {
+  } else static if (bits <= 64 && is(long)) {
     alias raw_type = long;
+  } else static if (bits <= 128 && is(cent)) {
+    alias raw_type = cent;
   } else {
-    alias raw_type = void;
-    static assert(0, "Unsupported bits width: " ~ bits);
+    static assert(0, "Unsupported bits width: " ~ bits.stringof);
   }
 }
 
