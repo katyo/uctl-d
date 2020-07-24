@@ -162,7 +162,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
                                       other.to!(fixDiff!(self, T))().raw);
   }
 
-  /// Multiplication of fixed-point value (binary *)
+  /// Fixed-point multiplication (binary *)
   @safe @nogc
   pure nothrow const
   fixProd!(self, T) opBinary(string op, T)(T other) if (op == "*" && is(T) && isFixed!T) {
@@ -173,6 +173,19 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
     return fixProd!(self, T).from_raw(cast(fixProd!(self, T).raw_t)
                                       ((cast(op_raw_t) raw) *
                                        (cast(op_raw_t) other.raw) >> r_bits));
+  }
+
+  /// Fixed-point division (binary /)
+  @safe @nogc
+  pure nothrow const
+  fixQuot!(self, T) opBinary(string op, T)(T other) if (op == "/" && is(T) && isFixed!T) {
+    enum uint op_bits = bits + T.bits;
+    alias op_raw_t = raw_type!(op_bits);
+    enum uint r_bits = exp - (fixQuot!(self, T).exp + T.exp);
+
+    return fixQuot!(self, T).from_raw(cast(fixQuot!(self, T).raw_t)
+                                      (((cast(op_raw_t) raw) << r_bits) /
+                                       (cast(op_raw_t) other.raw)));
   }
 }
 
@@ -209,6 +222,21 @@ template fixProd(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
   enum uint bits = max(A.bits, B.bits);
 
   alias fixProd = fix!(rmin, rmax, bits);
+}
+
+/// The result of fixed-point division
+template fixQuot(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
+  enum real minXmin = A.rmin / B.rmin;
+  enum real minXmax = A.rmin / B.rmax;
+  enum real maxXmin = A.rmax / B.rmin;
+  enum real maxXmax = A.rmax / B.rmax;
+
+  enum real rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
+  enum real rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
+
+  enum uint bits = max(A.bits, B.bits);
+
+  alias fixQuot = fix!(rmin, rmax, bits);
 }
 
 /// Create fixed-point constant from floating-point
@@ -461,6 +489,11 @@ template bitsOf(X...) if (X.length == 1) {
 @safe @nogc nothrow unittest {
   assert(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3) == fix!(-4000, 2000)(6.624999));
   //assert(asfix!(1.25) * asfix!(5.3) == asfix!(6.625));
+}
+
+/// Test division
+@safe @nogc nothrow unittest {
+  assert(fix!(-4000, 2000)(6.625) / fix!(-20, 10)(5.3) == fix!(-400, 200)(1.25));
 }
 
 // support for standalone unit testing without a runtime
