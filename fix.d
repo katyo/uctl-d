@@ -178,6 +178,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 template fixSum(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
   enum real rmin = A.rmin + B.rmin;
   enum real rmax = A.rmax + B.rmax;
+
   enum uint bits = max(A.bits, B.bits);
 
   alias fixSum = fix!(rmin, rmax, bits);
@@ -187,6 +188,7 @@ template fixSum(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
 template fixDiff(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
   enum real rmin = A.rmin - B.rmax;
   enum real rmax = A.rmax - B.rmin;
+
   enum uint bits = max(A.bits, B.bits);
 
   alias fixDiff = fix!(rmin, rmax, bits);
@@ -198,10 +200,11 @@ template fixProd(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
   enum real minXmax = A.rmin * B.rmax;
   enum real maxXmin = A.rmax * B.rmin;
   enum real maxXmax = A.rmax * B.rmax;
-  enum uint bits = max(A.bits, B.bits);
 
   enum real rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
   enum real rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
+
+  enum uint bits = max(A.bits, B.bits);
 
   alias fixProd = fix!(rmin, rmax, bits);
 }
