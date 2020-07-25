@@ -162,42 +162,58 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   @safe @nogc
   pure nothrow const
   fixSum!(self, T) opBinary(string op, T)(T other) if (op == "+" && is(T) && isFixed!T) {
-    return fixSum!(self, T).from_raw(this.to!(fixSum!(self, T))().raw +
-                                     other.to!(fixSum!(self, T))().raw);
+    alias R = fixSum!(self, T);
+
+    auto a = raw.raw_to!(exp, R.exp, R.bits)();
+    auto b = other.raw.raw_to!(T.exp, R.exp, R.bits)();
+
+    return R.from_raw(a + b);
   }
 
   /// Subtraction of fixed-point value (binary -)
   @safe @nogc
   pure nothrow const
   fixDiff!(self, T) opBinary(string op, T)(T other) if (op == "-" && is(T) && isFixed!T) {
-    return fixDiff!(self, T).from_raw(this.to!(fixDiff!(self, T))().raw -
-                                      other.to!(fixDiff!(self, T))().raw);
+    alias R = fixDiff!(self, T);
+
+    auto a = raw.raw_to!(exp, R.exp, R.bits)();
+    auto b = other.raw.raw_to!(T.exp, R.exp, R.bits)();
+
+    return R.from_raw(a - b);
   }
 
   /// Fixed-point multiplication (binary *)
   @safe @nogc
   pure nothrow const
   fixProd!(self, T) opBinary(string op, T)(T other) if (op == "*" && is(T) && isFixed!T) {
-    enum uint op_bits = bits + T.bits;
-    alias op_raw_t = raw_type!(op_bits);
-    enum uint r_bits = fixProd!(self, T).exp - (exp + T.exp);
+    alias R = fixProd!(self, T);
 
-    return fixProd!(self, T).from_raw(cast(fixProd!(self, T).raw_t)
-                                      ((cast(op_raw_t) raw) *
-                                       (cast(op_raw_t) other.raw) >> r_bits));
+    enum uint op_bits = bits + T.bits;
+    enum uint op_exp = exp + T.exp;
+
+    auto a = raw.raw_to_bits!op_bits();
+    auto b = other.raw.raw_to_bits!op_bits();
+
+    auto r = (a * b).raw_to!(op_exp, R.exp, R.bits)();
+
+    return R.from_raw(r);
   }
 
   /// Fixed-point division (binary /)
   @safe @nogc
   pure nothrow const
   fixQuot!(self, T) opBinary(string op, T)(T other) if (op == "/" && is(T) && isFixed!T) {
-    enum uint op_bits = bits + T.bits;
-    alias op_raw_t = raw_type!(op_bits);
-    enum uint r_bits = exp - (fixQuot!(self, T).exp + T.exp);
+    alias R = fixQuot!(self, T);
 
-    return fixQuot!(self, T).from_raw(cast(fixQuot!(self, T).raw_t)
-                                      (((cast(op_raw_t) raw) << r_bits) /
-                                       (cast(op_raw_t) other.raw)));
+    enum uint op_bits = T.bits + R.bits;
+    enum uint op_exp = T.exp + R.exp;
+
+    auto a = raw.raw_to!(exp, op_exp, op_bits)();
+    auto b = other.raw.raw_to_bits!op_bits();
+
+    auto r = (a / b).raw_to_bits!(R.bits)();
+
+    return R.from_raw(r);
   }
 }
 
