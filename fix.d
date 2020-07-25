@@ -215,6 +215,20 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
     return R.from_raw(r);
   }
+
+  /// Fixed-point remainder (binary %)
+  @safe @nogc
+  pure nothrow const
+  fixMod!(self, T) opBinary(string op, T)(T other) if (op == "%" && is(T) && isFixed!T) {
+    alias R = fixMod!(self, T);
+
+    auto a = raw;
+    auto b = other.raw.raw_to!(T.exp, exp, bits)();
+
+    auto r = (a % b).raw_to!(exp, R.exp, R.bits);
+
+    return R.from_raw(r);
+  }
 }
 
 /// The result of fixed-point addition
@@ -265,6 +279,18 @@ template fixQuot(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
   enum uint bits = max(A.bits, B.bits);
 
   alias fixQuot = fix!(rmin, rmax, bits);
+}
+
+/// The result of fixed-point remainder
+template fixMod(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
+  enum real rlim = fmax(fabs(B.rmin), fabs(B.rmax));
+
+  enum real rmin = A.isntneg ? 0.0 : -rlim;
+  enum real rmax = A.isntpos ? 0.0 : rlim;
+
+  enum uint bits = B.bits;
+
+  alias fixMod = fix!(rmin, rmax, bits);
 }
 
 /// Create fixed-point constant from floating-point
@@ -533,6 +559,10 @@ template bitsOf(X...) if (X.length == 1) {
 /// Test division
 @safe @nogc nothrow unittest {
   assert(fix!(-4000, 2000)(6.625) / fix!(-20, 10)(5.3) == fix!(-400, 200)(1.25));
+
+/// Test remainder
+@nogc nothrow unittest {
+  assert(fix!(-100, 50)(11.25) % fix!(-10, 20)(3.5) == fix!(-20, 20)(0.75));
 }
 
 // support for standalone unit testing without a runtime
