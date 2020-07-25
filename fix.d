@@ -113,7 +113,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Convert number into generic floating-point value
   @safe @nogc
   pure nothrow const
-  T to(T)() if (is(T) && isFloat!T) {
+  T opCast(T)() if (is(T) && isFloat!T) {
     version(fixRound) {
       return ((cast(T) raw) * 2 + (raw < 0 ? -0.5 : 0.5)) * (cast(T) (-exp + 1).exp_ratio());
     } else {
@@ -124,7 +124,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Convert number into generic integer value
   @safe @nogc
   pure nothrow const
-  T to(T)() if (is(T) && isInt!T) {
+  T opCast(T)() if (is(T) && isInt!T) {
     static if (exp < 0) {
       version(fixRound) {
         // FIXME: rounding
@@ -140,15 +140,15 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Convert number to different range or mantissa width
   @safe @nogc
   pure nothrow const
-  T to(T)() if (is(T) && isFixed!T) {
+  T opCast(T)() if (is(T) && isFixed!T) {
     return T.from_raw(raw.raw_to!(exp, T.exp, T.bits)());
   }
 
   /// Unified cast operation
   @safe @nogc
   pure nothrow const
-  T opCast(T)() if (is(T) && isNumer!T) {
-    return to!T();
+  T to(T)() if (is(T) && isNumer!T) {
+    return cast(T) this;
   }
 
   /// Negation (unary -)
