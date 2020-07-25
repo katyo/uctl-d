@@ -1,4 +1,4 @@
-#DFLAGS += -d-version=fixRound
+DFLAGS += -d-version=fixRound
 
 app.elf: main.o fix.o
 	cc -Wl,--gc-sections $^ -o $@

@@ -114,11 +114,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   @safe @nogc
   pure nothrow const
   T opCast(T)() if (is(T) && isFloat!T) {
-    version(fixRound) {
-      return ((cast(T) raw) * 2 + (raw < 0 ? -0.5 : 0.5)) * (cast(T) (-exp + 1).exp_ratio());
-    } else {
-      return (cast(T) raw) * (cast(T) (-exp).exp_ratio());
-    }
+    return (cast(T) raw) * (cast(T) (-exp).exp_ratio());
   }
 
   /// Convert number into generic integer value
@@ -336,8 +332,13 @@ T raw_to_exp(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
   static if (rexp < exp) {
     return raw << (exp - rexp);
   } else static if (rexp > exp) {
-    // TODO: rounding
-    return raw >> (rexp - exp);
+    version(fixRound) {
+      // FIXME: rounding
+      // raw + 0.5 <=> (raw * 2 + 1) / 2
+      return ((raw >> (rexp - exp - 1)) + 1) >> 1;
+    } else {
+      return raw >> (rexp - exp);
+    }
   } else {
     return raw;
   }
@@ -552,8 +553,12 @@ template bitsOf(X...) if (X.length == 1) {
 
 /// Test multiplication
 @nogc nothrow unittest {
-  assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.624999));
-  //assert_eq(asfix!(1.25) * asfix!(5.3), asfix!(6.625));
+  version(fixRound) {
+    assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.625));
+    assert_eq(asfix!(1.25) * asfix!(5.3), asfix!(6.625));
+  } else {
+    assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.624999));
+  }
 }
 
 /// Test division
