@@ -468,107 +468,188 @@ template bitsOf(X...) if (X.length == 1) {
 }
 
 /// Test exponent extimation
-@safe @nogc nothrow unittest {
-  assert(fix!(0).exp == -30); // -31
-  assert(fix!(0.8).exp == -31);
-  assert(fix!(0, 0.1).exp == -34);
-  assert(fix!(-0.1, 0).exp == -34);
-  assert(fix!(0, 0.5).exp == -32);
-  assert(fix!(0, 1).exp == -30); // -31
-  assert(fix!(0, 100).exp == -24);
-  assert(fix!(-100, 0).exp == -24);
-  assert(fix!(-100, 100).exp == -24);
-  assert(fix!(-100, 1000).exp == -21);
-  assert(fix!(100000000).exp == -4);
-  assert(fix!(1000000000).exp == -1);
-  assert(fix!(10000000000).exp == 3);
-  assert(fix!(100000000000).exp == 6);
+@nogc nothrow unittest {
+  assert_eq(fix!(0).exp, -30); // -31
+  assert_eq(fix!(0.8).exp, -31);
+  assert_eq(fix!(0, 0.1).exp, -34);
+  assert_eq(fix!(-0.1, 0).exp, -34);
+  assert_eq(fix!(0, 0.5).exp, -32);
+  assert_eq(fix!(0, 1).exp, -30); // -31
+  assert_eq(fix!(0, 100).exp, -24);
+  assert_eq(fix!(-100, 0).exp, -24);
+  assert_eq(fix!(-100, 100).exp, -24);
+  assert_eq(fix!(-100, 1000).exp, -21);
+  assert_eq(fix!(100000000).exp, -4);
+  assert_eq(fix!(1000000000).exp, -1);
+  assert_eq(fix!(10000000000).exp, 3);
+  assert_eq(fix!(100000000000).exp, 6);
 }
 
 /// Test step (or precision)
-@safe @nogc nothrow unittest {
-  assert(fix!(1).step.to!double() == 9.313225746154785e-10); //4.656612873077393e-10
-  assert(fix!(10).step.to!double() == 7.450580596923828e-9);
-  assert(fix!(100).step.to!double() == 5.960464477539063e-8);
-  assert(fix!(1000).step.to!double() == 4.76837158203125e-7);
-  assert(fix!(100000000).step.to!double() == 0.0625);
-  assert(fix!(1000000000).step.to!double() == 0.5);
-  assert(fix!(10000000000).step.to!double() == 8);
-  assert(fix!(100000000000).step.to!double() == 64);
+@nogc nothrow unittest {
+  assert_eq(cast(double) fix!(1).step, 9.313225746154785e-10); //4.656612873077393e-10
+  assert_eq(cast(double) fix!(10).step, 7.450580596923828e-9);
+  assert_eq(cast(double) fix!(100).step, 5.960464477539063e-8);
+  assert_eq(cast(double) fix!(1000).step, 4.76837158203125e-7);
+  assert_eq(cast(double) fix!(100000000).step, 0.0625);
+  assert_eq(cast(double) fix!(1000000000).step, 0.5);
+  assert_eq(cast(double) fix!(10000000000).step, 8);
+  assert_eq(cast(double) fix!(100000000000).step, 64);
+}
 
-  assert(fix!(-100, 100)(10).to!double() == 10);
-  assert(fix!(-100, 100)(10).to!int() == 10);
-  assert(fix!(-100, 100)(0.5).to!double() == 0.5);
+/// Test cast
+@nogc nothrow unittest {
+  assert_eq(cast(double) fix!(-100, 100)(10), 10);
+  assert_eq(cast(int) fix!(-100, 100)(10), 10);
+  assert_eq(cast(float) fix!(-100, 100)(0.5), 0.5);
 
-  assert(fix!(-100, 100)(0.3).to!int() == 0);
-  assert(fix!(-100, 100)(1.3).to!int() == 1);
+  assert_eq(cast(int) fix!(-100, 100)(0.3), 0);
+  assert_eq(cast(int) fix!(-100, 100)(1.3), 1);
 
   version(fixRound) {
-    //assert(fix!(-100, 100)(0.5).to!int() == 1);
-    //assert(fix!(-100, 100)(1.5).to!int() == 2);
+    assert_eq(cast(int) fix!(-100, 100)(0.5), 1);
+    assert_eq(cast(int) fix!(-100, 100)(1.5), 2);
   }
 }
 
 /// Test `asfix`
-@safe @nogc nothrow unittest {
-  assert(asfix!0.exp == -30); // -31
-  assert(asfix!0.to!double() == 0);
+@nogc nothrow unittest {
+  assert_eq(asfix!0.exp, -30); // -31
+  assert_eq(cast(double) asfix!0, 0);
 
-  assert(asfix!1.exp == -30); // -31
-  assert(asfix!1.to!double == 1);
+  assert_eq(asfix!1.exp, -30); // -31
+  assert_eq(cast(double) asfix!1, 1);
 
-  assert(asfix!(0.1).exp == -34);
-  assert(asfix!(0.1).to!double() == 0.09999999997671694);
+  assert_eq(asfix!(0.1).exp, -34);
+  assert_eq(cast(double) asfix!(0.1), 0.09999999997671694);
 
-  assert(asfix!(100).exp == -24);
-  assert(asfix!(100).to!double() == 100);
+  assert_eq(asfix!(100).exp, -24);
+  assert_eq(cast(double) asfix!(100), 100);
 }
 
-/// Test adjustment
-@safe @nogc nothrow unittest {
-  assert(fix!(-10, 10)(5).to!(fix!(-10, 100)) == fix!(-10, 100)(5));
-  assert(fix!(-10, 10)(5).to!(fix!(-10, 100)).to!int() == 5);
-  assert(fix!(-10, 10)(1.5).to!(fix!(-10, 100)) == fix!(-10, 100)(1.5));
+/// Test cast fixed
+@nogc nothrow unittest {
+  assert_eq(fix!(-10, 10)(5).to!(fix!(-10, 100)), fix!(-10, 100)(5));
+  assert_eq(cast(int) fix!(-10, 10)(5).to!(fix!(-10, 100)), 5);
+  assert_eq(fix!(-10, 10)(1.5).to!(fix!(-10, 100)), fix!(-10, 100)(1.5));
 }
 
 /// Test negation
-@safe @nogc nothrow unittest {
-  assert((-fix!(-100, 100)(5)).to!double() == -5);
-  assert((-fix!(-100, 100)(5)).to!int() == -5);
-  assert((-fix!(-100, 100)(5)) == fix!(-100, 100)(-5));
-  assert((-fix!(-100, 100)(-0.5)).to!double() == 0.5);
-  assert((-fix!(-100, 100)(-0.5)) == fix!(-100, 100)(0.5));
+@nogc nothrow unittest {
+  assert_eq(-fix!(-100, 100)(5), fix!(-100, 100)(-5));
+  assert_eq(-fix!(-100, 100)(-0.5), fix!(-100, 100)(0.5));
 }
 
 /// Test addition
-@safe @nogc nothrow unittest {
-  assert(fix!(-100, 200)(1.23) + fix!(-20, 10)(5) == fix!(-120, 210)(6.23));
+@nogc nothrow unittest {
+  assert_eq(fix!(-100, 200)(1.23) + fix!(-20, 10)(5), fix!(-120, 210)(6.23));
 }
 
 /// Test subtraction
-@safe @nogc nothrow unittest {
-  assert(fix!(-100, 200)(1.25) - fix!(-20, 10)(5.3) == fix!(-110, 220)(-4.05));
+@nogc nothrow unittest {
+  assert_eq(fix!(-100, 200)(1.25) - fix!(-20, 10)(5.3), fix!(-110, 220)(-4.05));
 }
 
 /// Test multiplication
-@safe @nogc nothrow unittest {
-  assert(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3) == fix!(-4000, 2000)(6.624999));
-  //assert(asfix!(1.25) * asfix!(5.3) == asfix!(6.625));
+@nogc nothrow unittest {
+  assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.624999));
+  //assert_eq(asfix!(1.25) * asfix!(5.3), asfix!(6.625));
 }
 
 /// Test division
-@safe @nogc nothrow unittest {
-  assert(fix!(-4000, 2000)(6.625) / fix!(-20, 10)(5.3) == fix!(-400, 200)(1.25));
+@nogc nothrow unittest {
+  assert_eq(fix!(-4000, 2000)(6.625) / fix!(-20, 10)(5.3), fix!(-400, 200)(1.25));
+}
 
 /// Test remainder
 @nogc nothrow unittest {
-  assert(fix!(-100, 50)(11.25) % fix!(-10, 20)(3.5) == fix!(-20, 20)(0.75));
+  assert_eq(fix!(-100, 50)(11.25) % fix!(-10, 20)(3.5), fix!(-20, 20)(0.75));
+}
+
+template fmtOf(T) if (is(T) && isInt!T) {
+  import core.stdc.inttypes: PRIi8, PRIi16, PRIi32, PRIi64;
+
+  static if (bitsOf!T == 8) {
+    enum string fmtOf = cast(string) "%" ~ PRIi8;
+  } else static if (bitsOf!T == 16) {
+    enum string fmtOf = cast(string) "%" ~ PRIi16;
+  } else static if (bitsOf!T == 32) {
+    enum string fmtOf = cast(string) "%" ~ PRIi32;
+  } else static if (bitsOf!T == 64) {
+    enum string fmtOf = cast(string) "%" ~ PRIi64;
+  } else {
+    static assert(false, "Unsupported formatting of type: " ~ T.stringof);
+  }
+}
+
+template fmtOf(T) if (is(T) && isFloat!T) {
+  static if (is(T == float)) {
+    enum string fmtOf = "%f";
+  } else static if (is(T == double)) {
+    enum string fmtOf = "%g";
+  } else {
+    static assert(false, "Unsupported formatting of type: " ~ T.stringof);
+  }
+}
+
+/// Check equality of integer values
+@nogc nothrow
+void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b) if (is(T) && isInt!T) {
+  enum string F = fmtOf!T;
+
+  if (a != b) {
+    import core.stdc.stdio: snprintf;
+    import core.stdc.assert_: __assert;
+
+    char[64] buf;
+
+    snprintf(buf.ptr, buf.length, (F ~ " == " ~ F).ptr, a, b);
+    __assert(buf.ptr, file.ptr, line);
+  }
+}
+
+/// Check equality of floating-point values
+@nogc nothrow
+void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T epsilon = T.epsilon) if (is(T) && (isInt!T || isFloat!T)) {
+  enum string F = fmtOf!T;
+
+  if (fabs(a - b) > epsilon) {
+    import core.stdc.stdio: snprintf;
+    import core.stdc.assert_: __assert;
+
+    char[64] buf;
+
+    snprintf(buf.ptr, buf.length, (F ~ " == " ~ F).ptr, a, b);
+    __assert(buf.ptr, file.ptr, line);
+  }
+}
+
+/// Check equality of fixed-point values
+@nogc nothrow
+void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b) if (is(T) && isFixed!T) {
+  alias R = double;
+  enum string F = "%0.10g (%i)";
+
+  auto ra = cast(R) a;
+  auto rb = cast(R) b;
+
+  if (fabs(ra - rb) > R.epsilon) {
+    import core.stdc.stdio: snprintf;
+    import core.stdc.assert_: __assert;
+
+    char[64] buf;
+
+    snprintf(buf.ptr, buf.length, (F ~ " == " ~ F).ptr, ra, a.raw, rb, b.raw);
+    __assert(buf.ptr, file.ptr, line);
+  }
 }
 
 // support for standalone unit testing without a runtime
 version(D_BetterC) {
   version(unittest) {
-    extern(C) void main() {
+    @nogc
+    nothrow extern(C)
+    void main() {
       static foreach(unitTest; __traits(getUnitTests, __traits(parent, main)))
         unitTest();
     }
