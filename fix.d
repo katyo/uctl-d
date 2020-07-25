@@ -33,6 +33,22 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Stepping value (precision)
   static const self step = from_raw(1);
 
+  /// The number is positive
+  /// (both rmin and rmax greater than zero)
+  enum bool ispos = rmin > 0 && rmax > 0;
+
+  /// The number is negative
+  /// (both rmin and rmax less than zero)
+  enum bool isneg = rmin < 0 && rmax < 0;
+
+  /// The number is not negative
+  /// (both rmin and rmax greater than or equals zero)
+  enum bool isntneg = rmin >= 0 && rmax >= 0;
+
+  /// The number is not positive
+  /// (both rmin and rmax less than or equals zero)
+  enum bool isntpos = rmin <= 0 && rmax <= 0;
+
   /// Mantissa type
   alias raw_t = raw_type!(bits);
 
