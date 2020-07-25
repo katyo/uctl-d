@@ -141,11 +141,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   @safe @nogc
   pure nothrow const
   T to(T)() if (is(T) && isFixed!T) {
-    static if (T.exp < exp && T.bits > bits) {
-      return T.from_raw(raw.raw_to_bits!(T.bits)().raw_to_exp!(exp, T.exp)());
-    } else {
-      return T.from_raw(raw.raw_to_exp!(exp, T.exp)().raw_to_bits!(T.bits)());
-    }
+    return T.from_raw(raw.raw_to!(exp, T.exp, T.bits)());
   }
 
   /// Unified cast operation
@@ -282,14 +278,14 @@ real exp_ratio(int exp, real radix = 2) {
 
 @safe @nogc
 pure nothrow
-raw_type!(bits) raw_to_bits(uint bits, T)(T raw) if (is(T) && isInt!T) {
-  return cast(raw_type!(bits)) raw;
+T max(T)(T a, T b) if (is(T) && isNumer!T) {
+  return a > b ? a : b;
 }
 
 @safe @nogc
 pure nothrow
-T max(T)(T a, T b) if (is(T) && isNumer!T) {
-  return a > b ? a : b;
+raw_type!(rbits) raw_to_bits(uint rbits, T)(T raw) if (is(T) && isInt!T) {
+  return cast(raw_type!(rbits)) raw;
 }
 
 @safe @nogc
@@ -302,6 +298,17 @@ T raw_to_exp(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
     return raw >> (rexp - exp);
   } else {
     return raw;
+  }
+}
+
+@safe @nogc
+pure nothrow
+raw_type!(rbits) raw_to(int exp, int rexp, uint rbits, T)(T raw) if (is(T) && isInt!T) {
+  enum uint bits = bitsOf!T;
+  static if (rexp < exp && rbits > bits) {
+    return raw.raw_to_bits!(rbits)().raw_to_exp!(exp, rexp)();
+  } else {
+    return raw.raw_to_exp!(exp, rexp)().raw_to_bits!(rbits)();
   }
 }
 
