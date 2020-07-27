@@ -38,21 +38,27 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Stepping value (precision)
   static const self step = from_raw(1);
 
-  /// The number is positive
+  /// Number is positive
   /// (both rmin and rmax greater than zero)
   enum bool ispos = rmin > 0 && rmax > 0;
 
-  /// The number is negative
+  /// Number is negative
   /// (both rmin and rmax less than zero)
   enum bool isneg = rmin < 0 && rmax < 0;
 
-  /// The number is not negative
+  /// Number is not negative
   /// (both rmin and rmax greater than or equals zero)
   enum bool isntneg = rmin >= 0 && rmax >= 0;
 
-  /// The number is not positive
+  /// Number is not positive
   /// (both rmin and rmax less than or equals zero)
   enum bool isntpos = rmin <= 0 && rmax <= 0;
+
+  /// Number has integer part
+  enum bool hasint = fabs(rmin) >= 1.0 || fabs(rmax) >= 1.0;
+
+  /// Number has fraction part
+  enum bool hasfrac = exp < 0;
 
   /// Mantissa type
   alias raw_t = raw_type!(bits);
@@ -126,7 +132,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
         // FIXME: rounding
         return ((raw >> (-exp - 1)) + (raw < 0 ? -1 : 1)) >> 1;
       } else {
-        return raw >> (-exp);
+        return raw >> -exp;
       }
     } else {
       return (cast(T) raw) << exp;
