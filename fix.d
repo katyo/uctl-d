@@ -161,7 +161,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Addition of fixed-point value (binary +)
   const pure nothrow @nogc @safe
-  fixSum!(self, T) opBinary(string op, T)(T other) if (op == "+" && is(T) && isFixed!T) {
+  fixSum!(self, T) opBinary(string op, T)(const(T) other) if (op == "+" && is(T) && isFixed!T) {
     alias R = fixSum!(self, T);
 
     auto a = raw.raw_to!(exp, R.exp, R.bits)();
@@ -172,7 +172,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Subtraction of fixed-point value (binary -)
   const pure nothrow @nogc @safe
-  fixDiff!(self, T) opBinary(string op, T)(T other) if (op == "-" && is(T) && isFixed!T) {
+  fixDiff!(self, T) opBinary(string op, T)(const(T) other) if (op == "-" && is(T) && isFixed!T) {
     alias R = fixDiff!(self, T);
 
     auto a = raw.raw_to!(exp, R.exp, R.bits)();
@@ -183,7 +183,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point multiplication (binary *)
   const pure nothrow @nogc @safe
-  fixProd!(self, T) opBinary(string op, T)(T other) if (op == "*" && is(T) && isFixed!T) {
+  fixProd!(self, T) opBinary(string op, T)(const(T) other) if (op == "*" && is(T) && isFixed!T) {
     alias R = fixProd!(self, T);
 
     enum uint op_bits = bits + T.bits;
@@ -199,7 +199,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point division (binary /)
   const pure nothrow @nogc @safe
-  fixQuot!(self, T) opBinary(string op, T)(T other) if (op == "/" && is(T) && isFixed!T) {
+  fixQuot!(self, T) opBinary(string op, T)(const(T) other) if (op == "/" && is(T) && isFixed!T) {
     alias R = fixQuot!(self, T);
 
     enum uint op_bits = T.bits + R.bits;
@@ -215,7 +215,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point remainder (binary %)
   const pure nothrow @nogc @safe
-  fixMod!(self, T) opBinary(string op, T)(T other) if (op == "%" && is(T) && isFixed!T) {
+  fixMod!(self, T) opBinary(string op, T)(const(T) other) if (op == "%" && is(T) && isFixed!T) {
     alias R = fixMod!(self, T);
 
     auto a = raw;
@@ -247,7 +247,7 @@ nothrow @nogc unittest {
 
 /// Test step (or precision)
 nothrow @nogc unittest {
-  assert_eq(cast(double) fix!(1).step, 9.313225746154785e-10); //4.656612873077393e-10
+  assert_eq(cast(double) fix!(1).step, 9.313225746154785e-10);
   assert_eq(cast(double) fix!(10).step, 7.450580596923828e-9);
   assert_eq(cast(double) fix!(100).step, 5.960464477539063e-8);
   assert_eq(cast(double) fix!(1000).step, 4.76837158203125e-7);
