@@ -1,26 +1,21 @@
+SOURCES += num.d fix.d test.d
 DFLAGS += -d-version=fixRound
-
-app.elf: main.o fix.o
-	cc -Wl,--gc-sections $^ -o $@
-	size $@
-
-%.o: %.d
-	ldc2 -c -betterC -nogc $(DFLAGS) $<
 
 %.test: %.d
 	ldc2 -g $(DFLAGS) -betterC -nogc -unittest $<
 	./$*
 	rm $*
 
-test: fix.test
+test: $(patsubst %.d,%.test,$(SOURCES))
 
-doc: fix.d
-	ldc2 -o- -D -X -Xfdocs.json $^
+doc: $(SOURCES)
+	ldc2 -preview=markdown -o- -D -X -Xfdoc.json $^
+	dub run ddox -- filter doc.json --only-documented
 	mkdir -p doc
 	cp -r $(HOME)/.dub/packages/ddox-*/ddox/public/* doc
-	dub run ddox -- generate-html docs.json doc
+	dub run ddox -- generate-html doc.json doc
 
 clean:
 	rm -f *.o *.elf
 
-.PHONY: doc clean
+.PHONY: test doc clean
