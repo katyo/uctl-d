@@ -153,8 +153,10 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Negation (unary -)
   const pure nothrow @nogc @safe
-  self opUnary(string op)() if (op == "-") {
-    return from_raw(-raw);
+  fixNeg!(self) opUnary(string op)() if (op == "-") {
+    alias R = fixNeg!(self);
+
+    return R.from_raw(-raw);
   }
 
   /// Addition of fixed-point value (binary +)
@@ -279,8 +281,8 @@ nothrow @nogc unittest {
 
 /// Test negation
 nothrow @nogc unittest {
-  assert_eq(-fix!(-100, 100)(5), fix!(-100, 100)(-5));
-  assert_eq(-fix!(-100, 100)(-0.5), fix!(-100, 100)(0.5));
+  assert_eq(-fix!(-100, 200)(5), fix!(-200, 100)(-5));
+  assert_eq(-fix!(-22, 11)(-0.5), fix!(-11, 22)(0.5));
 }
 
 /// Test addition
@@ -311,6 +313,16 @@ nothrow @nogc unittest {
 /// Test remainder
 nothrow @nogc unittest {
   assert_eq(fix!(-100, 50)(11.25) % fix!(-10, 20)(3.5), fix!(-20, 20)(0.75));
+}
+
+/// The result of negation
+template fixNeg(T) if (is(T) && isFixed!T) {
+  enum real rmin = -T.rmax;
+  enum real rmax = -T.rmin;
+
+  enum uint bits = T.bits;
+
+  alias fixNeg = fix!(rmin, rmax, bits);
 }
 
 /// The result of fixed-point addition
