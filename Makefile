@@ -1,4 +1,4 @@
-SOURCES += num.d fix.d test.d
+SOURCES += num.d fix.d test.d lt.d
 DFLAGS += -d-version=fixRound
 
 test.%: %.d
