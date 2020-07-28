@@ -90,32 +90,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Create number from generic integer value
   const pure nothrow @nogc @safe
   this(T)(T val) if (is(T) && isInt!T) {
-    static if (bitsOf!T > bitsOf!raw_t) {
-      auto val2 = val;
-    } else {
-      auto val2 = cast(raw_t) val;
-    }
-
-    static if (exp < 0) {
-      /*version(fixRound) {
-        val2 = ((val2 << (-exp + 1)) + (val2 < 0 ? -1 : 1)) >> 1;
-      } else {
-        val2 = val2 << -exp;
-      }*/
-      val2 = val2 << -exp;
-    } else {
-      version(fixRound) {
-        val2 = ((val2 >> (exp - 1)) + (val2 < 0 ? -1 : 1)) >> 1;
-      } else {
-        val2 = val2 >> exp;
-      }
-    }
-
-    static if (bitsOf!T > bitsOf!raw_t) {
-      raw = cast(raw_t) val2;
-    } else {
-      raw = val2;
-    }
+    raw = val.raw_to!(0, exp, bits);
   }
 
   /// Convert number into generic floating-point value
@@ -128,12 +103,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   const pure nothrow @nogc @safe
   T opCast(T)() if (is(T) && isInt!T) {
     static if (exp < 0) {
-      version(fixRound) {
-        // FIXME: rounding
-        return ((raw >> (-exp - 1)) + (raw < 0 ? -1 : 1)) >> 1;
-      } else {
-        return raw >> -exp;
-      }
+      return raw.raw_to_exp!(exp, 0)();
     } else {
       return (cast(T) raw) << exp;
     }
@@ -265,10 +235,30 @@ nothrow @nogc unittest {
 
   assert_eq(cast(int) fix!(-100, 100)(0.3), 0);
   assert_eq(cast(int) fix!(-100, 100)(1.3), 1);
+  assert_eq(cast(int) fix!(-100, 100)(7.4), 7);
+
+  assert_eq(cast(int) fix!(-100, 100)(-0.3), 0);
+  assert_eq(cast(int) fix!(-100, 100)(-1.3), -1);
+  assert_eq(cast(int) fix!(-100, 100)(-7.4), -7);
 
   version(fixRound) {
     assert_eq(cast(int) fix!(-100, 100)(0.5), 1);
     assert_eq(cast(int) fix!(-100, 100)(1.5), 2);
+
+    assert_eq(cast(int) fix!(-100, 100)(-0.5), -1);
+    assert_eq(cast(int) fix!(-100, 100)(-1.5), -2);
+
+    assert_eq(cast(int) fix!(-100, 100)(7.6), 8);
+    assert_eq(cast(int) fix!(-100, 100)(-7.6), -8);
+  } else {
+    assert_eq(cast(int) fix!(-100, 100)(0.5), 0);
+    assert_eq(cast(int) fix!(-100, 100)(1.5), 1);
+
+    assert_eq(cast(int) fix!(-100, 100)(-0.5), 0);
+    assert_eq(cast(int) fix!(-100, 100)(-1.5), -1);
+
+    assert_eq(cast(int) fix!(-100, 100)(7.6), 7);
+    assert_eq(cast(int) fix!(-100, 100)(-7.6), -7);
   }
 }
 
@@ -442,11 +432,11 @@ T raw_to_exp(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
     return raw << (exp - rexp);
   } else static if (rexp > exp) {
     version(fixRound) {
-      // FIXME: rounding
-      // raw + 0.5 <=> (raw * 2 + 1) / 2
-      return ((raw >> (rexp - exp - 1)) + 1) >> 1;
+      // FIXME: rounding ~ floor(raw + 0.5)
+      enum T half = 1 << (rexp - exp - 1);
+      return (raw + (raw < 0 ? -half : half)) / cast(T) 2.pow(rexp - exp);
     } else {
-      return raw >> (rexp - exp);
+      return raw / cast(T) 2.pow(rexp - exp);
     }
   } else {
     return raw;
