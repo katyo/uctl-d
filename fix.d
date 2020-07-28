@@ -256,7 +256,7 @@ nothrow @nogc unittest {
   assert_eq(cast(double) fix!(100000000000).step, 64);
 }
 
-/// Test casting
+/// Casting to float or int
 nothrow @nogc unittest {
   assert_eq(cast(double) fix!(-100, 100)(10), 10);
   assert_eq(cast(int) fix!(-100, 100)(10), 10);
@@ -291,14 +291,13 @@ nothrow @nogc unittest {
   }
 }
 
-/// Test casting fixed
+/// Casting to fixed
 nothrow @nogc unittest {
   assert_eq(cast(fix!(-10, 100)) fix!(-10, 10)(5), fix!(-10, 100)(5));
   assert_eq(cast(int) cast(fix!(-10, 100)) fix!(-10, 10)(5), 5);
   assert_eq(cast(fix!(-10, 100)) fix!(-10, 10)(1.5), fix!(-10, 100)(1.5));
 }
 
-/// Test negation
 /// Fraction part
 nothrow @nogc unittest {
   assert_eq(fix!(-2, 1)(0.55).fracof, fix!(-1, 1)(0.55));
@@ -337,22 +336,23 @@ nothrow @nogc unittest {
   assert_eq(fix!(-10, 15)(9.99).intof, fix!(-10, 15)(9));
 }
 
+/// Negation
 nothrow @nogc unittest {
   assert_eq(-fix!(-100, 200)(5), fix!(-200, 100)(-5));
   assert_eq(-fix!(-22, 11)(-0.5), fix!(-11, 22)(0.5));
 }
 
-/// Test addition
+/// Addition
 nothrow @nogc unittest {
   assert_eq(fix!(-100, 200)(1.23) + fix!(-20, 10)(5), fix!(-120, 210)(6.23));
 }
 
-/// Test subtraction
+/// Subtraction
 nothrow @nogc unittest {
   assert_eq(fix!(-100, 200)(1.25) - fix!(-20, 10)(5.3), fix!(-110, 220)(-4.05));
 }
 
-/// Test multiplication
+/// Multiplication
 nothrow @nogc unittest {
   version(fixRound) {
     assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.625));
@@ -362,12 +362,12 @@ nothrow @nogc unittest {
   }
 }
 
-/// Test division
+/// Division
 nothrow @nogc unittest {
   assert_eq(fix!(-4000, 2000)(6.625) / fix!(1, 10)(5.3), fix!(-4000, 2000)(1.25));
 }
 
-/// Test remainder
+/// Remainder
 nothrow @nogc unittest {
   assert_eq(fix!(-100, 50)(11.25) % fix!(-10, 20)(3.5), fix!(-20, 20)(0.75));
 }
