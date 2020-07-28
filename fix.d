@@ -226,6 +226,28 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
     return R.from_raw(r);
   }
+
+  /// Fixed-point equality (==)
+  const pure nothrow @nogc @safe
+  bool opEquals(T)(const(T) other) if (is(T) && isFixed!T) {
+    alias C = cmp!(self, T);
+
+    auto a = raw.raw_to!(exp, C.exp, C.bits);
+    auto b = other.raw.raw_to!(T.exp, C.exp, C.bits);
+
+    return a == b;
+  }
+
+  /// Fixed-point comparison (<>)
+  const pure nothrow @nogc @safe
+  int opCmp(T)(const(T) other) if (is(T) && isFixed!T) {
+    alias C = cmp!(self, T);
+
+    auto a = raw.raw_to!(exp, C.exp, C.bits);
+    auto b = other.raw.raw_to!(T.exp, C.exp, C.bits);
+
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
 }
 
 /// Test exponent estimation
@@ -374,6 +396,40 @@ nothrow @nogc unittest {
   assert_eq(fix!(-100, 50)(11.25) % fix!(-10, 20)(3.5), fix!(-20, 20)(0.75));
 }
 
+/// Comparison
+nothrow @nogc unittest {
+  assert(fix!(-10, 50)(0) == fix!(-5, 20)(0));
+  assert(fix!(-10, 50)(0.5) == fix!(-5, 20)(0.5));
+  assert(fix!(-10, 50)(0.125) == fix!(-5, 20)(0.125));
+  assert(fix!(-10, 50)(9.25) == fix!(-5, 20)(9.25));
+
+  assert(fix!(-10, 50)(-0.5) == fix!(-5, 20)(-0.5));
+  assert(fix!(-10, 50)(-0.125) == fix!(-5, 20)(-0.125));
+  assert(fix!(-10, 50)(-9.25) == fix!(-5, 20)(-9.25));
+
+  assert(fix!(-10, 50)(0) != fix!(-5, 20)(1));
+  assert(fix!(-10, 50)(0.125) != fix!(-5, 20)(0.0625));
+  assert(fix!(-100, 50)(11.25) != fix!(-10, 20)(3.5));
+
+  assert(!(fix!(-10, 50)(0) < fix!(-5, 20)(0)));
+  assert(fix!(-10, 50)(0) <= fix!(-5, 20)(0));
+  assert(!(fix!(-10, 50)(0) > fix!(-5, 20)(0)));
+  assert(fix!(-10, 50)(0) >= fix!(-5, 20)(0));
+
+  assert(fix!(-10, 50)(0) < fix!(-5, 20)(1));
+  assert(!(fix!(-10, 50)(0) > fix!(-5, 20)(1)));
+
+  assert(fix!(-10, 50)(0.125) > fix!(-5, 20)(0.0625));
+  assert(fix!(-10, 50)(0.125) >= fix!(-5, 20)(0.0625));
+  assert(fix!(-100, 50)(11.25) > fix!(-10, 20)(3.5));
+  assert(fix!(-100, 50)(11.25) >= fix!(-10, 20)(3.5));
+
+  assert(fix!(-10, 50)(-0.125) < fix!(-5, 20)(-0.0625));
+  assert(fix!(-10, 50)(-0.125) <= fix!(-5, 20)(-0.0625));
+  assert(fix!(-100, 50)(-11.25) < fix!(-10, 20)(-3.5));
+  assert(fix!(-100, 50)(-11.25) <= fix!(-10, 20)(-3.5));
+}
+
 pure nothrow @nogc @safe
 T abs_floor(T)(T val) if (isFloat!T) {
   return val < 0 ? val.ceil() : val.floor();
@@ -476,6 +532,16 @@ template mod(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
   enum uint bits = B.bits;
 
   alias mod = fix!(rmin, rmax, bits);
+}
+
+/// The common type for fixed-point comparison
+template cmp(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
+  enum real rmin = fmin(A.rmin, B.rmin);
+  enum real rmax = fmax(A.rmax, B.rmax);
+
+  enum uint bits = max(A.bits, B.bits);
+
+  alias cmp = fix!(rmin, rmax, bits);
 }
 
 /// Create fixed-point constant from an arbitrary number
