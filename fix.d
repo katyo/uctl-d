@@ -21,27 +21,27 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   static assert(rmin_ <= rmax_, "Invalid range: minimum should be less than or equals to maximum.");
 
   /// Real minimum
-  static const real rmin = rmin_;
+  enum real rmin = rmin_;
   /// Real maximum
-  static const real rmax = rmax_;
+  enum real rmax = rmax_;
   /// Number of mantissa bits
-  static const uint bits = bits_;
+  enum uint bits = bits_;
 
   /// Real limit (absolute maximum)
-  static const real rlim = fmax(fabs(rmin), fabs(rmax));
+  enum real rlim = fmax(fabs(rmin), fabs(rmax));
 
   /// Exponent of number
-  static const int exp = rlim.estimate_exp() - bits + 1;
+  enum int exp = rlim.estimate_exp() - bits + 1;
 
   /// Minimum value
-  static const self min = rmin;
+  enum self min = rmin;
   /// Maximum value
-  static const self max = rmax;
+  enum self max = rmax;
   /// Stepping value (precision)
-  static const self step = from_raw(1);
+  enum self step = from_raw(1);
 
   /// Zero value
-  static const self zero = from_raw(0);
+  enum self zero = from_raw(0);
 
   /// Number is positive
   /// (both rmin and rmax greater than zero)

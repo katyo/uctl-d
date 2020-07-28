@@ -27,8 +27,8 @@ version(unittest) {
 */
 pure nothrow @nogc @safe
 R lt1(uint len, R, A, real start, real end, real function(real) pure nothrow @nogc @safe gen)(A arg) if (isFloat!R && isFloat!A) {
-  static const A init = cast(A) start;
-  static const A fact = (cast(A) (len - 1)) / (end - start);
+  enum A init = cast(A) start;
+  enum A fact = (cast(A) (len - 1)) / (end - start);
 
   R[len] gen_data() {
     R[len] data;
@@ -88,8 +88,8 @@ nothrow @nogc unittest {
 */
 pure nothrow @nogc @safe
 R lt1(uint len, R, A, real function(real) pure nothrow @nogc @safe gen)(A arg) if (isFixed!R && isFixed!A) {
-  static const auto init = asfix!(A.rmin);
-  static const auto fact = asfix!((cast(real) (len - 1)) / (A.rmax - A.rmin));
+  enum auto init = asfix!(A.rmin);
+  enum auto fact = asfix!((cast(real) (len - 1)) / (A.rmax - A.rmin));
 
   R[len] gen_data() {
     R[len] data;

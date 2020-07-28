@@ -106,8 +106,8 @@ T limit(T)(T val, T lim) if (isNumer!T) {
  */
 pure nothrow @nogc @safe
 T scale(real from_min, real from_max, real to_min, real to_max, T)(T val) if (isNum!T) {
-  static const auto scale = cast(T) ((to_max - to_min) / (from_max - from_min));
-  static const auto offset = cast(T) (to_min - from_min * (to_max - to_min) / (from_max - from_min));
+  enum auto scale = cast(T) ((to_max - to_min) / (from_max - from_min));
+  enum auto offset = cast(T) (to_min - from_min * (to_max - to_min) / (from_max - from_min));
 
   return val * scale + offset;
 }
@@ -122,8 +122,8 @@ nothrow @nogc unittest {
 */
 pure nothrow @nogc @safe
 R scale(R, A)(A val) if (isFixed!R && isFixed!A) {
-  static const auto scale = asfix!((R.rmax - R.rmin) / (A.rmax - A.rmin));
-  static const auto offset = asfix!(R.rmin - A.rmin * (R.rmax - R.rmin) / (A.rmax - A.rmin));
+  enum auto scale = asfix!((R.rmax - R.rmin) / (A.rmax - A.rmin));
+  enum auto offset = asfix!(R.rmin - A.rmin * (R.rmax - R.rmin) / (A.rmax - A.rmin));
 
   return val * scale + offset;
 }
