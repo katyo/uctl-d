@@ -38,6 +38,9 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Stepping value (precision)
   static const self step = from_raw(1);
 
+  /// Zero value
+  static const self zero = from_raw(0);
+
   /// Number is positive
   /// (both rmin and rmax greater than zero)
   enum bool ispos = rmin > 0 && rmax > 0;
@@ -119,6 +122,32 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   const pure nothrow @nogc @safe
   T to(T)() if (is(T) && isNumer!T) {
     return cast(T) this;
+  }
+
+  /// Get integer part of number
+  const pure nothrow @nogc @property @safe
+  fixIntOf!(self) intof() {
+    alias R = typeof(return);
+
+    static if (!hasint) {
+      return R.zero;
+    } else static if (hasfrac) {
+      return cast(R) (this - cast(R) fracof);
+    } else {
+      return cast(R) this;
+    }
+  }
+
+  /// Get fraction part of number
+  const pure nothrow @nogc @property @safe
+  fixFracOf!(self) fracof() {
+    alias R = typeof(return);
+
+    static if (hasfrac) {
+      return cast(R) (this % asfix!(1.0));
+    } else {
+      return R.zero;
+    }
   }
 
   /// Negation (unary -)
@@ -270,6 +299,44 @@ nothrow @nogc unittest {
 }
 
 /// Test negation
+/// Fraction part
+nothrow @nogc unittest {
+  assert_eq(fix!(-2, 1)(0.55).fracof, fix!(-1, 1)(0.55));
+  assert_eq(fix!(-1, 2)(-0.55).fracof, fix!(-1, 1)(-0.55));
+
+  assert_eq(fix!(-1, 2)(1.001).fracof, fix!(-1, 1)(0.001));
+  assert_eq(fix!(-2, 1)(-1.001).fracof, fix!(-1, 1)(-0.001));
+
+  assert_eq(fix!(-2, 1)(-1.95).fracof, fix!(-1, 1)(-0.95));
+  assert_eq(fix!(-1, 2)(1.95).fracof, fix!(-1, 1)(0.95));
+
+  assert_eq(fix!(0, 2)(1.999).fracof, fix!(0, 1)(0.999));
+  assert_eq(fix!(-2, 0)(-1.999).fracof, fix!(-1, 0)(-0.999));
+
+  assert_eq(fix!(-1, 1)(-1).fracof, fix!(-1, 1)(0));
+  assert_eq(fix!(-1, 1)(1).fracof, fix!(-1, 1)(0));
+
+  assert_eq(fix!(-10, 15)(-1.5).fracof, fix!(-1, 1)(-0.5));
+  //assert_eq(fix!(-10, 15)(-1.54).fracof, fix!(-1, 1)(-0.54));
+
+  assert_eq(fix!(-1e10, 1e10)(0).fracof, fix!(0, 0)(0));
+}
+
+/// Integer part
+nothrow @nogc unittest {
+  assert_eq(fix!(-0.99, 0.0)(-0.55).intof, fix!(-0.0, 0)(0));
+  assert_eq(fix!(-0.99, 1.0)(0.55).intof, fix!(-0.0, 1)(0));
+  assert_eq(fix!(-1.0, 1.0)(1.0).intof, fix!(-1, 1)(1));
+  assert_eq(fix!(-1.0, 1.0)(-1.0).intof, fix!(-1, 1)(-1));
+
+  assert_eq(fix!(-10, 15)(-1.5).intof, fix!(-10, 15)(-1));
+  assert_eq(fix!(-10, 15)(-1.55).intof, fix!(-10, 15)(-1));
+  assert_eq(fix!(-10, 15)(-3.09).intof, fix!(-10, 15)(-3));
+  assert_eq(fix!(-10, 15)(-7.9).intof, fix!(-10, 15)(-7));
+
+  assert_eq(fix!(-10, 15)(9.99).intof, fix!(-10, 15)(9));
+}
+
 nothrow @nogc unittest {
   assert_eq(-fix!(-100, 200)(5), fix!(-200, 100)(-5));
   assert_eq(-fix!(-22, 11)(-0.5), fix!(-11, 22)(0.5));
@@ -303,6 +370,36 @@ nothrow @nogc unittest {
 /// Test remainder
 nothrow @nogc unittest {
   assert_eq(fix!(-100, 50)(11.25) % fix!(-10, 20)(3.5), fix!(-20, 20)(0.75));
+}
+
+pure nothrow @nogc @safe
+T abs_floor(T)(T val) if (isFloat!T) {
+  return val < 0 ? val.ceil() : val.floor();
+}
+
+/// The result of `intof`
+template fixIntOf(T) if (is(T) && isFixed!T) {
+  enum real rmin = T.rmin.abs_floor();
+  enum real rmax = T.rmax.abs_floor();
+
+  enum uint bits = T.bits;
+
+  alias fixIntOf = fix!(rmin, rmax, bits);
+}
+
+/// The result of `fracof`
+template fixFracOf(T) if (is(T) && isFixed!T) {
+  static if (T.hasfrac) {
+    enum real rmin = fmin(fmax(T.rmin, -1.0), 1.0);
+    enum real rmax = fmax(fmin(T.rmax, 1.0), -1.0);
+  } else {
+    enum real rmin = 0.0;
+    enum real rmax = 0.0;
+  }
+
+  enum uint bits = T.bits;
+
+  alias fixFracOf = fix!(rmin, rmax, bits);
 }
 
 /// The result of negation
