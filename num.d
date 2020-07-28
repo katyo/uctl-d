@@ -3,6 +3,12 @@
  */
 module num;
 
+version(unittest) {
+  import test: unittests;
+
+  mixin unittests;
+}
+
 /// Check when type or expr is number
 template isNum(X...) if (X.length == 1) {
   enum bool isNum = isInt!(X[0]) || isFloat!(X[0]);
@@ -168,14 +174,4 @@ nothrow @nogc @safe unittest {
 
   short a;
   assert(fmtOf!a == "%hd");
-}
-
-// Run tests without D-runtime
-version(D_BetterC) {
-  version(unittest) {
-    nothrow @nogc extern(C) void main() {
-      static foreach(unitTest; __traits(getUnitTests, __traits(parent, main)))
-        unitTest();
-    }
-  }
 }

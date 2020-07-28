@@ -44,14 +44,14 @@ void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T epsil
    Assert equality of fixed-point values
 */
 nothrow @nogc
-void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b) if (isFixed!T) {
+void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, double epsilon = double.epsilon) if (isFixed!T) {
   alias R = double;
   enum string F = "%0.10g (%i)";
 
   auto ra = cast(R) a;
   auto rb = cast(R) b;
 
-  if (fabs(ra - rb) > R.epsilon) {
+  if (fabs(ra - rb) > epsilon) {
     char[64] buf;
 
     snprintf(buf.ptr, buf.length, (F ~ " == " ~ F).ptr, ra, a.raw, rb, b.raw);
@@ -73,12 +73,17 @@ nothrow @nogc unittest {
   assert_eq(x, cast(typeof(x)) asfix!(12.3));
 }
 
-// Run tests without D-runtime
-version(D_BetterC) {
-  version(unittest) {
-    nothrow @nogc extern(C) void main() {
-      static foreach(unitTest; __traits(getUnitTests, __traits(parent, main)))
-        unitTest();
+mixin template unittests() {
+  // Run tests without D-runtime
+  version(D_BetterC) {
+    version(unittest) {
+      pragma(mangle, "main")
+      nothrow @nogc extern(C) void main() {
+        static foreach(unitTest; __traits(getUnitTests, __traits(parent, main)))
+          unitTest();
+      }
     }
   }
 }
+
+mixin unittests;

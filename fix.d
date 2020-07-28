@@ -7,7 +7,9 @@ import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
 import num: isInt, isFloat, isNum, bitsOf;
 
 version(unittest) {
-  import test: assert_eq;
+  import test: assert_eq, unittests;
+
+  mixin unittests;
 }
 
 /**
@@ -597,14 +599,4 @@ nothrow @nogc @safe unittest {
 /// Check when type or expr is numeric
 template isNumer(X...) if (X.length == 1) {
   enum bool isNumer = isFloat!(X[0]) || isInt!(X[0]) || isFixed!(X[0]);
-}
-
-// Run tests without D-runtime
-version(D_BetterC) {
-  version(unittest) {
-    nothrow @nogc extern(C) void main() {
-      static foreach(unitTest; __traits(getUnitTests, __traits(parent, main)))
-        unitTest();
-    }
-  }
 }
