@@ -297,7 +297,7 @@ nothrow @nogc unittest {
 
 /// Test division
 nothrow @nogc unittest {
-  assert_eq(fix!(-4000, 2000)(6.625) / fix!(-20, 10)(5.3), fix!(-400, 200)(1.25));
+  assert_eq(fix!(-4000, 2000)(6.625) / fix!(1, 10)(5.3), fix!(-4000, 2000)(1.25));
 }
 
 /// Test remainder
@@ -352,6 +352,8 @@ template fixProd(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
 
 /// The result of fixed-point division
 template fixQuot(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
+  static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point division is undefined for divider which can be zero.");
+
   enum real minXmin = A.rmin / B.rmin;
   enum real minXmax = A.rmin / B.rmax;
   enum real maxXmin = A.rmax / B.rmin;
