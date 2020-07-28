@@ -393,7 +393,7 @@ nothrow @nogc unittest {
 
 /// Remainder
 nothrow @nogc unittest {
-  assert_eq(fix!(-100, 50)(11.25) % fix!(-10, 20)(3.5), fix!(-20, 20)(0.75));
+  assert_eq(fix!(-100, 50)(11.25) % fix!(1, 20)(3.5), fix!(-20, 20)(0.75));
 }
 
 /// Comparison
@@ -524,6 +524,8 @@ template quot(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
 
 /// The result of fixed-point remainder
 template mod(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
+  static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point remainder is undefined for divider which can be zero.");
+
   enum real rlim = fmax(fabs(B.rmin), fabs(B.rmax));
 
   enum real rmin = A.isntneg ? 0.0 : -rlim;
