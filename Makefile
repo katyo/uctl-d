@@ -1,12 +1,22 @@
 SOURCES += num.d fix.d test.d
 DFLAGS += -d-version=fixRound
 
-%.test: %.d
+test.%: %.d
 	ldc2 -g $(DFLAGS) -betterC -nogc -unittest $<
 	./$*
 	rm $*
 
-test: $(patsubst %.d,%.test,$(SOURCES))
+debug.%: %.d
+	ldc2 -g $(DFLAGS) -betterC -nogc -unittest $<
+	gdb ./$*
+	rm $*
+
+dump.%: %.d
+	ldc2 -g $(DFLAGS) -betterC -nogc -unittest $<
+	objdump -D -S $* | less
+	rm $*
+
+test: $(patsubst %.d,test.%,$(SOURCES))
 
 doc: $(SOURCES)
 	ldc2 -preview=markdown -o- -D -X -Xfdoc.json $^
