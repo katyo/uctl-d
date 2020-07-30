@@ -111,7 +111,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   const pure nothrow @nogc @safe
   T opCast(T)() if (is(T) && isInt!T) {
     static if (exp < 0) {
-      return raw.raw_to_exp!(exp, 0)();
+      return raw.raw_to!(exp, 0)();
     } else {
       return (cast(T) raw) << exp;
     }
@@ -149,7 +149,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
     alias R = typeof(return);
 
     static if (hasfrac) {
-      return cast(R) (this % asfix!(1.0));
+      return cast(R) (this % asfix!(1));
     } else {
       return R.zero;
     }
@@ -193,8 +193,8 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
     enum uint op_bits = bits + T.bits;
     enum uint op_exp = exp + T.exp;
 
-    auto a = raw.raw_to_bits!op_bits();
-    auto b = other.raw.raw_to_bits!op_bits();
+    auto a = raw.raw_to!op_bits();
+    auto b = other.raw.raw_to!op_bits();
 
     auto r = (a * b).raw_to!(op_exp, R.exp, R.bits)();
 
@@ -210,9 +210,9 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
     enum uint op_exp = T.exp + R.exp;
 
     auto a = raw.raw_to!(exp, op_exp, op_bits)();
-    auto b = other.raw.raw_to_bits!op_bits();
+    auto b = other.raw.raw_to!op_bits();
 
-    auto r = (a / b).raw_to_bits!(R.bits)();
+    auto r = (a / b).raw_to!(R.bits)();
 
     return R.from_raw(r);
   }
@@ -221,9 +221,10 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   const pure nothrow @nogc @safe
   mod!(self, T) opBinary(string op, T)(const(T) other) if (op == "%" && is(T) && isFixed!T) {
     alias R = typeof(return);
+    enum uint op_bits = bits > T.bits ? bits : T.bits;
 
-    auto a = raw;
-    auto b = other.raw.raw_to!(T.exp, exp, bits)();
+    auto a = raw.raw_to!op_bits();
+    auto b = other.raw.raw_to!(T.exp, exp, op_bits);
 
     auto r = (a % b).raw_to!(exp, R.exp, R.bits);
 
@@ -663,36 +664,73 @@ T max(T)(T a, T b) if (is(T) && isNum!T) {
   return a > b ? a : b;
 }
 
+/**
+  Convert mantissa bits only
+
+  Converts mantissa type to `rbits`.
+*/
 pure nothrow @nogc @safe
-raw_type!(rbits) raw_to_bits(uint rbits, T)(T raw) if (is(T) && isInt!T) {
-  return cast(raw_type!(rbits)) raw;
+raw_type!(rbits) raw_to(uint rbits, T)(T raw) if (is(T) && isInt!T) {
+  return cast(typeof(return)) raw;
 }
 
+/**
+   Convert mantissa exponent only
+
+   Converts mantissa exponent from `exp` to `rexp`.
+*/
 pure nothrow @nogc @safe
-T raw_to_exp(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
-  static if (rexp < exp) {
-    return raw << (exp - rexp);
-  } else static if (rexp > exp) {
-    version(fixRound) {
-      // FIXME: rounding ~ floor(raw + 0.5)
-      enum T half = 1 << (rexp - exp - 1);
-      return (raw + (raw < 0 ? -half : half)) / cast(T) 2.pow(rexp - exp);
-    } else {
-      return raw / cast(T) 2.pow(rexp - exp);
-    }
-  } else {
-    return raw;
-  }
+raw_type!(bitsOf!T) raw_to(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
+  return raw.raw_to!(exp, rexp, bitsOf!T);
 }
 
+/**
+   Convert both mantissa exponent and bits
+
+   Converts mantissa exponent from `exp` to `rexp` and bits to `rbits`.
+*/
 pure nothrow @nogc @safe
-raw_type!(rbits) raw_to(int exp, int rexp, uint rbits, T)(T raw) if (is(T) && isInt!T) {
+raw_type!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T) && isInt!T) {
   enum uint bits = bitsOf!T;
+
   static if (rexp < exp && rbits > bits) {
-    return raw.raw_to_bits!(rbits)().raw_to_exp!(exp, rexp)();
+    // adjust raw type first
+    auto raw2 = raw.raw_to!rbits;
   } else {
-    return raw.raw_to_exp!(exp, rexp)().raw_to_bits!(rbits)();
+    auto raw2 = raw;
   }
+
+  static if (rexp < exp) {
+    enum int dexp = exp - rexp;
+    auto raw3 = raw2 << dexp;
+  } else static if (rexp > exp) {
+    enum int dexp = rexp - exp;
+    enum typeof(raw2) half = 1 << (dexp - 1);
+    enum typeof(raw2) one = 1 << dexp;
+
+    version(fixRound) {
+      // round half away from zero
+      // FIXME: rounding ~ floor(raw + 0.5)
+      auto raw21 = raw2 + (raw2 < 0 ? -half : half);
+    } else {
+      //auto raw21 = raw2 < 0 ? raw2 + one : raw2;
+      auto raw21 = raw2;
+    }
+
+    //auto raw3 = raw21 >> dexp;
+    auto raw3 = raw21 / one;
+  } else {
+    auto raw3 = raw2;
+  }
+
+  static if (rexp < exp && rbits > bits) {
+    auto raw4 = raw3;
+  } else {
+    // finally adjust raw type
+    auto raw4 = raw3.raw_to!rbits;
+  }
+
+  return raw4;
 }
 
 /// Selects appropriate mantissa type by width in bits
