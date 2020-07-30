@@ -87,7 +87,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Create number from generic floating-point value
   const pure nothrow @nogc @safe
-  this(T)(T val) if (is(T) && isFloat!T) {
+  this(T)(const T val) if (is(T) && isFloat!T) {
     auto val2 = val * (cast(real) 2).pow(-exp);
     version(fixRound) {
       val2 += val2 < 0 ? -0.5 : 0.5;
@@ -97,7 +97,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Create number from generic integer value
   const pure nothrow @nogc @safe
-  this(T)(T val) if (is(T) && isInt!T) {
+  this(T)(const T val) if (is(T) && isInt!T) {
     raw = val.raw_to!(0, exp, bits);
   }
 
@@ -165,7 +165,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Addition of fixed-point value (binary +)
   const pure nothrow @nogc @safe
-  sum!(self, T) opBinary(string op, T)(const(T) other) if (op == "+" && is(T) && isFixed!T) {
+  sum!(self, T) opBinary(string op, T)(const T other) if (op == "+" && is(T) && isFixed!T) {
     alias R = typeof(return);
 
     auto a = raw.raw_to!(exp, R.exp, R.bits)();
@@ -176,7 +176,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Subtraction of fixed-point value (binary -)
   const pure nothrow @nogc @safe
-  diff!(self, T) opBinary(string op, T)(const(T) other) if (op == "-" && is(T) && isFixed!T) {
+  diff!(self, T) opBinary(string op, T)(const T other) if (op == "-" && is(T) && isFixed!T) {
     alias R = typeof(return);
 
     auto a = raw.raw_to!(exp, R.exp, R.bits)();
@@ -187,7 +187,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point multiplication (binary *)
   const pure nothrow @nogc @safe
-  prod!(self, T) opBinary(string op, T)(const(T) other) if (op == "*" && is(T) && isFixed!T) {
+  prod!(self, T) opBinary(string op, T)(const T other) if (op == "*" && is(T) && isFixed!T) {
     alias R = typeof(return);
 
     enum uint op_bits = bits + T.bits;
@@ -203,7 +203,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point division (binary /)
   const pure nothrow @nogc @safe
-  quot!(self, T) opBinary(string op, T)(const(T) other) if (op == "/" && is(T) && isFixed!T) {
+  quot!(self, T) opBinary(string op, T)(const T other) if (op == "/" && is(T) && isFixed!T) {
     alias R = typeof(return);
 
     enum uint op_bits = T.bits + R.bits;
@@ -219,7 +219,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point remainder (binary %)
   const pure nothrow @nogc @safe
-  mod!(self, T) opBinary(string op, T)(const(T) other) if (op == "%" && is(T) && isFixed!T) {
+  mod!(self, T) opBinary(string op, T)(const T other) if (op == "%" && is(T) && isFixed!T) {
     alias R = typeof(return);
     enum uint op_bits = bits > T.bits ? bits : T.bits;
 
@@ -233,7 +233,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point equality (==)
   const pure nothrow @nogc @safe
-  bool opEquals(T)(const(T) other) if (is(T) && isFixed!T) {
+  bool opEquals(T)(const T other) if (is(T) && isFixed!T) {
     alias C = cmp!(self, T);
 
     auto a = raw.raw_to!(exp, C.exp, C.bits);
@@ -244,7 +244,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point comparison (<>)
   const pure nothrow @nogc @safe
-  int opCmp(T)(const(T) other) if (is(T) && isFixed!T) {
+  int opCmp(T)(const T other) if (is(T) && isFixed!T) {
     alias C = cmp!(self, T);
 
     auto a = raw.raw_to!(exp, C.exp, C.bits);
@@ -322,7 +322,7 @@ nothrow @nogc unittest {
   assert_eq(cast(double) fix!(100000000000).step, 64);
 }
 
-/// Casting to float or int
+/// Casting to float and int
 nothrow @nogc unittest {
   assert_eq(cast(double) fix!(-100, 100)(10), 10);
   assert_eq(cast(int) fix!(-100, 100)(10), 10);
