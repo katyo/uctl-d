@@ -519,89 +519,117 @@ template fracOf(T) if (is(T) && isFixed!T) {
 }
 
 /// The result of negation
-template neg(T) if (is(T) && isFixed!T) {
-  enum real rmin = -T.rmax;
-  enum real rmax = -T.rmin;
+template neg(T) if (is(T) && isNumer!T) {
+  static if (isFixed!T) {
+    enum real rmin = -T.rmax;
+    enum real rmax = -T.rmin;
 
-  enum uint bits = T.bits;
+    enum uint bits = T.bits;
 
-  alias neg = fix!(rmin, rmax, bits);
+    alias neg = fix!(rmin, rmax, bits);
+  } else {
+    alias neg = T;
+  }
 }
 
 /// The result of fixed-point addition
-template sum(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
-  enum real rmin = A.rmin + B.rmin;
-  enum real rmax = A.rmax + B.rmax;
+template sum(A, B) if(is(A) && is(B) && isNumer!A && isNumer!B) {
+  static if (isFixed!A && isFixed!B) {
+    enum real rmin = A.rmin + B.rmin;
+    enum real rmax = A.rmax + B.rmax;
 
-  enum uint bits = max(A.bits, B.bits);
+    enum uint bits = max(A.bits, B.bits);
 
-  alias sum = fix!(rmin, rmax, bits);
+    alias sum = fix!(rmin, rmax, bits);
+  } else static if (is(A == B)) {
+    alias sum = A;
+  }
 }
 
 /// The result of fixed-point subtraction
-template diff(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
-  enum real rmin = A.rmin - B.rmax;
-  enum real rmax = A.rmax - B.rmin;
+template diff(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
+  static if (isFixed!A && isFixed!B) {
+    enum real rmin = A.rmin - B.rmax;
+    enum real rmax = A.rmax - B.rmin;
 
-  enum uint bits = max(A.bits, B.bits);
+    enum uint bits = max(A.bits, B.bits);
 
-  alias diff = fix!(rmin, rmax, bits);
+    alias diff = fix!(rmin, rmax, bits);
+  } else static if (is(A == B)) {
+    alias diff = A;
+  }
 }
 
 /// The result of fixed-point multiplication
-template prod(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
-  enum real minXmin = A.rmin * B.rmin;
-  enum real minXmax = A.rmin * B.rmax;
-  enum real maxXmin = A.rmax * B.rmin;
-  enum real maxXmax = A.rmax * B.rmax;
+template prod(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
+  static if (isFixed!A && isFixed!B) {
+    enum real minXmin = A.rmin * B.rmin;
+    enum real minXmax = A.rmin * B.rmax;
+    enum real maxXmin = A.rmax * B.rmin;
+    enum real maxXmax = A.rmax * B.rmax;
 
-  enum real rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
-  enum real rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
+    enum real rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
+    enum real rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
 
-  enum uint bits = max(A.bits, B.bits);
+    enum uint bits = max(A.bits, B.bits);
 
-  alias prod = fix!(rmin, rmax, bits);
+    alias prod = fix!(rmin, rmax, bits);
+  } else static if (is(A == B)) {
+    alias prod = A;
+  }
 }
 
 /// The result of fixed-point division
-template quot(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
-  static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point division is undefined for divider which can be zero.");
+template quot(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
+  static if (isFixed!A && isFixed!B) {
+    static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point division is undefined for divider which can be zero.");
 
-  enum real minXmin = A.rmin / B.rmin;
-  enum real minXmax = A.rmin / B.rmax;
-  enum real maxXmin = A.rmax / B.rmin;
-  enum real maxXmax = A.rmax / B.rmax;
+    enum real minXmin = A.rmin / B.rmin;
+    enum real minXmax = A.rmin / B.rmax;
+    enum real maxXmin = A.rmax / B.rmin;
+    enum real maxXmax = A.rmax / B.rmax;
 
-  enum real rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
-  enum real rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
+    enum real rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
+    enum real rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
 
-  enum uint bits = max(A.bits, B.bits);
+    enum uint bits = max(A.bits, B.bits);
 
-  alias quot = fix!(rmin, rmax, bits);
+    alias quot = fix!(rmin, rmax, bits);
+  } else static if (is(A == B)) {
+    alias quot = A;
+  }
 }
 
 /// The result of fixed-point remainder
-template mod(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
-  static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point remainder is undefined for divider which can be zero.");
+template mod(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
+  static if (isFixed!A && isFixed!B) {
+    static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point remainder is undefined for divider which can be zero.");
 
-  enum real rlim = fmax(fabs(B.rmin), fabs(B.rmax));
+    enum real rlim = fmax(fabs(B.rmin), fabs(B.rmax));
 
-  enum real rmin = A.isntneg ? 0.0 : -rlim;
-  enum real rmax = A.isntpos ? 0.0 : rlim;
+    enum real rmin = A.isntneg ? 0.0 : -rlim;
+    enum real rmax = A.isntpos ? 0.0 : rlim;
 
-  enum uint bits = B.bits;
+    enum uint bits = B.bits;
 
-  alias mod = fix!(rmin, rmax, bits);
+    alias mod = fix!(rmin, rmax, bits);
+  } else static if (is(A == B)) {
+    alias mod = B;
+  }
 }
 
 /// The common type for fixed-point comparison
-template cmp(A, B) if (is(A) && isFixed!A && is(B) && isFixed!B) {
-  enum real rmin = fmin(A.rmin, B.rmin);
-  enum real rmax = fmax(A.rmax, B.rmax);
+template cmp(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
+  static if (isFixed!A && isFixed!B) {
+    enum real rmin = fmin(A.rmin, B.rmin);
+    enum real rmax = fmax(A.rmax, B.rmax);
 
-  enum uint bits = max(A.bits, B.bits);
+    enum uint bits = max(A.bits, B.bits);
 
-  alias cmp = fix!(rmin, rmax, bits);
+    alias cmp = fix!(rmin, rmax, bits);
+  } else static if (is(A == B)) {
+    alias cmp = A;
+  }
 }
 
 /// Create fixed-point constant from an arbitrary number
