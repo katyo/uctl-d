@@ -16,6 +16,8 @@ version(unittest) {
    Fixed-point range-based numeric type
 
    TODO:
+
+   See also: [Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic).
  */
 struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   static assert(rmin_ != real.nan, "Invalid range: minimum is not a number");
@@ -761,7 +763,11 @@ raw_type!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T)
   return raw4;
 }
 
-/// Selects appropriate mantissa type by width in bits
+/**
+   Select mantissa type
+
+   Selects appropriate mantissa type by width in bits.
+*/
 template raw_type(uint bits) {
   static if (bits <= 8 && is(byte)) {
     alias raw_type = byte;
@@ -778,7 +784,7 @@ template raw_type(uint bits) {
   }
 }
 
-/// Check when type or expr is fixed-point number
+/// Check when type or value is fixed-point number
 template isFixed(X...) if (X.length == 1) {
   static if (is(X[0])) {
     static if (__traits(hasMember, X[0], "rmin") && __traits(hasMember, X[0], "rmax") && __traits(hasMember, X[0], "bits")) {
