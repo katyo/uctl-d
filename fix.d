@@ -18,6 +18,12 @@ version(unittest) {
    TODO:
  */
 struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
+  static assert(rmin_ != real.nan, "Invalid range: minimum is not a number");
+  static assert(rmax_ != real.nan, "Invalid range: Maximum is not a number");
+  static assert(rmin_ != -real.infinity, "Invalid range: minimum of range is -∞");
+  static assert(rmax_ != -real.infinity, "Invalid range: maximum of range is -∞");
+  static assert(rmin_ != real.infinity, "Invalid range: minimum of range is +∞");
+  static assert(rmax_ != real.infinity, "Invalid range: maximum of range is +∞");
   static assert(rmin_ <= rmax_, "Invalid range: minimum should be less than or equals to maximum.");
 
   /// Real minimum
