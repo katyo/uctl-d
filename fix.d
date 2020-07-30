@@ -33,11 +33,8 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Number of mantissa bits
   enum uint bits = bits_;
 
-  /// Real limit (absolute maximum)
-  enum real rlim = fmax(fabs(rmin), fabs(rmax));
-
   /// Exponent of number
-  enum int exp = rlim.estimate_exp() - bits + 1;
+  enum int exp = estimate_exp(rmin, rmax, bits);
 
   /// Minimum value
   enum self min = rmin;
@@ -258,20 +255,58 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
 /// Test exponent estimation
 nothrow @nogc unittest {
-  assert_eq(fix!(0).exp, -30); // -31
-  assert_eq(fix!(0.8).exp, -31);
-  assert_eq(fix!(0, 0.1).exp, -34);
-  assert_eq(fix!(-0.1, 0).exp, -34);
-  assert_eq(fix!(0, 0.5).exp, -32);
-  assert_eq(fix!(0, 1).exp, -30); // -31
-  assert_eq(fix!(0, 100).exp, -24);
-  assert_eq(fix!(-100, 0).exp, -24);
-  assert_eq(fix!(-100, 100).exp, -24);
-  assert_eq(fix!(-100, 1000).exp, -21);
-  assert_eq(fix!(100000000).exp, -4);
-  assert_eq(fix!(1000000000).exp, -1);
-  assert_eq(fix!(10000000000).exp, 3);
-  assert_eq(fix!(100000000000).exp, 6);
+  assert_eq(fix!(0, 0, 32).exp, -31);
+
+  assert_eq(fix!(-1, 0.999999999534338712692260742188, 32).exp, -31);
+  assert_eq(fix!(-1, 1, 32).exp, -30);
+  assert_eq(fix!(-2, 1.99999999906867742538452148438, 32).exp, -30);
+  assert_eq(fix!(-2, 2, 32).exp, -29);
+  assert_eq(fix!(-4, 3.99999999813735485076904296875, 32).exp, -29);
+  assert_eq(fix!(-4, 4, 32).exp, -28);
+  assert_eq(fix!(-8, 7.9999999962747097015380859375, 32).exp, -28);
+  assert_eq(fix!(-8, 8, 32).exp, -27);
+  assert_eq(fix!(-16, 15.999999992549419403076171875, 32).exp, -27);
+  assert_eq(fix!(-32, 31.99999998509883880615234375, 32).exp, -26);
+  assert_eq(fix!(-64, 63.9999999701976776123046875, 32).exp, -25);
+  assert_eq(fix!(-128, 127.999999940395355224609375, 32).exp, -24);
+  assert_eq(fix!(-256, 255.99999988079071044921875, 32).exp, -23);
+  assert_eq(fix!(-512, 511.9999997615814208984375, 32).exp, -22);
+  assert_eq(fix!(-1024, 1023.999999523162841796875, 32).exp, -21);
+  assert_eq(fix!(-2048, 2047.99999904632568359375, 32).exp, -20);
+
+  assert_eq(fix!(-2, 0, 32).exp, -30);
+  assert_eq(fix!(0, 1, 32).exp, -30);
+  assert_eq(fix!(-31, 0, 32).exp, -26);
+  assert_eq(fix!(0, 31, 32).exp, -26);
+  assert_eq(fix!(-32, 0, 32).exp, -26);
+  assert_eq(fix!(0, 32, 32).exp, -25);
+
+  assert_eq(fix!(-0.5, 0.499999999767169356346130371094, 32).exp, -32);
+  assert_eq(fix!(-0.5, 0.5, 32).exp, -31);
+  assert_eq(fix!(-0.25, 0.249999999883584678173065185547, 32).exp, -33);
+  assert_eq(fix!(-0.25, 0.25, 32).exp, -32);
+  assert_eq(fix!(-0.125, 0.124999999941792339086532592773, 32).exp, -34);
+  assert_eq(fix!(-0.125, 0.125, 32).exp, -33);
+  assert_eq(fix!(-0.0625, 0.0623999999999999999985959581866, 32).exp, -35);
+  assert_eq(fix!(-0.0625, 0.0625, 32).exp, -34);
+  assert_eq(fix!(-0.03125, 0.0312499999854480847716331481934, 32).exp, -36);
+  assert_eq(fix!(-0.03125, 0.03125, 32).exp, -35);
+  assert_eq(fix!(-0.015625, 0.0156249999927240423858165740967, 32).exp, -37);
+  assert_eq(fix!(-0.015625, 0.015625, 32).exp, -36);
+
+  assert_eq(fix!(0.8, 0.8, 32).exp, -31);
+  assert_eq(fix!(0, 0.1, 32).exp, -34);
+  assert_eq(fix!(-0.1, 0, 32).exp, -34);
+  assert_eq(fix!(0, 0.5, 32).exp, -31);
+  assert_eq(fix!(0, 1, 32).exp, -30);
+  assert_eq(fix!(0, 100, 32).exp, -24);
+  assert_eq(fix!(-100, 0, 32).exp, -24);
+  assert_eq(fix!(-100, 100, 32).exp, -24);
+  assert_eq(fix!(-100, 1000, 32).exp, -21);
+  assert_eq(fix!(0, 100000000, 32).exp, -4);
+  assert_eq(fix!(0, 1000000000, 32).exp, -1);
+  assert_eq(fix!(0, 10000000000, 32).exp, 3);
+  assert_eq(fix!(0, 100000000000, 32).exp, 6);
 }
 
 /// Test step (or precision)
@@ -307,6 +342,12 @@ nothrow @nogc unittest {
     assert_eq(cast(int) fix!(-100, 100)(-0.5), -1);
     assert_eq(cast(int) fix!(-100, 100)(-1.5), -2);
 
+    assert_eq(cast(int) fix!(-100, 100)(0.4), 0);
+    assert_eq(cast(int) fix!(-100, 100)(1.4), 1);
+
+    assert_eq(cast(int) fix!(-100, 100)(-0.4), 0);
+    assert_eq(cast(int) fix!(-100, 100)(-1.4), -1);
+
     assert_eq(cast(int) fix!(-100, 100)(7.6), 8);
     assert_eq(cast(int) fix!(-100, 100)(-7.6), -8);
   } else {
@@ -315,6 +356,12 @@ nothrow @nogc unittest {
 
     assert_eq(cast(int) fix!(-100, 100)(-0.5), 0);
     assert_eq(cast(int) fix!(-100, 100)(-1.5), -1);
+
+    assert_eq(cast(int) fix!(-100, 100)(0.4), 0);
+    assert_eq(cast(int) fix!(-100, 100)(1.4), 1);
+
+    assert_eq(cast(int) fix!(-100, 100)(-0.4), 0);
+    assert_eq(cast(int) fix!(-100, 100)(-1.4), -1);
 
     assert_eq(cast(int) fix!(-100, 100)(7.6), 7);
     assert_eq(cast(int) fix!(-100, 100)(-7.6), -7);
@@ -331,13 +378,17 @@ nothrow @nogc unittest {
 /// Fraction part
 nothrow @nogc unittest {
   assert_eq(fix!(-2, 1)(0.55).fracof, fix!(-1, 1)(0.55));
-  assert_eq(fix!(-1, 2)(-0.55).fracof, fix!(-1, 1)(-0.55));
+  assert_eq(fix!(-1, 1)(-0.54).fracof, fix!(-1, 1)(-0.54));
+  assert_eq(fix!(-2, 1)(-0.55).fracof, fix!(-1, 1)(-0.55));
 
-  assert_eq(fix!(-1, 2)(1.001).fracof, fix!(-1, 1)(0.001));
-  assert_eq(fix!(-2, 1)(-1.001).fracof, fix!(-1, 1)(-0.001));
+  assert_eq(fix!(-1, 2)(1.005).fracof, fix!(-1, 1)(0.005), fix!(-1, 1).step);
+  assert_eq(fix!(-2, 1)(-1.005).fracof, fix!(-1, 1)(-0.005), fix!(-1, 1).step);
+
+  assert_eq(fix!(-1, 2)(1.001).fracof, fix!(-1, 1)(0.001), fix!(-1, 1).step);
+  assert_eq(fix!(-2, 1)(-1.001).fracof, fix!(-1, 1)(-0.001), fix!(-1, 1).step);
 
   assert_eq(fix!(-2, 1)(-1.95).fracof, fix!(-1, 1)(-0.95));
-  assert_eq(fix!(-1, 2)(1.95).fracof, fix!(-1, 1)(0.95));
+  assert_eq(fix!(-1, 2)(1.95).fracof, fix!(-1, 1)(0.95), fix!(-1, 1).step);
 
   assert_eq(fix!(0, 2)(1.999).fracof, fix!(0, 1)(0.999));
   assert_eq(fix!(-2, 0)(-1.999).fracof, fix!(-1, 0)(-0.999));
@@ -566,10 +617,10 @@ template asfix(X...) if ((X.length == 1 || X.length == 2) && is(typeof(X[0])) &&
 
 /// Test `asfix`
 nothrow @nogc unittest {
-  assert_eq(asfix!0.exp, -30); // -31
+  assert_eq(asfix!0.exp, -31);
   assert_eq(cast(double) asfix!0, 0);
 
-  assert_eq(asfix!1.exp, -30); // -31
+  assert_eq(asfix!1.exp, -30);
   assert_eq(cast(double) asfix!1, 1);
 
   assert_eq(asfix!0.1.exp, -34);
@@ -584,11 +635,27 @@ nothrow @nogc unittest {
 }
 
 pure nothrow @nogc @safe
-int estimate_exp(real lim) {
-  auto lim2 = lim < real.epsilon ? 1 : lim;
-  auto exp = lim2.log2();
-  auto exp2 = fabs(exp) < real.epsilon ? 1 : cast(int) exp.ceil();
-  return exp2;
+int estimate_exp(real min, real max, uint bits)
+in (min <= max)
+in (bits <= 64)
+do {
+  if (fabs(min) <= real.epsilon && fabs(max) < real.epsilon) {
+    return 1 - cast(int) bits;
+  }
+
+  auto lim = fmax(fabs(min), fabs(max));
+  auto dig = cast(int) lim.log2().ceil();
+  auto exp = dig + 1 - cast(int) bits;
+
+  auto alim = (cast(real) 2).pow(dig);
+  auto amin = -alim;
+  auto amax = alim - (cast(real) 2).pow(exp);
+
+  if (min < amin || max > amax) {
+    exp += 1;
+  }
+
+  return exp;
 }
 
 pure nothrow @nogc @safe
