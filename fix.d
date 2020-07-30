@@ -6,6 +6,16 @@ module fix;
 import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
 import num: isInt, isFloat, isNum, bitsOf;
 
+version(fixRoundToNearest) {
+  version = fixRoundTo;
+} else {
+  version(fixRoundToZero) {
+    version = fixRoundTo;
+  } else {
+    version = fixRoundDown;
+  }
+}
+
 version(unittest) {
   import test: assert_eq, unittests;
 
@@ -90,8 +100,8 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Create number from generic floating-point value
   const pure nothrow @nogc @safe
   this(T)(const T val) if (is(T) && isFloat!T) {
-    auto val2 = val * (cast(real) 2).pow(-exp);
-    version(fixRound) {
+    T val2 = val * (cast(T) 2).pow(-exp);
+    version(fixRoundToNearest) {
       val2 += val2 < 0 ? -0.5 : 0.5;
     }
     raw = cast(raw_t) val2;
@@ -121,6 +131,12 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
 
   /// Convert number to different range or mantissa width
   const pure nothrow @nogc @safe
+  this(T)(const T other) if (is(T) && isFixed!T) {
+    raw = other.raw.raw_to!(T.exp, exp, bits)();
+  }
+
+  /// Convert number to different range or mantissa width
+  const pure nothrow @nogc @safe
   T opCast(T)() if (is(T) && isFixed!T) {
     return T.from_raw(raw.raw_to!(exp, T.exp, T.bits)());
   }
@@ -139,9 +155,9 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
     static if (!hasint) {
       return R.zero;
     } else static if (hasfrac) {
-      return cast(R) (this - cast(R) fracof);
+      return R(this - R(fracof));
     } else {
-      return cast(R) this;
+      return R(this);
     }
   }
 
@@ -151,7 +167,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
     alias R = typeof(return);
 
     static if (hasfrac) {
-      return cast(R) (this % asfix!(1));
+      return R(this % asfix!(1));
     } else {
       return R.zero;
     }
@@ -334,11 +350,17 @@ nothrow @nogc unittest {
   assert_eq(cast(int) fix!(-100, 100)(1.3), 1);
   assert_eq(cast(int) fix!(-100, 100)(7.4), 7);
 
-  assert_eq(cast(int) fix!(-100, 100)(-0.3), 0);
-  assert_eq(cast(int) fix!(-100, 100)(-1.3), -1);
-  assert_eq(cast(int) fix!(-100, 100)(-7.4), -7);
+  version(fixRoundTo) { // nearest or zero
+    assert_eq(cast(int) fix!(-100, 100)(-0.3), 0);
+    assert_eq(cast(int) fix!(-100, 100)(-1.3), -1);
+    assert_eq(cast(int) fix!(-100, 100)(-7.4), -7);
+  } else { // round down
+    assert_eq(cast(int) fix!(-100, 100)(-0.3), -1);
+    assert_eq(cast(int) fix!(-100, 100)(-1.3), -2);
+    assert_eq(cast(int) fix!(-100, 100)(-7.4), -8);
+  }
 
-  version(fixRound) {
+  version(fixRoundNearest) {
     assert_eq(cast(int) fix!(-100, 100)(0.5), 1);
     assert_eq(cast(int) fix!(-100, 100)(1.5), 2);
 
@@ -353,7 +375,9 @@ nothrow @nogc unittest {
 
     assert_eq(cast(int) fix!(-100, 100)(7.6), 8);
     assert_eq(cast(int) fix!(-100, 100)(-7.6), -8);
-  } else {
+  }
+
+  version(fixRoundToZero) {
     assert_eq(cast(int) fix!(-100, 100)(0.5), 0);
     assert_eq(cast(int) fix!(-100, 100)(1.5), 1);
 
@@ -368,6 +392,23 @@ nothrow @nogc unittest {
 
     assert_eq(cast(int) fix!(-100, 100)(7.6), 7);
     assert_eq(cast(int) fix!(-100, 100)(-7.6), -7);
+  }
+
+  version(fixRoundDown) {
+    assert_eq(cast(int) fix!(-100, 100)(0.5), 0);
+    assert_eq(cast(int) fix!(-100, 100)(1.5), 1);
+
+    assert_eq(cast(int) fix!(-100, 100)(-0.5), -1);
+    assert_eq(cast(int) fix!(-100, 100)(-1.5), -2);
+
+    assert_eq(cast(int) fix!(-100, 100)(0.4), 0);
+    assert_eq(cast(int) fix!(-100, 100)(1.4), 1);
+
+    assert_eq(cast(int) fix!(-100, 100)(-0.4), -1);
+    assert_eq(cast(int) fix!(-100, 100)(-1.4), -2);
+
+    assert_eq(cast(int) fix!(-100, 100)(7.6), 7);
+    assert_eq(cast(int) fix!(-100, 100)(-7.6), -8);
   }
 }
 
@@ -438,7 +479,7 @@ nothrow @nogc unittest {
 
 /// Multiplication
 nothrow @nogc unittest {
-  version(fixRound) {
+  version(fixRoundToNearest) {
     assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.625));
     assert_eq(asfix!(1.25) * asfix!(5.3), asfix!(6.625));
   } else {
@@ -736,19 +777,24 @@ raw_type!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T)
   } else static if (rexp > exp) {
     enum int dexp = rexp - exp;
     enum typeof(raw2) half = 1 << (dexp - 1);
-    enum typeof(raw2) one = 1 << dexp;
+    enum typeof(raw2) one_ = 1 << dexp;
+    enum typeof(raw2) one = one_ < 0 ? one_ : one_;
 
-    version(fixRound) {
-      // round half away from zero
+    version(fixRoundToNearest) {
       // FIXME: rounding ~ floor(raw + 0.5)
       auto raw21 = raw2 + (raw2 < 0 ? -half : half);
-    } else {
-      //auto raw21 = raw2 < 0 ? raw2 + one : raw2;
+    }
+
+    version(fixRoundToZero) {
+      auto raw21 = raw2 < 0 ? raw2 + one : raw2;
+    }
+
+    version(fixRoundDown) {
       auto raw21 = raw2;
     }
 
-    //auto raw3 = raw21 >> dexp;
-    auto raw3 = raw21 / one;
+    auto raw3 = raw21 >> dexp;
+    //auto raw3 = raw21 / one;
   } else {
     auto raw3 = raw2;
   }
