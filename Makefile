@@ -1,5 +1,5 @@
-SOURCES += num.d fix.d test.d lt.d
 DFLAGS += -d-version=fixRound
+SOURCES += num.d fix.d test.d lt.d util.d unit.d
 
 test.%: %.d
 	ldc2 -g $(DFLAGS) -betterC -nogc -unittest $<
