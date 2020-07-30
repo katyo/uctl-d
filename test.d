@@ -44,17 +44,16 @@ void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T epsil
    Assert equality of fixed-point values
 */
 nothrow @nogc
-void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, double epsilon = double.epsilon) if (isFixed!T) {
+void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T max_error = T.zero) if (isFixed!T) {
   alias R = double;
   enum string F = "%0.10g (%i)";
 
-  auto ra = cast(R) a;
-  auto rb = cast(R) b;
+  auto d = a.raw > b.raw ? a.raw - b.raw : b.raw - a.raw;
 
-  if (fabs(ra - rb) > epsilon) {
-    char[64] buf;
+  if (d > max_error.raw) {
+    char[128] buf;
 
-    snprintf(buf.ptr, buf.length, (F ~ " == " ~ F).ptr, ra, a.raw, rb, b.raw);
+    snprintf(buf.ptr, buf.length, (F ~ " == " ~ F ~ " (error > " ~ F ~ ")").ptr, cast(double) a, a.raw, cast(double) b, b.raw, cast(double) max_error, max_error.raw);
     __assert(buf.ptr, file.ptr, line);
   }
 }
