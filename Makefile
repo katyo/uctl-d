@@ -1,5 +1,17 @@
-DFLAGS += -d-version=fixRound
 SOURCES += num.d fix.d test.d lt.d util.d unit.d
+#DFLAGS += -d-version=fixRoundToZero
+#DFLAGS += -d-version=fixRoundToNearest
+#DFLAGS += -d-debug
+
+DENV ?= bc
+
+ifeq ($(DENV),bc) # betterC
+DFLAGS += -betterC -nogc
+endif
+
+ifeq ($(DENV),rt) # runtime
+DFLAGS += -main
+endif
 
 test.%: %.d
 	ldc2 -g $(DFLAGS) -betterC -nogc -unittest $<
