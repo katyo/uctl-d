@@ -691,15 +691,8 @@ template cmp(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
 }
 
 /// Create fixed-point constant from an arbitrary number
-///
-/// This macro accepts optional number of mantissa bits which is set to 32 by default.
-template asfix(X...) if ((X.length == 1 || X.length == 2) && is(typeof(X[0])) && isNum!(typeof(X[0])) && (X.length == 1 || is(typeof(X[1]) == int) && X[1] <= 64)) {
-  static if (X.length == 2) {
-    enum uint bits = X[1];
-  } else {
-    enum uint bits = 32;
-  }
-  enum fix!(cast(real) X[0], cast(real) X[0], bits) asfix = X[0];
+template asfix(real val, uint bits = 32) {
+  enum fix!(val, val, bits) asfix = val;
 }
 
 /// Test `asfix`
@@ -719,6 +712,9 @@ nothrow @nogc unittest {
   assert(is(typeof(asfix!(100, 64).raw) == long));
   assert_eq(asfix!(100, 64).exp, -56);
   assert_eq(cast(double) asfix!(100, 64), 100);
+
+  enum auto a = asfix!(1e3);
+  enum auto b = asfix!(1/1e-3);
 }
 
 private pure nothrow @nogc @safe
