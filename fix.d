@@ -883,3 +883,17 @@ nothrow @nogc @safe unittest {
 template isNumer(X...) if (X.length == 1) {
   enum bool isNumer = isFloat!(X[0]) || isInt!(X[0]) || isFixed!(X[0]);
 }
+
+/// Check that fixed-point number is constant
+template isFixedConst(X...) if (X.length == 1) {
+  static if (is(X[0]) && isFixed(X[0])) {
+    enum bool isFixedConst = fabs(X[0].rmin - X[0].rmax) < real_t.epsilon;
+  } else {
+    enum bool isFixedConst = isFixedConst!(typeof(X[0]));
+  }
+}
+
+/// Check that fixed-point number is constant and equals to value
+template isFixedEqualsTo(X, real_t val) {
+  enum bool isFixedEqualsTo = isFixedConst!(X) && fabs(X.rmin - val) < real_t.epsilon;
+}
