@@ -99,6 +99,52 @@ nothrow @nogc @safe unittest {
   assert(bitsOf!a == 8);
 }
 
+/// Signed version of unsigned type
+template signedOf(X...) if (X.length == 1 && isIntegral!(X[0])) {
+  static if (is(X[0])) {
+    static if (isSigned!(X[0])) {
+      alias signedOf = X[0];
+    } else {
+      static if (is(ubyte) && is(X[0] == ubyte)) {
+        alias signedOf = byte;
+      } else static if (is(ushort) && is(X[0] == ushort)) {
+        alias signedOf = short;
+      } else static if (is(uint) && is(X[0] == uint)) {
+        alias signedOf = int;
+      } else static if (is(ulong) && is(X[0] == ulong)) {
+        alias signedOf = long;
+      } else static if (is(ucent) && is(X[0] == ucent)) {
+        alias signedOf = cent;
+      }
+    }
+  } else {
+    alias signedOf = signedOf!(typeof(X[0]));
+  }
+}
+
+/// Unsigned version of signed type
+template unsignedOf(X...) if (X.length == 1 && isIntegral!(X[0])) {
+  static if (is(X[0])) {
+    static if (isUnsigned!(X[0])) {
+      alias unsignedOf = X[0];
+    } else {
+      static if (is(byte) && is(X[0] == byte)) {
+        alias unsignedOf = ubyte;
+      } else static if (is(short) && is(X[0] == short)) {
+        alias unsignedOf = ushort;
+      } else static if (is(int) && is(X[0] == int)) {
+        alias unsignedOf = uint;
+      } else static if (is(long) && is(X[0] == long)) {
+        alias unsignedOf = ulong;
+      } else static if (is(cent) && is(X[0] == cent)) {
+        alias unsignedOf = ucent;
+      }
+    }
+  } else {
+    alias unsignedOf = unsignedOf!(typeof(X[0]));
+  }
+}
+
 /**
    Get formatting specifier for an arbitrary numeric type or value
  */
