@@ -162,8 +162,13 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
   /// Get integer part of number
   const pure nothrow @nogc @property @safe
-  intOf!(self) intof() {
-    alias R = typeof(return);
+  auto intof() {
+    enum real_t Rrmin = rmin.abs_floor();
+    enum real_t Rrmax = rmax.abs_floor();
+
+    enum uint Rbits = bits;
+
+    alias R = fix!(Rrmin, Rrmax, Rbits);
 
     static if (!hasint) {
       return R.zero;
@@ -178,8 +183,18 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
   /// Get fraction part of number
   const pure nothrow @nogc @property @safe
-  fracOf!(self) fracof() {
-    alias R = typeof(return);
+  auto fracof() {
+    static if (hasfrac) {
+      enum real_t Rrmin = fmin(fmax(rmin, -1.0), 1.0);
+      enum real_t Rrmax = fmax(fmin(rmax, 1.0), -1.0);
+    } else {
+      enum real_t Rrmin = 0.0;
+      enum real_t Rrmax = 0.0;
+    }
+
+    enum uint Rbits = bits;
+
+    alias R = fix!(Rrmin, Rrmax, Rbits);
 
     static if (hasfrac) {
       return R(this % asfix!(1));
@@ -190,16 +205,26 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
   /// Negation (unary -)
   const pure nothrow @nogc @safe
-  neg!(self) opUnary(string op)() if (op == "-") {
-    alias R = typeof(return);
+  auto opUnary(string op)() if (op == "-") {
+    enum real_t Rrmin = -rmax;
+    enum real_t Rrmax = -rmin;
+
+    enum uint Rbits = bits;
+
+    alias R = fix!(Rrmin, Rrmax, Rbits);
 
     return R.from_raw(-raw);
   }
 
   /// Addition of fixed-point value (binary +)
   const pure nothrow @nogc @safe
-  sum!(self, T) opBinary(string op, T)(const T other) if (op == "+" && is(T) && isFixed!T) {
-    alias R = typeof(return);
+  auto opBinary(string op, T)(const T other) if (op == "+" && is(T) && isFixed!T) {
+    enum real_t Rrmin = rmin + T.rmin;
+    enum real_t Rrmax = rmax + T.rmax;
+
+    enum uint Rbits = max2(bits, T.bits);
+
+    alias R = fix!(Rrmin, Rrmax, Rbits);
 
     auto a = raw.raw_to!(exp, R.exp, R.bits)();
     auto b = other.raw.raw_to!(T.exp, R.exp, R.bits)();
@@ -209,8 +234,13 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
   /// Subtraction of fixed-point value (binary -)
   const pure nothrow @nogc @safe
-  diff!(self, T) opBinary(string op, T)(const T other) if (op == "-" && is(T) && isFixed!T) {
-    alias R = typeof(return);
+  auto opBinary(string op, T)(const T other) if (op == "-" && is(T) && isFixed!T) {
+    enum real_t Rrmin = rmin - T.rmax;
+    enum real_t Rrmax = rmax - T.rmin;
+
+    enum uint Rbits = max2(bits, T.bits);
+
+    alias R = fix!(Rrmin, Rrmax, Rbits);
 
     auto a = raw.raw_to!(exp, R.exp, R.bits)();
     auto b = other.raw.raw_to!(T.exp, R.exp, R.bits)();
@@ -220,8 +250,18 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point multiplication (binary *)
   const pure nothrow @nogc @safe
-  prod!(self, T) opBinary(string op, T)(const T other) if (op == "*" && is(T) && isFixed!T) {
-    alias R = typeof(return);
+  auto opBinary(string op, T)(const T other) if (op == "*" && is(T) && isFixed!T) {
+    enum real_t minXmin = rmin * T.rmin;
+    enum real_t minXmax = rmin * T.rmax;
+    enum real_t maxXmin = rmax * T.rmin;
+    enum real_t maxXmax = rmax * T.rmax;
+
+    enum real_t Rrmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
+    enum real_t Rrmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
+
+    enum uint Rbits = max2(bits, T.bits);
+
+    alias R = fix!(Rrmin, Rrmax, Rbits);
 
     enum uint op_bits = bits + T.bits;
     enum uint op_exp = exp + T.exp;
@@ -236,8 +276,20 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point division (binary /)
   const pure nothrow @nogc @safe
-  quot!(self, T) opBinary(string op, T)(const T other) if (op == "/" && is(T) && isFixed!T) {
-    alias R = typeof(return);
+  auto opBinary(string op, T)(const T other) if (op == "/" && is(T) && isFixed!T) {
+    static assert(((T.rmin < 0 && T.rmax < 0) || (T.rmin > 0 && T.rmax > 0)), "Fixed-point division is undefined for divider which can be zero.");
+
+    enum real_t minXmin = rmin / T.rmin;
+    enum real_t minXmax = rmin / T.rmax;
+    enum real_t maxXmin = rmax / T.rmin;
+    enum real_t maxXmax = rmax / T.rmax;
+
+    enum real_t Rrmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
+    enum real_t Rrmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
+
+    enum uint Rbits = max2(bits, T.bits);
+
+    alias R = fix!(rmin, rmax, bits);
 
     enum uint op_bits = T.bits + R.bits;
     enum uint op_exp = T.exp + R.exp;
@@ -252,8 +304,18 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
   /// Fixed-point remainder (binary %)
   const pure nothrow @nogc @safe
-  mod!(self, T) opBinary(string op, T)(const T other) if (op == "%" && is(T) && isFixed!T) {
-    alias R = typeof(return);
+  auto opBinary(string op, T)(const T other) if (op == "%" && is(T) && isFixed!T) {
+    static assert(((T.rmin < 0 && T.rmax < 0) || (T.rmin > 0 && T.rmax > 0)), "Fixed-point remainder is undefined for divider which can be zero.");
+
+    enum real_t rlim = fmax(fabs(T.rmin), fabs(T.rmax));
+
+    enum real_t Rrmin = isntneg ? 0.0 : -rlim;
+    enum real_t Rrmax = isntpos ? 0.0 : rlim;
+
+    enum uint Rbits = T.bits;
+
+    alias R = fix!(Rrmin, Rrmax, Rbits);
+
     enum uint op_bits = bits > T.bits ? bits : T.bits;
 
     auto a = raw.raw_to!op_bits();
@@ -570,148 +632,23 @@ nothrow @nogc unittest {
   assert(fix!(-100, 50)(-11.25) <= fix!(-10, 20)(-3.5));
 }
 
-pure nothrow @nogc @safe
+private pure nothrow @nogc @safe
+T max2(T)(T a, T b) {
+  return max(a, b);
+}
+
+private pure nothrow @nogc @safe
 T abs_floor(T)(T val) if (isFloat!T) {
   return val < 0 ? val.ceil() : val.floor();
 }
 
-/// The result of `intof`
-template intOf(T) if (is(T) && isFixed!T) {
-  enum real_t rmin = T.rmin.abs_floor();
-  enum real_t rmax = T.rmax.abs_floor();
+private template cmp(A, B) if (isFixed!A && isFixed!B) {
+  enum real_t rmin = fmin(A.rmin, B.rmin);
+  enum real_t rmax = fmax(A.rmax, B.rmax);
 
-  enum uint bits = T.bits;
+  enum uint bits = max2(A.bits, B.bits);
 
-  alias intOf = fix!(rmin, rmax, bits);
-}
-
-/// The result of `fracof`
-template fracOf(T) if (is(T) && isFixed!T) {
-  static if (T.hasfrac) {
-    enum real_t rmin = fmin(fmax(T.rmin, -1.0), 1.0);
-    enum real_t rmax = fmax(fmin(T.rmax, 1.0), -1.0);
-  } else {
-    enum real_t rmin = 0.0;
-    enum real_t rmax = 0.0;
-  }
-
-  enum uint bits = T.bits;
-
-  alias fracOf = fix!(rmin, rmax, bits);
-}
-
-/// The result of negation
-template neg(T) if (is(T) && isNumer!T) {
-  static if (isFixed!T) {
-    enum real_t rmin = -T.rmax;
-    enum real_t rmax = -T.rmin;
-
-    enum uint bits = T.bits;
-
-    alias neg = fix!(rmin, rmax, bits);
-  } else {
-    alias neg = T;
-  }
-}
-
-/// The result of fixed-point addition
-template sum(A, B) if(is(A) && is(B) && isNumer!A && isNumer!B) {
-  static if (isFixed!A && isFixed!B) {
-    enum real_t rmin = A.rmin + B.rmin;
-    enum real_t rmax = A.rmax + B.rmax;
-
-    enum uint bits = max(A.bits, B.bits);
-
-    alias sum = fix!(rmin, rmax, bits);
-  } else static if (is(A == B)) {
-    alias sum = A;
-  }
-}
-
-/// The result of fixed-point subtraction
-template diff(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
-  static if (isFixed!A && isFixed!B) {
-    enum real_t rmin = A.rmin - B.rmax;
-    enum real_t rmax = A.rmax - B.rmin;
-
-    enum uint bits = max(A.bits, B.bits);
-
-    alias diff = fix!(rmin, rmax, bits);
-  } else static if (is(A == B)) {
-    alias diff = A;
-  }
-}
-
-/// The result of fixed-point multiplication
-template prod(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
-  static if (isFixed!A && isFixed!B) {
-    enum real_t minXmin = A.rmin * B.rmin;
-    enum real_t minXmax = A.rmin * B.rmax;
-    enum real_t maxXmin = A.rmax * B.rmin;
-    enum real_t maxXmax = A.rmax * B.rmax;
-
-    enum real_t rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
-    enum real_t rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
-
-    enum uint bits = max(A.bits, B.bits);
-
-    alias prod = fix!(rmin, rmax, bits);
-  } else static if (is(A == B)) {
-    alias prod = A;
-  }
-}
-
-/// The result of fixed-point division
-template quot(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
-  static if (isFixed!A && isFixed!B) {
-    static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point division is undefined for divider which can be zero.");
-
-    enum real_t minXmin = A.rmin / B.rmin;
-    enum real_t minXmax = A.rmin / B.rmax;
-    enum real_t maxXmin = A.rmax / B.rmin;
-    enum real_t maxXmax = A.rmax / B.rmax;
-
-    enum real_t rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
-    enum real_t rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
-
-    enum uint bits = max(A.bits, B.bits);
-
-    alias quot = fix!(rmin, rmax, bits);
-  } else static if (is(A == B)) {
-    alias quot = A;
-  }
-}
-
-/// The result of fixed-point remainder
-template mod(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
-  static if (isFixed!A && isFixed!B) {
-    static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point remainder is undefined for divider which can be zero.");
-
-    enum real_t rlim = fmax(fabs(B.rmin), fabs(B.rmax));
-
-    enum real_t rmin = A.isntneg ? 0.0 : -rlim;
-    enum real_t rmax = A.isntpos ? 0.0 : rlim;
-
-    enum uint bits = B.bits;
-
-    alias mod = fix!(rmin, rmax, bits);
-  } else static if (is(A == B)) {
-    alias mod = B;
-  }
-}
-
-/// The common type for fixed-point comparison
-template cmp(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
-  static if (isFixed!A && isFixed!B) {
-    enum real_t rmin = fmin(A.rmin, B.rmin);
-    enum real_t rmax = fmax(A.rmax, B.rmax);
-
-    enum uint bits = max(A.bits, B.bits);
-
-    alias cmp = fix!(rmin, rmax, bits);
-  } else static if (is(A == B)) {
-    alias cmp = A;
-  }
+  alias cmp = fix!(rmin, rmax, bits);
 }
 
 /// Create fixed-point constant from an arbitrary number
