@@ -3,20 +3,23 @@
  */
 module num;
 
+import std.traits: isFloatingPoint, isIntegral, isSigned, isUnsigned;
+import std.algorithm.comparison: clamp;
+
 version(unittest) {
-  import test: unittests;
+  import std.meta: AliasSeq;
+  import test: assert_eq, unittests;
 
   mixin unittests;
 }
 
-/// Check when type or expr is number
-template isNum(X...) if (X.length == 1) {
-  enum bool isNum = isInt!(X[0]) || isFloat!(X[0]);
-}
-
 /// Check when type or expr is floating-point number
 template isFloat(X...) if (X.length == 1) {
-  enum bool isFloat = __traits(isArithmetic, X[0]) && __traits(isFloating, X[0]) && __traits(isScalar, X[0]);
+  static if (is(X[0])) {
+    enum bool isFloat = isFloatingPoint!(X[0]);
+  } else {
+    enum bool isFloat = isFloat!(typeof(X[0]));
+  }
 }
 
 /// Test `isFloat`
@@ -40,7 +43,11 @@ nothrow @nogc @safe unittest {
 
 /// Check when type or expr is integer number
 template isInt(X...) if (X.length == 1) {
-  enum bool isInt = __traits(isArithmetic, X[0]) && __traits(isIntegral, X[0]) && __traits(isScalar, X[0]) && !isChar!(X[0]);
+  static if (is(X[0])) {
+    enum bool isInt = isIntegral!(X[0]);
+  } else {
+    enum bool isInt = isInt!(typeof(X[0]));
+  }
 }
 
 /// Test `isInt`
@@ -62,13 +69,9 @@ nothrow @nogc @safe unittest {
   assert(!isInt!"abc");
 }
 
-/// Check when type or expr is character
-template isChar(X...) if (X.length == 1) {
-  static if (is(X[0])) {
-    enum bool isChar = is(X[0] == char);
-  } else {
-    enum bool isChar = isChar!(typeof(X[0]));
-  }
+/// Check when type or expr is number
+template isNum(X...) if (X.length == 1) {
+  enum bool isNum = isInt!(X[0]) || isFloat!(X[0]);
 }
 
 /// Get number of bits of specified type or value
@@ -102,30 +105,6 @@ nothrow @nogc @safe unittest {
 template fmtOf(X...) if (X.length == 1) {
   static if (is(X[0])) {
     static if (isInt!(X[0])) {
-      /*
-      import core.stdc.inttypes: PRIu8, PRId8, PRIu16, PRId16, PRIu32, PRId32, PRIu64, PRId64;
-
-      static if (is(X[0] == ubyte)) {
-        enum string fmtOf = cast(string) "%" ~ PRIu8;
-      } else static if (is(X[0] == byte)) {
-        enum string fmtOf = cast(string) "%" ~ PRId8;
-      } else static if (is(X[0] == ushort)) {
-        enum string fmtOf = cast(string) "%" ~ PRIu16;
-      } else static if (is(X[0] == short)) {
-        enum string fmtOf = cast(string) "%" ~ PRId16;
-      } else static if (is(X[0] == uint)) {
-        enum string fmtOf = cast(string) "%" ~ PRIu32;
-      } else static if (is(X[0] == int)) {
-        enum string fmtOf = cast(string) "%" ~ PRId32;
-      } else static if (is(X[0] == ulong)) {
-        enum string fmtOf = cast(string) "%" ~ PRIu64;
-      } else static if (is(X[0] == long)) {
-        enum string fmtOf = cast(string) "%" ~ PRId64;
-      } else {
-        static assert(false, "Unsupported formatting of integer type: " ~ T.stringof);
-      }
-      */
-
       static if (is(X[0] == ubyte)) {
         enum string fmtOf = cast(string) "%hhu";
       } else static if (is(X[0] == byte)) {
@@ -143,7 +122,7 @@ template fmtOf(X...) if (X.length == 1) {
       } else static if (is(X[0] == long)) {
         enum string fmtOf = cast(string) "%lld";
       } else {
-        static assert(false, "Unsupported formatting of integer type: " ~ T.stringof);
+        static assert(false, "Unsupported formatting of integer type: " ~ X[0].stringof);
       }
     } else static if (isFloat!(X[0])) {
       static if (is(X[0] == float)) {
@@ -151,7 +130,7 @@ template fmtOf(X...) if (X.length == 1) {
       } else static if (is(X[0] == double)) {
         enum string fmtOf = "%g";
       } else {
-        static assert(false, "Unsupported formatting of floating-point type: " ~ T.stringof);
+        static assert(false, "Unsupported formatting of floating-point type: " ~ X[0].stringof);
       }
     }
   } else {

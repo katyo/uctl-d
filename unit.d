@@ -4,6 +4,7 @@
 module unit;
 
 import std.math: PI;
+import std.traits: Unqual, isInstanceOf;
 import num: isNum;
 import fix: fix, prod, asfix, isFixed, isNumer;
 
@@ -18,7 +19,7 @@ version(unittest) {
  */
 struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
   alias units = U;
-  alias raw_t = T;
+  alias raw_t = Unqual!T;
 
   T raw;
 
@@ -40,11 +41,7 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
 /// Check that some value or type has measurement units
 template hasUnits(X...) if (X.length == 1) {
   static if (is(X[0])) {
-    static if (__traits(hasMember, X[0], "raw") && __traits(hasMember, X[0], "raw_t") && __traits(hasMember, X[0], "units")) {
-      enum bool hasUnits = is(X[0] == Val!(X[0].raw_t, X[0].units));
-    } else {
-      enum bool hasUnits = false;
-    }
+    enum bool hasUnits = isInstanceOf!(Val, X[0]);
   } else {
     enum bool hasUnits = hasUnits!(typeof(X));
   }

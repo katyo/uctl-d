@@ -3,6 +3,8 @@
  */
 module fix;
 
+import std.traits: isInstanceOf;
+import std.algorithm.comparison: max;
 import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
 import num: isInt, isFloat, isNum, bitsOf;
 
@@ -730,11 +732,6 @@ do {
   return exp;
 }
 
-pure nothrow @nogc @safe
-T max(T)(T a, T b) if (is(T) && isNum!T) {
-  return a > b ? a : b;
-}
-
 /**
   Convert mantissa bits only
 
@@ -830,14 +827,10 @@ template raw_type(uint bits) {
   }
 }
 
-/// Check when type or value is fixed-point number
+/// Checks that type or value is fixed-point number
 template isFixed(X...) if (X.length == 1) {
   static if (is(X[0])) {
-    static if (__traits(hasMember, X[0], "rmin") && __traits(hasMember, X[0], "rmax") && __traits(hasMember, X[0], "bits")) {
-      enum bool isFixed = is(X[0] == fix!(X[0].rmin, X[0].rmax, X[0].bits));
-    }  else {
-      enum bool isFixed = false;
-    }
+    enum bool isFixed = isInstanceOf!(fix, X[0]);
   } else {
     enum bool isFixed = isFixed!(typeof(X[0]));
   }
