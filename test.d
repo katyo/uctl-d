@@ -8,8 +8,8 @@ import core.stdc.stdio: snprintf;
 import core.stdc.assert_: __assert;
 
 import num: isInt, isFloat, fmtOf;
-import fix: fix, isFixed, isNumer;
-import unit: Val, isUnits;
+import fix: fix, isFixed, isSameFixed, isNumer;
+import unit: Val, isUnits, hasUnits;
 
 /**
    Assert equality of integer values
@@ -30,10 +30,10 @@ void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b) if (isI
    Assert equality of floating-point values
 */
 nothrow @nogc
-void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T epsilon = T.epsilon) if (isFloat!T) {
+void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T max_error = T.epsilon) if (isFloat!T) {
   enum string F = fmtOf!T;
 
-  if (fabs(a - b) > epsilon) {
+  if (fabs(a - b) > max_error) {
     char[64] buf;
 
     snprintf(buf.ptr, buf.length, (F ~ " == " ~ F).ptr, a, b);
@@ -45,8 +45,7 @@ void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T epsil
    Assert equality of fixed-point values
 */
 nothrow @nogc
-void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T max_error = T.zero) if (isFixed!T) {
-  alias R = double;
+void assert_eq(T, S, string file = __FILE__, int line = __LINE__)(T a, S b, T max_error = T.zero) if (isFixed!T && isFixed!S && isSameFixed!(T, S)) {
   enum string F = "%0.10g (%i)";
 
   auto d = a.raw > b.raw ? a.raw - b.raw : b.raw - a.raw;
@@ -63,7 +62,7 @@ void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T max_e
    Assert equality of integer values with units
 */
 nothrow @nogc
-void assert_eq(T, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(T, U) b) if (isInt!(T) && isUnits!U) {
+void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b) if (isInt!T && isInt!S && isUnits!U && is(T == S)) {
   assert_eq!(T.raw_t, file, line)(a.raw, b.raw);
 }
 
@@ -71,16 +70,16 @@ void assert_eq(T, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, 
    Assert equality of floating-point values with units
 */
 nothrow @nogc
-void assert_eq(T, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(T, U) b, T epsilon = T.epsilon) if (isFloat!(T) && isUnits!U) {
-  assert_eq!(T, file, line)(a.raw, b.raw, epsilon);
+void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b, T max_error = T.epsilon) if (isFloat!T && isFloat!S && isUnits!U && is(T == S)) {
+  assert_eq!(T, file, line)(a.raw, b.raw, max_error);
 }
 
 /**
    Assert equality of fixed-point values with units
 */
 nothrow @nogc
-void assert_eq(T, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(T, U) b, T max_error = T.zero) if (isFixed!(T) && isUnits!U) {
-  assert_eq!(T, file, line)(a.raw, b.raw, max_error);
+void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b, T max_error = T.zero) if (isFixed!T && isFixed!S && isUnits!U && isSameFixed!(T, S)) {
+  assert_eq!(T, S, file, line)(a.raw, b.raw, max_error);
 }
 
 /// Test `assert_eq`
