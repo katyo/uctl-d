@@ -341,6 +341,9 @@ nothrow @nogc unittest {
   assert_eq(fix!(0, 1000000000, 32).exp, -1);
   assert_eq(fix!(0, 10000000000, 32).exp, 3);
   assert_eq(fix!(0, 100000000000, 32).exp, 6);
+
+  assert_eq(fix!(-10, 10).exp, -27);
+  assert_eq(asfix!(1e3 / 1e0).exp, -21);
 }
 
 /// Test step (or precision)
@@ -459,6 +462,8 @@ nothrow @nogc unittest {
   //assert_eq(fix!(-10, 15)(-1.54).fracof, fix!(-1, 1)(-0.54));
 
   assert_eq(fix!(-1e10, 1e10)(0).fracof, fix!(0, 0)(0));
+
+  assert_eq(fix!(-10, 15)(-3.09).fracof, fix!(-1, 1)(-0.09), fix!(-1, 1)(0.00000001));
 }
 
 /// Integer part
@@ -485,11 +490,27 @@ nothrow @nogc unittest {
 /// Addition
 nothrow @nogc unittest {
   assert_eq(fix!(-100, 200)(1.23) + fix!(-20, 10)(5), fix!(-120, 210)(6.23));
+
+  // add const
+  assert_eq(fix!(-10, 10)(1.25) + asfix!(2.5), fix!(-7.5, 12.5)(3.75));
+
+  // add zero
+  assert_eq(fix!(-10, 10)(1.25) + asfix!(0.0), fix!(-10, 10)(1.25));
 }
 
 /// Subtraction
 nothrow @nogc unittest {
   assert_eq(fix!(-100, 200)(1.25) - fix!(-20, 10)(5.3), fix!(-110, 220)(-4.05));
+
+  // subtract const
+  assert_eq(fix!(-10, 10)(1.25) - asfix!(2.5), fix!(-12.5, 7.5)(-1.25));
+
+  // subtract zero
+  assert_eq(fix!(-10, 10)(1.25) - asfix!(0.0), fix!(-10, 10)(1.25));
+
+  assert_eq(fix!(-10, 10)(9) - fix!(-10, 10)(8), fix!(-20, 20)(1));
+
+  assert_eq(fix!(-10, 10)(9) - asfix!(8), fix!(-18, 2)(1));
 }
 
 /// Multiplication
@@ -500,6 +521,9 @@ nothrow @nogc unittest {
   } else {
     assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.624999));
   }
+
+  assert_eq(fix!(-10, 10)(1.25) * asfix!(1e3), fix!(-10000, 10000)(1250.0));
+  assert_eq(fix!(-10, 10)(1.25) * asfix!(1/1e-3), fix!(-10000, 10000)(1250.0));
 }
 
 /// Division
