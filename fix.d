@@ -857,6 +857,28 @@ nothrow @nogc @safe unittest {
   assert(!isFixed!123);
 }
 
+/// Checks that fixed-point types is same
+template isSameFixed(X...) if (X.length == 2) {
+  static if (isFixed!(X[0]) && isFixed!(X[1])) {
+    enum bool isSameFixed = X[0].bits == X[1].bits && X[0].exp == X[1].exp;
+  } else {
+    enum bool isSameFixed = false;
+  }
+}
+
+/// Test `isSameFixed`
+nothrow @nogc @safe unittest {
+  assert(isSameFixed!(fix!(-1, 1), fix!(-1, 1)));
+  assert(isSameFixed!(typeof(fix!(-1.1, 0.3)(0.0) * asfix!(1e3)), fix!(-1100, 300)));
+  assert(isSameFixed!(typeof(fix!(-5, 10)(0.0) * asfix!(1e-3)), fix!(-0.005, 0.01)));
+  assert(isSameFixed!(asfix!(1/1e-3), asfix!(1e3)));
+  assert(isSameFixed!(fix!(-10, 10)(1.25) * asfix!(1e3), fix!(-10000, 10000)(1250.0)));
+  assert(isSameFixed!(fix!(-10, 10)(1.25) * asfix!(1/1e-3), fix!(-10000, 10000)(1250.0)));
+
+  assert(!isSameFixed!(fix!(-1, 1), fix!(0, 2)));
+  assert(!isSameFixed!(double, double));
+}
+
 /// Check when type or expr is numeric
 template isNumer(X...) if (X.length == 1) {
   enum bool isNumer = isFloat!(X[0]) || isInt!(X[0]) || isFixed!(X[0]);
