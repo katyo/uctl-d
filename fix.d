@@ -6,7 +6,7 @@ module fix;
 import std.traits: isInstanceOf;
 import std.algorithm.comparison: max;
 import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
-import num: isInt, isFloat, isNum, bitsOf;
+import num: isInt, isFloat, isNum, bitsOf, filledBits;
 
 version(fixDouble) {
   alias real_t = double;
@@ -96,8 +96,12 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   /// Mantissa type
   alias raw_t = raw_type!(bits);
 
+  enum raw_t intmask = filledBits!(raw_t, -exp, bits);
+
+  enum raw_t fracmask = filledBits!(raw_t, 0, -exp);
+
   /// Self type alias
-  alias self = fix!(rmin, rmax, bits);
+  alias self = typeof(this);
 
   /// Raw mantisa value
   raw_t raw = 0;
@@ -135,11 +139,7 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   /// Convert number into generic integer value
   const pure nothrow @nogc @safe
   T opCast(T)() if (is(T) && isInt!T) {
-    static if (exp < 0) {
-      return raw.raw_to!(exp, 0)();
-    } else {
-      return (cast(T) raw) << exp;
-    }
+    return raw.raw_to!(exp, 0, bitsOf!T)();
   }
 
   /// Convert number to different range or mantissa width
@@ -168,7 +168,9 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
     static if (!hasint) {
       return R.zero;
     } else static if (hasfrac) {
-      return R(this - R(fracof));
+      raw_t raw2 = raw & intmask;
+      if (raw < 0 && raw2 < raw) raw2 += fracmask + 1;
+      return R.from_raw(raw2.raw_to!(exp, R.exp, R.bits));
     } else {
       return R(this);
     }
