@@ -112,7 +112,8 @@ R lt1(uint len, R, A, real function(real) pure nothrow @nogc @safe gen)(A arg) i
 
   auto uidx = cast(uint) idx;
 
-  auto interp = cast(fix!(0, 1)) (pos - cast(fix!(0, len - 2)) idx);
+  //auto interp = cast(fix!(0, 1)) (pos - cast(fix!(0, len - 2)) idx);
+  auto interp = cast(fix!(0, 1)) (pos - cast(typeof(pos)) idx);
 
   auto offset = data[uidx];
   auto factor = data[uidx + 1] - data[uidx];
@@ -127,15 +128,15 @@ R lt1(uint len, R, A, real function(real) pure nothrow @nogc @safe gen)(A arg) i
   alias sqr = lt1!(10, X, X, (x) => x * x);
 
   assert_eq(sqr(cast(X) 0), cast(X) 0);
-  assert_eq(sqr(cast(X) 0.1), cast(X) 0.01, 0.002);
-  assert_eq(sqr(cast(X) 0.5), cast(X) 0.25, 0.01);
-  assert_eq(sqr(cast(X) 1), cast(X) 1, 0.00001);
+  assert_eq(sqr(cast(X) 0.1), cast(X) 0.01, cast(X) 0.002);
+  assert_eq(sqr(cast(X) 0.5), cast(X) 0.25, cast(X) 0.005);
+  assert_eq(sqr(cast(X) 1), cast(X) 1, cast(X) 0.000001);
 
   void test_as_func(X delegate(X) pure nothrow @safe @nogc f) {
     assert_eq(sqr(cast(X) 0), cast(X) 0);
-    assert_eq(sqr(cast(X) 0.1), cast(X) 0.01, 0.002);
-    assert_eq(sqr(cast(X) 0.5), cast(X) 0.25, 0.01);
-    assert_eq(sqr(cast(X) 1), cast(X) 1, 0.00001);
+    assert_eq(sqr(cast(X) 0.1), cast(X) 0.01, cast(X) 0.002);
+    assert_eq(sqr(cast(X) 0.5), cast(X) 0.25, cast(X) 0.005);
+    assert_eq(sqr(cast(X) 1), cast(X) 1, cast(X) 0.000001);
   }
 
   test_as_func(&sqr);

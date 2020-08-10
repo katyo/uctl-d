@@ -132,5 +132,5 @@ R scale(R, A)(A val) if (isFixed!R && isFixed!A) {
 nothrow @nogc unittest {
   alias F = fix!(-11.5, 39.0);
   alias T = fix!(-1.15, 3.9);
-  assert_eq((cast(F) 33.4).scale!(T, F)(), cast(T) 3.34);
+  assert_eq((cast(F) 33.4).scale!(T, F)(), cast(T) 3.34, cast(T) 1e-8);
 }
