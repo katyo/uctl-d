@@ -8,6 +8,16 @@ import std.algorithm.comparison: max;
 import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
 import num: isInt, isFloat, isNum, bitsOf;
 
+version(fixDouble) {
+  alias real_t = double;
+} else {
+  version(fixFloat) {
+    alias real_t = float;
+  } else {
+    alias real_t = real;
+  }
+}
+
 version(fixRoundToNearest) {
   version = fixRoundTo;
 } else {
@@ -31,19 +41,20 @@ version(unittest) {
 
    See also: [Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic).
  */
-struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
-  static assert(rmin_ != real.nan, "Invalid range: minimum is not a number");
-  static assert(rmax_ != real.nan, "Invalid range: Maximum is not a number");
-  static assert(rmin_ != -real.infinity, "Invalid range: minimum of range is -∞");
-  static assert(rmax_ != -real.infinity, "Invalid range: maximum of range is -∞");
-  static assert(rmin_ != real.infinity, "Invalid range: minimum of range is +∞");
-  static assert(rmax_ != real.infinity, "Invalid range: maximum of range is +∞");
+struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
+  static assert(rmin_ != real_t.nan, "Invalid range: minimum is not a number");
+  static assert(rmax_ != real_t.nan, "Invalid range: Maximum is not a number");
+  static assert(rmin_ != -real_t.infinity, "Invalid range: minimum of range is -∞");
+  static assert(rmax_ != -real_t.infinity, "Invalid range: maximum of range is -∞");
+  static assert(rmin_ != real_t.infinity, "Invalid range: minimum of range is +∞");
+  static assert(rmax_ != real_t.infinity, "Invalid range: maximum of range is +∞");
   static assert(rmin_ <= rmax_, "Invalid range: minimum should be less than or equals to maximum.");
 
   /// Real minimum
-  enum real rmin = rmin_;
+  enum real_t rmin = rmin_;
   /// Real maximum
-  enum real rmax = rmax_;
+  enum real_t rmax = rmax_;
+
   /// Number of mantissa bits
   enum uint bits = bits_;
 
@@ -118,7 +129,7 @@ struct fix(real rmin_, real rmax_ = rmin_, uint bits_ = 32) {
   /// Convert number into generic floating-point value
   const pure nothrow @nogc @safe
   T opCast(T)() if (is(T) && isFloat!T) {
-    return (cast(T) raw) * (cast(T) (cast(real) 2).pow(exp));
+    return (cast(T) raw) * (cast(T) (cast(real_t) 2).pow(exp));
   }
 
   /// Convert number into generic integer value
@@ -540,8 +551,8 @@ T abs_floor(T)(T val) if (isFloat!T) {
 
 /// The result of `intof`
 template intOf(T) if (is(T) && isFixed!T) {
-  enum real rmin = T.rmin.abs_floor();
-  enum real rmax = T.rmax.abs_floor();
+  enum real_t rmin = T.rmin.abs_floor();
+  enum real_t rmax = T.rmax.abs_floor();
 
   enum uint bits = T.bits;
 
@@ -551,11 +562,11 @@ template intOf(T) if (is(T) && isFixed!T) {
 /// The result of `fracof`
 template fracOf(T) if (is(T) && isFixed!T) {
   static if (T.hasfrac) {
-    enum real rmin = fmin(fmax(T.rmin, -1.0), 1.0);
-    enum real rmax = fmax(fmin(T.rmax, 1.0), -1.0);
+    enum real_t rmin = fmin(fmax(T.rmin, -1.0), 1.0);
+    enum real_t rmax = fmax(fmin(T.rmax, 1.0), -1.0);
   } else {
-    enum real rmin = 0.0;
-    enum real rmax = 0.0;
+    enum real_t rmin = 0.0;
+    enum real_t rmax = 0.0;
   }
 
   enum uint bits = T.bits;
@@ -566,8 +577,8 @@ template fracOf(T) if (is(T) && isFixed!T) {
 /// The result of negation
 template neg(T) if (is(T) && isNumer!T) {
   static if (isFixed!T) {
-    enum real rmin = -T.rmax;
-    enum real rmax = -T.rmin;
+    enum real_t rmin = -T.rmax;
+    enum real_t rmax = -T.rmin;
 
     enum uint bits = T.bits;
 
@@ -580,8 +591,8 @@ template neg(T) if (is(T) && isNumer!T) {
 /// The result of fixed-point addition
 template sum(A, B) if(is(A) && is(B) && isNumer!A && isNumer!B) {
   static if (isFixed!A && isFixed!B) {
-    enum real rmin = A.rmin + B.rmin;
-    enum real rmax = A.rmax + B.rmax;
+    enum real_t rmin = A.rmin + B.rmin;
+    enum real_t rmax = A.rmax + B.rmax;
 
     enum uint bits = max(A.bits, B.bits);
 
@@ -594,8 +605,8 @@ template sum(A, B) if(is(A) && is(B) && isNumer!A && isNumer!B) {
 /// The result of fixed-point subtraction
 template diff(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
   static if (isFixed!A && isFixed!B) {
-    enum real rmin = A.rmin - B.rmax;
-    enum real rmax = A.rmax - B.rmin;
+    enum real_t rmin = A.rmin - B.rmax;
+    enum real_t rmax = A.rmax - B.rmin;
 
     enum uint bits = max(A.bits, B.bits);
 
@@ -608,13 +619,13 @@ template diff(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
 /// The result of fixed-point multiplication
 template prod(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
   static if (isFixed!A && isFixed!B) {
-    enum real minXmin = A.rmin * B.rmin;
-    enum real minXmax = A.rmin * B.rmax;
-    enum real maxXmin = A.rmax * B.rmin;
-    enum real maxXmax = A.rmax * B.rmax;
+    enum real_t minXmin = A.rmin * B.rmin;
+    enum real_t minXmax = A.rmin * B.rmax;
+    enum real_t maxXmin = A.rmax * B.rmin;
+    enum real_t maxXmax = A.rmax * B.rmax;
 
-    enum real rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
-    enum real rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
+    enum real_t rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
+    enum real_t rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
 
     enum uint bits = max(A.bits, B.bits);
 
@@ -629,13 +640,13 @@ template quot(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
   static if (isFixed!A && isFixed!B) {
     static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point division is undefined for divider which can be zero.");
 
-    enum real minXmin = A.rmin / B.rmin;
-    enum real minXmax = A.rmin / B.rmax;
-    enum real maxXmin = A.rmax / B.rmin;
-    enum real maxXmax = A.rmax / B.rmax;
+    enum real_t minXmin = A.rmin / B.rmin;
+    enum real_t minXmax = A.rmin / B.rmax;
+    enum real_t maxXmin = A.rmax / B.rmin;
+    enum real_t maxXmax = A.rmax / B.rmax;
 
-    enum real rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
-    enum real rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
+    enum real_t rmin = fmin(fmin(minXmin, minXmax), fmin(maxXmin, maxXmax));
+    enum real_t rmax = fmax(fmax(minXmin, minXmax), fmax(maxXmin, maxXmax));
 
     enum uint bits = max(A.bits, B.bits);
 
@@ -650,10 +661,10 @@ template mod(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
   static if (isFixed!A && isFixed!B) {
     static assert(((B.rmin < 0 && B.rmax < 0) || (B.rmin > 0 && B.rmax > 0)), "Fixed-point remainder is undefined for divider which can be zero.");
 
-    enum real rlim = fmax(fabs(B.rmin), fabs(B.rmax));
+    enum real_t rlim = fmax(fabs(B.rmin), fabs(B.rmax));
 
-    enum real rmin = A.isntneg ? 0.0 : -rlim;
-    enum real rmax = A.isntpos ? 0.0 : rlim;
+    enum real_t rmin = A.isntneg ? 0.0 : -rlim;
+    enum real_t rmax = A.isntpos ? 0.0 : rlim;
 
     enum uint bits = B.bits;
 
@@ -666,8 +677,8 @@ template mod(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
 /// The common type for fixed-point comparison
 template cmp(A, B) if (is(A) && is(B) && isNumer!A && isNumer!B) {
   static if (isFixed!A && isFixed!B) {
-    enum real rmin = fmin(A.rmin, B.rmin);
-    enum real rmax = fmax(A.rmax, B.rmax);
+    enum real_t rmin = fmin(A.rmin, B.rmin);
+    enum real_t rmax = fmax(A.rmax, B.rmax);
 
     enum uint bits = max(A.bits, B.bits);
 
@@ -708,12 +719,12 @@ nothrow @nogc unittest {
   assert_eq(cast(double) asfix!(100, 64), 100);
 }
 
-pure nothrow @nogc @safe
-int estimate_exp(real min, real max, uint bits)
+private pure nothrow @nogc @safe
+int estimate_exp(real_t min, real_t max, uint bits)
 in (min <= max)
 in (bits <= 64)
 do {
-  if (fabs(min) <= real.epsilon && fabs(max) < real.epsilon) {
+  if (fabs(min) <= real_t.epsilon && fabs(max) < real_t.epsilon) {
     return 1 - cast(int) bits;
   }
 
@@ -721,9 +732,9 @@ do {
   auto dig = cast(int) lim.log2().ceil();
   auto exp = dig + 1 - cast(int) bits;
 
-  auto alim = (cast(real) 2).pow(dig);
+  auto alim = (cast(real_t) 2).pow(dig);
   auto amin = -alim;
-  auto amax = alim - (cast(real) 2).pow(exp);
+  auto amax = alim - (cast(real_t) 2).pow(exp);
 
   if (min < amin || max > amax) {
     exp += 1;

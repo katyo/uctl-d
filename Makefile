@@ -1,4 +1,5 @@
 SOURCES += num.d fix.d test.d lt.d util.d unit.d
+#DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundToZero
 #DFLAGS += -d-version=fixRoundToNearest
 #DFLAGS += -d-debug
