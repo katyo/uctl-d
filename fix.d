@@ -8,6 +8,12 @@ import std.algorithm.comparison: max;
 import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
 import num: isInt, isFloat, isNum, bitsOf, filledBits;
 
+version(unittest) {
+  import test: assert_eq, unittests;
+
+  mixin unittests;
+}
+
 version(fixDouble) {
   alias real_t = double;
 } else {
@@ -28,10 +34,141 @@ version(fixRoundToNearest) {
   }
 }
 
-version(unittest) {
-  import test: assert_eq, unittests;
+private pure nothrow @nogc @safe
+int estimate_exp(real_t min, real_t max, uint bits)
+in (min <= max)
+in (bits <= 64)
+do {
+  if (fabs(min) <= real_t.epsilon && fabs(max) < real_t.epsilon) {
+    return 1 - cast(int) bits;
+  }
 
-  mixin unittests;
+  auto lim = fmax(fabs(min), fabs(max));
+  auto dig = cast(int) lim.log2().ceil();
+  auto exp = dig + 1 - cast(int) bits;
+
+  auto alim = (cast(real_t) 2).pow(dig);
+  auto amin = -alim;
+  auto amax = alim - (cast(real_t) 2).pow(exp);
+
+  if (min < amin || max > amax) {
+    exp += 1;
+  }
+
+  return exp;
+}
+
+/**
+   Select mantissa type
+
+   Selects appropriate mantissa type by width in bits.
+*/
+private template raw_type(uint bits) {
+  static if (bits <= 8 && is(byte)) {
+    alias raw_type = byte;
+  } else static if (bits <= 16 && is(short)) {
+    alias raw_type = short;
+  } else static if (bits <= 32 && is(int)) {
+    alias raw_type = int;
+  } else static if (bits <= 64 && is(long)) {
+    alias raw_type = long;
+  } else static if (bits <= 128 && is(cent)) {
+    alias raw_type = cent;
+  } else {
+    static assert(0, "Unsupported bits width: " ~ bits.stringof);
+  }
+}
+
+/**
+  Convert mantissa bits only
+
+  Converts mantissa type to `rbits`.
+*/
+private pure nothrow @nogc @safe
+raw_type!(rbits) raw_to(uint rbits, T)(T raw) if (is(T) && isInt!T) {
+  return cast(typeof(return)) raw;
+}
+
+/**
+   Convert mantissa exponent only
+
+   Converts mantissa exponent from `exp` to `rexp`.
+*/
+private pure nothrow @nogc @safe
+raw_type!(bitsOf!T) raw_to(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
+  return raw.raw_to!(exp, rexp, bitsOf!T);
+}
+
+/**
+   Convert both mantissa exponent and bits
+
+   Converts mantissa exponent from `exp` to `rexp` and bits to `rbits`.
+*/
+private pure nothrow @nogc @safe
+raw_type!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T) && isInt!T) {
+  enum uint bits = bitsOf!T;
+
+  static if (rexp < exp && rbits > bits) {
+    // adjust raw type first
+    auto raw2 = raw.raw_to!rbits;
+  } else {
+    auto raw2 = raw;
+  }
+
+  static if (rexp < exp) {
+    enum int dexp = exp - rexp;
+    auto raw3 = raw2 << dexp;
+  } else static if (rexp > exp) {
+    enum int dexp = rexp - exp;
+    enum typeof(raw2) half = 1 << (dexp - 1);
+    enum typeof(raw2) one = 1 << dexp;
+
+    version(fixRoundToNearest) {
+      // FIXME: rounding ~ floor(raw + 0.5)
+      auto raw21 = raw2 + (raw2 < 0 ? -half : half);
+    }
+
+    version(fixRoundToZero) {
+      auto raw21 = raw2 < 0 ? raw2 + one : raw2;
+    }
+
+    version(fixRoundDown) {
+      auto raw21 = raw2;
+    }
+
+    auto raw3 = raw21 >> dexp;
+    //auto raw3 = raw21 / one;
+  } else {
+    auto raw3 = raw2;
+  }
+
+  static if (rexp < exp && rbits > bits) {
+    auto raw4 = raw3;
+  } else {
+    // finally adjust raw type
+    auto raw4 = raw3.raw_to!rbits;
+  }
+
+  return raw4;
+}
+
+nothrow @nogc unittest {
+  version(fixRoundDown) {
+    assert_eq(0b01010.raw_to!(0, 1), 0b0101);
+    assert_eq(0b01010.raw_to!(0, 2), 0b010);
+    assert_eq(0b01010.raw_to!(0, 3), 0b01);
+    assert_eq((-0b01010).raw_to!(0, 1), -0b0101);
+    assert_eq((-0b01010).raw_to!(0, 2), -0b011);
+    assert_eq((-0b01010).raw_to!(0, 3), -0b10);
+  }
+  version(fixRoundToNearest) {
+    assert_eq(0b01010.raw_to!(0, 1), 0b0101);
+    assert_eq(0b01010.raw_to!(0, 2), 0b011);
+    assert_eq(0b01010.raw_to!(0, 3), 0b01);
+    assert_eq((-0b01010).raw_to!(0, 1), -0b0101);
+    assert_eq((-0b01010).raw_to!(0, 2), -0b011);
+    assert_eq((-0b01010).raw_to!(0, 3), -0b10);
+  }
 }
 
 /**
@@ -674,125 +811,6 @@ nothrow @nogc unittest {
 
   enum auto a = asfix!(1e3);
   enum auto b = asfix!(1/1e-3);
-}
-
-private pure nothrow @nogc @safe
-int estimate_exp(real_t min, real_t max, uint bits)
-in (min <= max)
-in (bits <= 64)
-do {
-  if (fabs(min) <= real_t.epsilon && fabs(max) < real_t.epsilon) {
-    return 1 - cast(int) bits;
-  }
-
-  auto lim = fmax(fabs(min), fabs(max));
-  auto dig = cast(int) lim.log2().ceil();
-  auto exp = dig + 1 - cast(int) bits;
-
-  auto alim = (cast(real_t) 2).pow(dig);
-  auto amin = -alim;
-  auto amax = alim - (cast(real_t) 2).pow(exp);
-
-  if (min < amin || max > amax) {
-    exp += 1;
-  }
-
-  return exp;
-}
-
-/**
-  Convert mantissa bits only
-
-  Converts mantissa type to `rbits`.
-*/
-pure nothrow @nogc @safe
-raw_type!(rbits) raw_to(uint rbits, T)(T raw) if (is(T) && isInt!T) {
-  return cast(typeof(return)) raw;
-}
-
-/**
-   Convert mantissa exponent only
-
-   Converts mantissa exponent from `exp` to `rexp`.
-*/
-pure nothrow @nogc @safe
-raw_type!(bitsOf!T) raw_to(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
-  return raw.raw_to!(exp, rexp, bitsOf!T);
-}
-
-/**
-   Convert both mantissa exponent and bits
-
-   Converts mantissa exponent from `exp` to `rexp` and bits to `rbits`.
-*/
-pure nothrow @nogc @safe
-raw_type!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T) && isInt!T) {
-  enum uint bits = bitsOf!T;
-
-  static if (rexp < exp && rbits > bits) {
-    // adjust raw type first
-    auto raw2 = raw.raw_to!rbits;
-  } else {
-    auto raw2 = raw;
-  }
-
-  static if (rexp < exp) {
-    enum int dexp = exp - rexp;
-    auto raw3 = raw2 << dexp;
-  } else static if (rexp > exp) {
-    enum int dexp = rexp - exp;
-    enum typeof(raw2) half = 1 << (dexp - 1);
-    enum typeof(raw2) one_ = 1 << dexp;
-    enum typeof(raw2) one = one_ < 0 ? one_ : one_;
-
-    version(fixRoundToNearest) {
-      // FIXME: rounding ~ floor(raw + 0.5)
-      auto raw21 = raw2 + (raw2 < 0 ? -half : half);
-    }
-
-    version(fixRoundToZero) {
-      auto raw21 = raw2 < 0 ? raw2 + one : raw2;
-    }
-
-    version(fixRoundDown) {
-      auto raw21 = raw2;
-    }
-
-    auto raw3 = raw21 >> dexp;
-    //auto raw3 = raw21 / one;
-  } else {
-    auto raw3 = raw2;
-  }
-
-  static if (rexp < exp && rbits > bits) {
-    auto raw4 = raw3;
-  } else {
-    // finally adjust raw type
-    auto raw4 = raw3.raw_to!rbits;
-  }
-
-  return raw4;
-}
-
-/**
-   Select mantissa type
-
-   Selects appropriate mantissa type by width in bits.
-*/
-template raw_type(uint bits) {
-  static if (bits <= 8 && is(byte)) {
-    alias raw_type = byte;
-  } else static if (bits <= 16 && is(short)) {
-    alias raw_type = short;
-  } else static if (bits <= 32 && is(int)) {
-    alias raw_type = int;
-  } else static if (bits <= 64 && is(long)) {
-    alias raw_type = long;
-  } else static if (bits <= 128 && is(cent)) {
-    alias raw_type = cent;
-  } else {
-    static assert(0, "Unsupported bits width: " ~ bits.stringof);
-  }
 }
 
 /// Checks that type or value is fixed-point number
