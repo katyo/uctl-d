@@ -11,10 +11,11 @@ module trig;
 
 import num: isFloat;
 import fix: fix, asfix, isFixed;
-import unit: Val, as, to, hpi, rad;
+import unit: Val, to, isUnits, Angle, hpi;
 
 version(unittest) {
   import std.math: PI, sin, cos;
+  import unit: as, rad;
   import test: assert_eq, max_abs_error, mean_sqr_error, unittests;
 
   mixin unittests;
@@ -55,247 +56,251 @@ version(unittest) {
    cos(z) = 1 - ((2 - π/4) - (1 - π/4) * z^2) * z^2
    ---
 */
-auto sin(uint N, T)(const Val!(T, hpi) angle) if (N >= 2 && N <= 5 && (isFloat!T || isFixed!T)) {
-  static if (isFloat!T) {
-    alias R = T;
-  }
-  static if (isFixed!T) {
-    alias Z = fix!(-4, 4);
-    alias R = fix!(-1, 1);
-  }
-
-  auto x = angle.raw;
-
-  static if (N == 2) { // 2nd-order
-    static if (isFloat!T) { // floating-point
-      auto z = x % 4.0; // x %= 2π
-
-      auto n = false;
-
-      if (z < 0.0) { // x < 0
-        n = true;
-        z = -z;
-      }
-
-      if (z > 2.0) { // x > π
-        n = !n;
-        z = z - 2.0; // x -= π
-      }
-
-      auto y = (2.0 - z) * z;
-
-      return cast(R) (n ? -y : y);
+auto sin(uint N, T, U)(const Val!(T, U) angle) if (N >= 2 && N <= 5 && (isFloat!T || isFixed!T) && isUnits!U && is(U.Class == Angle)) {
+  static if (is(U == hpi)) {
+    static if (isFloat!T) {
+      alias R = T;
     }
-    static if (isFixed!T) { // fixed-point
-      auto z = cast(Z) (x % asfix!4.0); // x %= 2π
-
-      auto n = false;
-
-      if (z < cast(Z) 0.0) { // z < 0
-        n = true;
-        z = -z;
-      }
-
-      if (z > cast(Z) 2.0) { // x > π
-        n = !n;
-        z = cast(Z) (z - asfix!2.0); // x -= π
-      }
-
-      auto y = cast(R) ((asfix!2.0 - z) * z);
-
-      return cast(R) (n ? -y : y);
+    static if (isFixed!T) {
+      alias Z = fix!(-4, 4);
+      alias R = fix!(-1, 1);
     }
-  }
 
-  static if (N == 3) { // 3rd-order
-    /*
-     Qsinx: sin(x) = 3/%pi * x - 4/%pi^3 * x^3$
-     Qsinz: Qsinx, x = z * %pi/2$
-     factor(Qsinz);
-     */
-    static if (isFloat!T) { // floating-point
-      auto z = x % 4.0; // x %= 2π
+    auto x = angle.raw;
 
-      auto n = false;
+    static if (N == 2) { // 2nd-order
+      static if (isFloat!T) { // floating-point
+        auto z = x % 4.0; // x %= 2π
 
-      if (z < 0.0) { // x < 0
-        n = true;
-        z = -z;
+        auto n = false;
+
+        if (z < 0.0) { // x < 0
+          n = true;
+          z = -z;
+        }
+
+        if (z > 2.0) { // x > π
+          n = !n;
+          z = z - 2.0; // x -= π
+        }
+
+        auto y = (2.0 - z) * z;
+
+        return cast(R) (n ? -y : y);
       }
+      static if (isFixed!T) { // fixed-point
+        auto z = cast(Z) (x % asfix!4.0); // x %= 2π
 
-      if (z > 2.0) { // x > π
-        n = !n;
-        z = z - 2.0; // x -= π
+        auto n = false;
+
+        if (z < cast(Z) 0.0) { // z < 0
+          n = true;
+          z = -z;
+        }
+
+        if (z > cast(Z) 2.0) { // x > π
+          n = !n;
+          z = cast(Z) (z - asfix!2.0); // x -= π
+        }
+
+        auto y = cast(R) ((asfix!2.0 - z) * z);
+
+        return cast(R) (n ? -y : y);
       }
-
-      if (z > 1.0) { // x > π/2
-        z = 2.0 - z; // x = π - x
-      }
-
-      if (n) {
-        z = -z;
-      }
-
-      return cast(R) ((1.5 - 0.5 * z * z) * z);
     }
-    static if (isFixed!T) { // fixed-point
-      auto z = cast(Z) (x % asfix!4.0); // x %= 2π
 
-      auto n = false;
+    static if (N == 3) { // 3rd-order
+      /*
+        Qsinx: sin(x) = 3/%pi * x - 4/%pi^3 * x^3$
+        Qsinz: Qsinx, x = z * %pi/2$
+        factor(Qsinz);
+      */
+      static if (isFloat!T) { // floating-point
+        auto z = x % 4.0; // x %= 2π
 
-      if (z < cast(Z) 0.0) { // x < 0
-        n = true;
-        z = -z;
+        auto n = false;
+
+        if (z < 0.0) { // x < 0
+          n = true;
+          z = -z;
+        }
+
+        if (z > 2.0) { // x > π
+          n = !n;
+          z = z - 2.0; // x -= π
+        }
+
+        if (z > 1.0) { // x > π/2
+          z = 2.0 - z; // x = π - x
+        }
+
+        if (n) {
+          z = -z;
+        }
+
+        return cast(R) ((1.5 - 0.5 * z * z) * z);
       }
+      static if (isFixed!T) { // fixed-point
+        auto z = cast(Z) (x % asfix!4.0); // x %= 2π
 
-      if (z > cast(Z) 2.0) { // x > π
-        n = !n;
-        z = cast(Z) (z - asfix!2.0); // x -= π
+        auto n = false;
+
+        if (z < cast(Z) 0.0) { // x < 0
+          n = true;
+          z = -z;
+        }
+
+        if (z > cast(Z) 2.0) { // x > π
+          n = !n;
+          z = cast(Z) (z - asfix!2.0); // x -= π
+        }
+
+        if (z > cast(Z) 1.0) { // x > π/2
+          z = cast(Z) (asfix!2.0 - z); // x = π - x
+        }
+
+        if (n) {
+          z = -z;
+        }
+
+        return cast(R) ((asfix!1.5 - asfix!0.5 * z * z) * z);
       }
-
-      if (z > cast(Z) 1.0) { // x > π/2
-        z = cast(Z) (asfix!2.0 - z); // x = π - x
-      }
-
-      if (n) {
-        z = -z;
-      }
-
-      return cast(R) ((asfix!1.5 - asfix!0.5 * z * z) * z);
     }
-  }
 
-  static if (N == 4) { // 4th-order
-    /*
-      cos(z) = 1 - ((2 - π/4) - (1 - π/4) * z^2) * z^2
-     */
-    enum real a = 1.0;
-    enum real b = 2.0 - PI/4.0;
-    enum real c = 1.0 - PI/4.0;
+    static if (N == 4) { // 4th-order
+      /*
+        cos(z) = 1 - ((2 - π/4) - (1 - π/4) * z^2) * z^2
+      */
+      enum real a = 1.0;
+      enum real b = 2.0 - PI/4.0;
+      enum real c = 1.0 - PI/4.0;
 
-    static if (isFloat!T) { // floating-point
-      auto x_ = x - 1.0; // sin -> cos
-      auto z = x_ % 4.0; // x %= 2π
+      static if (isFloat!T) { // floating-point
+        auto x_ = x - 1.0; // sin -> cos
+        auto z = x_ % 4.0; // x %= 2π
 
-      auto n = false;
+        auto n = false;
 
-      if (z > 2.0) {
-        n = !n;
-        z = 2.0 - z;
+        if (z > 2.0) {
+          n = !n;
+          z = 2.0 - z;
+        }
+
+        if (z < -2.0) {
+          n = !n;
+          z = 2.0 + z;
+        }
+
+        if (z < 0.0) {
+          z = -z;
+        }
+
+        if (z > 1.0) {
+          n = !n;
+          z = z - 2.0;
+        }
+
+        auto z2 = z * z;
+
+        auto y = a - (b - c * z2) * z2;
+
+        return cast(R) (n ? -y : y);
       }
+      static if (isFixed!T) { // fixed-point
+        auto x_ = x - asfix!1.0; // sin -> cos
+        auto z = cast(Z) (x_ % asfix!4.0); // x %= 2π
 
-      if (z < -2.0) {
-        n = !n;
-        z = 2.0 + z;
+        auto n = false;
+
+        if (z > cast(Z) 2.0) {
+          n = !n;
+          z = cast(Z) (asfix!2.0 - z);
+        }
+
+        if (z < cast(Z) -2.0) {
+          n = !n;
+          z = cast(Z) (asfix!2.0 + z);
+        }
+
+        if (z < cast(Z) 0.0) {
+          z = -z;
+        }
+
+        if (z > cast(Z) 1.0) {
+          n = !n;
+          z = cast(Z) (z - asfix!2.0);
+        }
+
+        auto z2 = z * z;
+
+        auto y = cast(R) (asfix!a - (asfix!b - asfix!c * z2) * z2);
+
+        return cast(R) (n ? -y : y);
       }
-
-      if (z < 0.0) {
-        z = -z;
-      }
-
-      if (z > 1.0) {
-        n = !n;
-        z = z - 2.0;
-      }
-
-      auto z2 = z * z;
-
-      auto y = a - (b - c * z2) * z2;
-
-      return cast(R) (n ? -y : y);
     }
-    static if (isFixed!T) { // fixed-point
-      auto x_ = x - asfix!1.0; // sin -> cos
-      auto z = cast(Z) (x_ % asfix!4.0); // x %= 2π
 
-      auto n = false;
+    static if (N == 5) { // 5th-order
+      enum real a = 4.0 * (3.0 / PI - 9.0 / 16.0);
+      enum real b = 2.0 * a - 5.0 / 2.0;
+      enum real c = a - 3.0 / 2.0;
 
-      if (z > cast(Z) 2.0) {
-        n = !n;
-        z = cast(Z) (asfix!2.0 - z);
+      static if (isFloat!T) { // floating-point
+        auto z = x % 4.0; // x %= 2π
+
+        auto n = false;
+
+        if (z < 0.0) { // x < 0
+          n = true;
+          z = -z;
+        }
+
+        if (z > 2.0) { // x > π
+          n = !n;
+          z = z - 2.0; // x -= π
+        }
+
+        if (z > 1.0) { // x > π/2
+          z = 2.0 - z; // x = π - x
+        }
+
+        if (n) {
+          z = -z;
+        }
+
+        auto z2 = z * z;
+
+        return cast(R) ((a - (b - c * z2) * z2) * z);
       }
+      static if (isFixed!T) { // fixed-point
+        auto z = x % asfix!4.0; // x %= 2π
 
-      if (z < cast(Z) -2.0) {
-        n = !n;
-        z = cast(Z) (asfix!2.0 + z);
+        auto n = false;
+
+        if (z < cast(Z) 0.0) { // x < 0
+          n = true;
+          z = -z;
+        }
+
+        if (z > cast(Z) 2.0) { // x > π
+          n = !n;
+          z = cast(Z) (z - asfix!2.0); // x -= π
+        }
+
+        if (z > cast(Z) 1.0) { // x > π/2
+          z = cast(Z) (asfix!2.0 - z); // x = π - x
+        }
+
+        if (n) {
+          z = -z;
+        }
+
+        auto z2 = z * z;
+
+        return cast(R) ((asfix!a - (asfix!b - asfix!c * z2) * z2) * z);
       }
-
-      if (z < cast(Z) 0.0) {
-        z = -z;
-      }
-
-      if (z > cast(Z) 1.0) {
-        n = !n;
-        z = cast(Z) (z - asfix!2.0);
-      }
-
-      auto z2 = z * z;
-
-      auto y = cast(R) (asfix!a - (asfix!b - asfix!c * z2) * z2);
-
-      return cast(R) (n ? -y : y);
     }
-  }
-
-  static if (N == 5) { // 5th-order
-    enum real a = 4.0 * (3.0 / PI - 9.0 / 16.0);
-    enum real b = 2.0 * a - 5.0 / 2.0;
-    enum real c = a - 3.0 / 2.0;
-
-    static if (isFloat!T) { // floating-point
-      auto z = x % 4.0; // x %= 2π
-
-      auto n = false;
-
-      if (z < 0.0) { // x < 0
-        n = true;
-        z = -z;
-      }
-
-      if (z > 2.0) { // x > π
-        n = !n;
-        z = z - 2.0; // x -= π
-      }
-
-      if (z > 1.0) { // x > π/2
-        z = 2.0 - z; // x = π - x
-      }
-
-      if (n) {
-        z = -z;
-      }
-
-      auto z2 = z * z;
-
-      return cast(R) ((a - (b - c * z2) * z2) * z);
-    }
-    static if (isFixed!T) { // fixed-point
-      auto z = x % asfix!4.0; // x %= 2π
-
-      auto n = false;
-
-      if (z < cast(Z) 0.0) { // x < 0
-        n = true;
-        z = -z;
-      }
-
-      if (z > cast(Z) 2.0) { // x > π
-        n = !n;
-        z = cast(Z) (z - asfix!2.0); // x -= π
-      }
-
-      if (z > cast(Z) 1.0) { // x > π/2
-        z = cast(Z) (asfix!2.0 - z); // x = π - x
-      }
-
-      if (n) {
-        z = -z;
-      }
-
-      auto z2 = z * z;
-
-      return cast(R) ((asfix!a - (asfix!b - asfix!c * z2) * z2) * z);
-    }
+  } else {
+    return sin!N(angle.to!hpi);
   }
 }
 
@@ -303,9 +308,9 @@ auto sin(uint N, T)(const Val!(T, hpi) angle) if (N >= 2 && N <= 5 && (isFloat!T
 nothrow @nogc unittest {
   template max_err(uint N) {
     auto max_err =
-      max_abs_error!((double x) => sin!N(x.as!rad.to!hpi),
+      max_abs_error!((double x) => sin!N(x.as!rad),
                      (double x) => sin(x))
-      (-10*PI, 10*PI, 2000);
+      (-10*PI, 10*PI, 1000);
   }
 
   assert_eq(max_err!2, 0.056009, 1e-6);
@@ -317,11 +322,11 @@ nothrow @nogc unittest {
 /// Test sine for fixed-point
 nothrow @nogc unittest {
   template max_err(uint N) {
-    alias X = Val!(fix!(-10*PI, 10*PI), hpi);
+    alias X = fix!(-10*PI, 10*PI);
     auto max_err =
-      max_abs_error!((double x) => cast(double) sin!N(cast(X) x.as!rad.to!hpi),
+      max_abs_error!((double x) => cast(double) sin!N(X(x).as!rad),
                      (double x) => sin(x))
-      (-10*PI, 10*PI, 2000);
+      (-10*PI, 10*PI, 1000);
   }
 
   assert_eq(max_err!2, 0.056009, 1e-6);
@@ -341,11 +346,15 @@ nothrow @nogc unittest {
 
    See also: `sin`
  */
-auto cos(uint N, T)(const Val!(T, hpi) angle) if (N >= 2 && N <= 5 && (isFloat!T || isFixed!T)) {
-  static if (isFloat!T) {
-    return sin!N(angle + 1.as!hpi);
+auto cos(uint N, T, U)(const Val!(T, U) angle) if (N >= 2 && N <= 5 && (isFloat!T || isFixed!T) && isUnits!U && is(U.Class == Angle)) {
+  static if (is(U == hpi)) {
+    static if (isFloat!T) {
+      return sin!N(angle + 1.as!hpi);
+    } else {
+      return sin!N(angle + asfix!1.as!hpi);
+    }
   } else {
-    return sin!N(angle + asfix!1.as!hpi);
+    return cos!N(angle.to!hpi);
   }
 }
 
@@ -353,9 +362,9 @@ auto cos(uint N, T)(const Val!(T, hpi) angle) if (N >= 2 && N <= 5 && (isFloat!T
 nothrow @nogc unittest {
   template max_err(uint N) {
     auto max_err =
-      max_abs_error!((double x) => cos!N(x.as!rad.to!hpi),
+      max_abs_error!((double x) => cos!N(x.as!rad),
                      (double x) => cos(x))
-      (-10*PI, 10*PI, 2000);
+      (-10*PI, 10*PI, 1000);
   }
 
   assert_eq(max_err!2, 0.056009, 1e-6);
@@ -367,11 +376,11 @@ nothrow @nogc unittest {
 /// Test cosine for fixed-point
 nothrow @nogc unittest {
   template max_err(uint N) {
-    alias X = Val!(fix!(-10*PI, 10*PI), hpi);
+    alias X = fix!(-10*PI, 10*PI);
     auto max_err =
-      max_abs_error!((double x) => cast(double) cos!N(cast(X) x.as!rad.to!hpi),
+      max_abs_error!((double x) => cast(double) cos!N(X(x).as!rad),
                      (double x) => cos(x))
-      (-10*PI, 10*PI, 2000);
+      (-10*PI, 10*PI, 1000);
   }
 
   assert_eq(max_err!2, 0.056009, 1e-6);
