@@ -10,6 +10,9 @@ import fix: isFixed, fix, asfix;
 
 version(unittest) {
   import test: assert_eq, unittests;
+  import std.math: PI, sin;
+
+  enum auto eps = 1e-7;
 
   mixin unittests;
 }
@@ -52,7 +55,7 @@ R lt1(uint len, R, A, real start, real end, real function(real) pure nothrow @no
   return data[uidx] + cast(R) (pos - cast(typeof(pos)) idx) * (data[uidx + 1] - data[uidx]);
 }
 
-/// Test floating-point lookup tables
+/// Test floating-point lookup tables (x^2)
 nothrow @nogc unittest {
   alias sqr = lt1!(10, float, float, 0.0, 1.0, (x) => x * x);
 
@@ -69,6 +72,15 @@ nothrow @nogc unittest {
   }
 
   test_as_func(&sqr);
+}
+
+/// Test floating-point lookup tables (sin)
+nothrow @nogc unittest {
+  alias fsin = lt1!(32, float, float, 0.0, PI/2.0, (x) => sin(x));
+
+  assert_eq(fsin(0.0), 0.0, eps);
+  assert_eq(fsin(PI/6.0), 0.499856, eps);
+  assert_eq(fsin(PI/2.0), 1.0, eps);
 }
 
 /**
@@ -117,7 +129,7 @@ R lt1(uint len, R, A, real function(real) pure nothrow @nogc @safe gen)(A arg) i
   return cast(R) (offset + interp * factor);
 }
 
-/// Test fixed-point lookup tables
+/// Test fixed-point lookup tables (x^2)
 @nogc nothrow unittest {
   alias X = fix!(0.0, 1.0);
 
@@ -136,4 +148,16 @@ R lt1(uint len, R, A, real function(real) pure nothrow @nogc @safe gen)(A arg) i
   }
 
   test_as_func(&sqr);
+}
+
+/// Test fixed-point lookup tables (sin)
+nothrow @nogc unittest {
+  alias X = fix!(0.0, PI/2.0);
+  alias Y = fix!(-1.0, 1.0);
+
+  alias fsin = lt1!(32, Y, X, (x) => sin(x));
+
+  assert_eq(fsin(cast(X) 0.0), cast(Y) 0.0, cast(Y) eps);
+  assert_eq(fsin(cast(X) (PI/6.0)), cast(Y) 0.499856, cast(Y) eps);
+  assert_eq(fsin(cast(X) (PI/2.0)), cast(Y) 1.0, cast(Y) eps);
 }
