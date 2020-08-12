@@ -30,15 +30,13 @@ R lt1(uint len, R, A, real start, real end, real function(real) pure nothrow @no
   enum A init = cast(A) start;
   enum A fact = (cast(A) (len - 1)) / (end - start);
 
-  R[len] gen_data() {
+  static immutable R[len] data = (){
     R[len] data;
     foreach (uint i; 0 .. len) {
       data[i] = cast(R) gen(start + i * (end - start) / (len - 1));
     }
     return data;
-  }
-
-  static const R[len] data = gen_data();
+  }();
 
   auto pos = (arg - init) * fact;
   auto idx = cast(int) pos;
@@ -91,15 +89,13 @@ R lt1(uint len, R, A, real function(real) pure nothrow @nogc @safe gen)(A arg) i
   enum auto init = asfix!(A.rmin);
   enum auto fact = asfix!((cast(real) (len - 1)) / (A.rmax - A.rmin));
 
-  R[len] gen_data() {
+  static immutable R[len] data = () {
     R[len] data;
     foreach (uint i; 0 .. len) {
       data[i] = cast(R) gen(A.rmin + i * (A.rmax - A.rmin) / (len - 1));
     }
     return data;
-  }
-
-  static const R[len] data = gen_data();
+  }();
 
   auto pos = (arg - init) * fact;
   auto idx = cast(int) pos;
