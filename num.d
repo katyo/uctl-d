@@ -4,7 +4,7 @@
 module num;
 
 import std.traits: isFloatingPoint, isIntegral, isSigned, isUnsigned;
-import std.algorithm.comparison: clamp;
+import std.algorithm: clamp;
 
 version(unittest) {
   import std.meta: AliasSeq;
