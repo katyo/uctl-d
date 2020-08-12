@@ -3,13 +3,35 @@
  */
 module test;
 
-import std.math: fabs;
+import std.traits: isCallable, Parameters, ReturnType;
+import std.math: fmax, fabs;
+
 import core.stdc.stdio: snprintf;
 import core.stdc.assert_: __assert;
 
 import num: isInt, isFloat, fmtOf;
 import fix: fix, isFixed, isSameFixed, isNumer;
 import unit: Val, isUnits, hasUnits;
+
+/**
+   Unittests runner mixin
+
+   Use this mixin in modules to run tests in -betterC mode
+ */
+mixin template unittests() {
+  // Run tests without D-runtime
+  version(D_BetterC) {
+    version(unittest) {
+      pragma(mangle, "main")
+        nothrow @nogc extern(C) void main() {
+        static foreach(unitTest; __traits(getUnitTests, __traits(parent, main)))
+          unitTest();
+      }
+    }
+  }
+}
+
+mixin unittests;
 
 /**
    Assert equality of integer values
@@ -96,17 +118,108 @@ nothrow @nogc unittest {
   assert_eq(x, cast(typeof(x)) asfix!(12.3));
 }
 
-mixin template unittests() {
-  // Run tests without D-runtime
-  version(D_BetterC) {
-    version(unittest) {
-      pragma(mangle, "main")
-      nothrow @nogc extern(C) void main() {
-        static foreach(unitTest; __traits(getUnitTests, __traits(parent, main)))
-          unitTest();
+/**
+   Calculate maximum absolute error
+ */
+template max_abs_error(alias F, alias R) if (isCallable!F && isCallable!R && is(ReturnType!F == ReturnType!R) && is(Parameters!F == Parameters!R)) {
+  alias A = Parameters!F[0];
+  alias E = ReturnType!F;
+
+  alias max_abs_error = (A x, A X, uint N = 32) pure nothrow @nogc @safe {
+    static if (isFloat!A && isFloat!E) {
+      const auto step = (X - x) / (N - 1);
+
+      /* Hmm... Strange. Unfortutately we cannot use closures without GC.
+         return iota(0, N)
+         .map!((uint i) scope pure nothrow @nogc @safe {
+         auto arg = cast(A) (x + step * i);
+         return abs(F(arg) - R(arg));
+         })
+         .maxElement();
+      */
+      auto res = cast(E) 0;
+
+      foreach (i; 0..N) {
+        auto arg = cast(A) (x + step * i);
+        auto err = cast(E) fabs(F(arg) - R(arg));
+
+        res = cast(E) fmax(res, err);
       }
+
+      return res;
     }
-  }
+  };
 }
 
-mixin unittests;
+/// Test maximum absolute error
+nothrow @nogc unittest {
+  import std.math: PI, sin;
+
+  assert_eq(max_abs_error!((double x) => sin(x), (double x) => sin(x))(-2*PI, 2*PI), 0.0);
+  assert_eq(max_abs_error!((double x) => sin(x), (double x) => sin(x+1e-5))(-2*PI, 2*PI), 1e-5, 1e-9);
+}
+
+/**
+   Calculate mean absolute error
+*/
+template mean_abs_error(alias F, alias R) if (isCallable!F && isCallable!R && is(ReturnType!F == ReturnType!R) && is(Parameters!F == Parameters!R)) {
+  alias A = Parameters!F[0];
+  alias E = ReturnType!F;
+
+  alias mean_abs_error = (A x, A X, uint N = 32) pure nothrow @nogc @safe {
+    static if (isFloat!A && isFloat!E) {
+      const auto step = (X - x) / (N - 1);
+      auto res = cast(E) 0;
+
+      foreach (i; 0..N) {
+        auto arg = cast(A) (x + step * i);
+        auto err = fabs(F(arg) - R(arg));
+
+        res = cast(E) (res + err);
+      }
+
+      return res * (1.0 / N);
+    }
+  };
+}
+
+/// Test mean absolute error
+nothrow @nogc unittest {
+  import std.math: PI, sin;
+
+  assert_eq(mean_abs_error!((double x) => sin(x), (double x) => sin(x))(-2*PI, 2*PI), 0.0);
+  assert_eq(mean_abs_error!((double x) => sin(x), (double x) => sin(x+1e-5))(-2*PI, 2*PI), 6.48239e-6, 1e-10);
+}
+
+/**
+   Calculate mean square error
+*/
+template mean_sqr_error(alias F, alias R) if (isCallable!F && isCallable!R && is(ReturnType!F == ReturnType!R) && is(Parameters!F == Parameters!R)) {
+  alias A = Parameters!F[0];
+  alias E = typeof(ReturnType!F() * ReturnType!F());
+
+  alias mean_sqr_error = (A x, A X, uint N = 32) pure nothrow @nogc @safe {
+    static if (isFloat!A && isFloat!E) {
+      const auto step = (X - x) / (N - 1);
+      auto res = cast(E) 0;
+
+      foreach (i; 0..N) {
+        auto arg = cast(A) (x + step * i);
+        auto err = F(arg) - R(arg);
+        auto err2 = err * err;
+
+        res = cast(E) (res + err2);
+      }
+
+      return res * (1.0 / N);
+    }
+  };
+}
+
+/// Test mean square error
+nothrow @nogc unittest {
+  import std.math: PI, sin;
+
+  assert_eq(mean_sqr_error!((double x) => sin(x), (double x) => sin(x))(-2*PI, 2*PI), 0.0);
+  assert_eq(mean_sqr_error!((double x) => sin(x), (double x) => sin(x+1e-5))(-2*PI, 2*PI), 5.15625e-11);
+}
