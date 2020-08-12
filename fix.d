@@ -118,9 +118,7 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   const pure nothrow @nogc @safe
   this(T)(const T val) if (is(T) && isFloat!T) {
     T val2 = val * (cast(T) 2).pow(-exp);
-    version(fixRoundToNearest) {
-      val2 += val2 < 0 ? -0.5 : 0.5;
-    }
+    val2 += val2 < 0 ? -0.5 : 0.5;
     raw = cast(raw_t) val2;
   }
 
