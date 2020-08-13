@@ -37,15 +37,55 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
     return cast(X) raw;
   }
 
+  /// Negation
+  const pure nothrow @nogc @safe
+  auto opUnary(string op)() if (op == "-") {
+    return (- cast(T) raw).as!U;
+  }
+
   /// Addition/subtraction
   const pure nothrow @nogc @safe
   auto opBinary(string op, A)(const A other) if ((op == "+" || op == "-") && hasUnits!A && is(U.Class == A.units.Class)) {
+    auto raw1 = cast(T) raw;
     static if(is(U == A.units)) { // same units
-      return mixin("(cast(T) raw " ~ op ~ " cast(A.raw_t) other.raw).as!U");
+      // casting needs for removing const qualifiers
+      auto raw2 = cast(A.raw_t) other.raw;
     } else { // same class
       auto other2 = other.to!U;
-      return mixin("(cast(T) raw " ~ op ~ " cast(typeof(other2).raw_t) other2.raw).as!U");
+      auto raw2 = cast(typeof(other2).raw_t) other2.raw;
     }
+    return mixin("raw1" ~ op ~ "raw2").as!U;
+  }
+
+  /// Multiplication/division by unit-less
+  const pure nothrow @nogc @safe
+  auto opBinary(string op, A)(const A other) if ((op == "*" || op == "/" || op == "%") && isNumer!A) {
+    auto raw1 = cast(T) raw;
+    auto raw2 = cast(A) other;
+
+    return mixin("raw1" ~ op ~ "raw2").as!U;
+  }
+
+  /// Equality (==)
+  const pure nothrow @nogc @safe
+  bool opEquals(A)(const A other) if (hasUnits!A && is(U.Class == A.units.Class)) {
+    static if(is(U == A.units)) { // same units
+      auto raw2 = other.raw;
+    } else { // same class
+      auto raw2 = other.to!U.raw;
+    }
+    return raw == raw2;
+  }
+
+  /// Comparison (<>)
+  const pure nothrow @nogc @safe
+  int opCmp(A)(const A other) if (hasUnits!A && is(U.Class == A.units.Class)) {
+    static if(is(U == A.units)) { // same units
+      auto raw2 = other.raw;
+    } else { // same class
+      auto raw2 = other.to!U.raw;
+    }
+    return raw < raw2 ? -1 : raw > raw2 ? 1 : 0;
   }
 }
 
@@ -201,8 +241,6 @@ nothrow @nogc unittest {
   assert(3.125.as!sec.to!usec == 3125000.0.as!usec);
   assert(0.25.as!sec.to!usec == 250000.0.as!usec);
 
-  assert_eq(1.0.as!V + 2.0.as!V, 3.0.as!V);
-
   alias X = fix!(-10, 10);
 
   assert(X(1.25).as!m.raw == X(1.25));
@@ -211,6 +249,42 @@ nothrow @nogc unittest {
 
   assert_eq((fix!(-10, 10)(1.25)).as!m.to!mm, (fix!(-10000, 10000)(1250.0)).as!mm);
   assert_eq(fix!(-10, 10)(1.25).as!m.to!cm, fix!(-1000, 1000)(125.0).as!cm);
+}
+
+/// Arithmetic operations
+nothrow @nogc unittest {
+  assert_eq(-(1.0.as!V), (-1.0).as!V);
+
+  assert_eq(1.0.as!V + 2.0.as!V, 3.0.as!V);
+  assert_eq(1.0.as!V + 2000.0.as!mV, 3.0.as!V);
+  assert_eq(1.0.as!V + 0.002.as!MV, 3.0.as!V);
+
+  assert_eq(1.0.as!V - 2.0.as!V, -1.0.as!V);
+  assert_eq(1.0.as!V - 2000.0.as!mV, -1.0.as!V);
+  assert_eq(1.0.as!V - 0.002.as!MV, -1.0.as!V);
+
+  assert_eq(1.0.as!V * 2.0, 2.0.as!V);
+  assert_eq(1.0.as!V / 2.0, 0.5.as!V);
+  assert_eq(1.0.as!V % 2.0, 1.0.as!V);
+}
+
+/// Comparison operations
+nothrow @nogc unittest {
+  assert(1.0.as!V == 1.0.as!V);
+  assert(1.0.as!V == 1000.0.as!mV);
+  assert(1.0.as!V == 0.001.as!MV);
+
+  assert(1.0.as!V != 2.0.as!V);
+  assert(1.0.as!V != 1001.0.as!mV);
+  assert(1.0.as!V != 0.0011.as!MV);
+
+  assert(1.0.as!V < 2.0.as!V);
+  assert(1.0.as!V < 2000.0.as!mV);
+  assert(1.0.as!V < 0.002.as!MV);
+
+  assert(1.0.as!V > 0.9.as!V);
+  assert(1.0.as!V > 900.0.as!mV);
+  assert(1.0.as!V > 0.0009.as!MV);
 }
 
 /// Defines new measurement units
