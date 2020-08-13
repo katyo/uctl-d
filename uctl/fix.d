@@ -482,6 +482,42 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
     return a < b ? -1 : a > b ? 1 : 0;
   }
+
+  /// Adding fixed-point value (+=)
+  ///
+  /// **Note**: Be careful to avoid overflows
+  pure nothrow @nogc @safe
+  opOpAssign(string op, T)(const T other) if (op == "+" && isFixed!T) {
+    raw += other.raw.raw_to!(T.exp, exp, bits)();
+  }
+
+  /// Subtracting fixed-point value (+=)
+  ///
+  /// **Note**: Be careful to avoid overflows
+  pure nothrow @nogc @safe
+  opOpAssign(string op, T)(const T other) if (op == "-" && isFixed!T) {
+    raw -= other.raw.raw_to!(T.exp, exp, bits)();
+  }
+
+  /// Multiplying to integer value (*=)
+  ///
+  /// **Note**: Be careful to avoid overflows
+  pure nothrow @nogc @safe
+  opOpAssign(string op, T)(const T other) if (op == "*" && isInt!T) {
+    raw *= other;
+  }
+
+  /// Dividing by integer value (/=)
+  pure nothrow @nogc @safe
+  opOpAssign(string op, T)(const T other) if (op == "/" && isInt!T) {
+    raw /= other;
+  }
+
+  /// Remainding by integer value (%=)
+  pure nothrow @nogc @safe
+  opOpAssign(string op, T)(const T other) if (op == "%" && isInt!T) {
+    raw %= other.raw_to!(0, exp, bits);
+  }
 }
 
 /// Test exponent estimation
@@ -765,6 +801,42 @@ nothrow @nogc unittest {
   assert(fix!(-10, 50)(-0.125) <= fix!(-5, 20)(-0.0625));
   assert(fix!(-100, 50)(-11.25) < fix!(-10, 20)(-3.5));
   assert(fix!(-100, 50)(-11.25) <= fix!(-10, 20)(-3.5));
+}
+
+/// Test op-assign
+nothrow @nogc unittest {
+  alias X = fix!(-100, 50);
+  alias Y = fix!(0, 5);
+  alias Z = fix!(-200, 10000);
+
+  X a = 11.25;
+
+  a += X(1.5);
+  assert_eq(a, X(12.75));
+
+  a -= X(1.5);
+  assert_eq(a, X(11.25));
+
+  a += Y(0.5);
+  assert_eq(a, X(11.75));
+
+  a -= Y(0.5);
+  assert_eq(a, X(11.25));
+
+  a += Z(2.5);
+  assert_eq(a, X(13.75));
+
+  a -= Z(2.5);
+  assert_eq(a, X(11.25));
+
+  a *= 2;
+  assert_eq(a, X(22.5));
+
+  a /= 2;
+  assert_eq(a, X(11.25));
+
+  a %= 2;
+  assert_eq(a, X(1.25));
 }
 
 private pure nothrow @nogc @safe
