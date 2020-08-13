@@ -2,14 +2,16 @@ MODULES += \
   uctl.package \
   uctl.num \
   uctl.fix \
-  uctl.util \
   uctl.unit \
-  uctl.trig \
-  uctl.lt \
+  uctl.math.package \
+  uctl.math.trig \
+  uctl.util.package \
+  uctl.util.val \
+  uctl.util.lt \
   uctl.test
 
 SOURCES = $(patsubst %,%.d,$(subst .,/,$(MODULES)))
-TESTS = $(patsubst %,test.%,$(MODULES))
+TESTS = $(patsubst %,test.%,$(filter-out %.package,$(MODULES)))
 
 #DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundDown
