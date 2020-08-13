@@ -87,6 +87,23 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
     }
     return raw < raw2 ? -1 : raw > raw2 ? 1 : 0;
   }
+
+  /// Adding/subtracting value (+=, -=)
+  pure nothrow @nogc @safe
+  opOpAssign(string op, A)(const A other) if ((op == "+" || op == "-") && hasUnits!A && is(U.Class == A.units.Class)) {
+    static if(is(U == A.units)) { // same units
+      auto raw2 = other.raw;
+    } else { // same class
+      auto raw2 = other.to!U.raw;
+    }
+    mixin("raw" ~ op ~ "=raw2;");
+  }
+
+  /// Multiplying to/dividing by/remainder of raw value (*=, /=, %=)
+  pure nothrow @nogc @safe
+  opOpAssign(string op, A)(const A other) if ((op == "*" || op == "/" || op == "%") && isNumer!A) {
+    mixin("raw" ~ op ~ "=other;");
+  }
 }
 
 /// Check that some value or type has measurement units
@@ -285,6 +302,38 @@ nothrow @nogc unittest {
   assert(1.0.as!V > 0.9.as!V);
   assert(1.0.as!V > 900.0.as!mV);
   assert(1.0.as!V > 0.0009.as!MV);
+}
+
+/// Op-assign operations
+nothrow @nogc unittest {
+  auto a = 3.0.as!V;
+
+  a += 1.5.as!V;
+  assert_eq(a, 4.5.as!V);
+
+  a -= 1.5.as!V;
+  assert_eq(a, 3.0.as!V);
+
+  a += 1500.0.as!mV;
+  assert_eq(a, 4.5.as!V);
+
+  a -= 1500.0.as!mV;
+  assert_eq(a, 3.0.as!V);
+
+  a += 0.0015.as!MV;
+  assert_eq(a, 4.5.as!V);
+
+  a -= 0.0015.as!MV;
+  assert_eq(a, 3.0.as!V);
+
+  a *= 2.0;
+  assert_eq(a, 6.0.as!V);
+
+  a /= 2.0;
+  assert_eq(a, 3.0.as!V);
+
+  a %= 2.0;
+  assert_eq(a, 1.0.as!V);
 }
 
 /// Defines new measurement units
