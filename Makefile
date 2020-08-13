@@ -7,6 +7,7 @@ MODULES += \
   uctl.math.trig \
   uctl.util.package \
   uctl.util.val \
+  uctl.util.dl \
   uctl.util.lt \
   uctl.test
 
