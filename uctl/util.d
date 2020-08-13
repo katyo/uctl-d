@@ -1,13 +1,14 @@
 /**
    Various numeric utilities
  */
-module util;
+module uctl.util;
 
-import num: isNum;
-import fix: fix, asfix, isFixed, isNumer;
+import uctl.num: isNum;
+import uctl.fix: fix, asfix, isFixed, isNumer;
 
 version(unittest) {
-  import test: assert_eq, unittests;
+  import uctl.test: assert_eq, unittests;
+
   mixin unittests;
 }
 

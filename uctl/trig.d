@@ -7,16 +7,16 @@
 
    You can select best-fit function according to specific use case.
  */
-module trig;
+module uctl.trig;
 
-import num: isFloat;
-import fix: fix, asfix, isFixed;
-import unit: Val, to, isUnits, Angle, hpi;
+import uctl.num: isFloat;
+import uctl.fix: fix, asfix, isFixed;
+import uctl.unit: Val, to, isUnits, Angle, hpi;
 
 version(unittest) {
   import std.math: PI, sin, cos;
-  import unit: as, rad;
-  import test: assert_eq, max_abs_error, mean_sqr_error, unittests;
+  import uctl.unit: as, rad;
+  import uctl.test: assert_eq, max_abs_error, mean_sqr_error, unittests;
 
   mixin unittests;
 }

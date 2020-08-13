@@ -1,15 +1,15 @@
 /**
    Fixed-point range-based arithmetic
  */
-module fix;
+module uctl.fix;
 
 import std.traits: isInstanceOf;
 import std.algorithm.comparison: max;
 import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
-import num: isInt, isFloat, isNum, bitsOf, filledBits;
+import uctl.num: isInt, isFloat, isNum, bitsOf, filledBits;
 
 version(unittest) {
-  import test: assert_eq, unittests;
+  import uctl.test: assert_eq, unittests;
 
   mixin unittests;
 }

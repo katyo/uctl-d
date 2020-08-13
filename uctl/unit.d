@@ -1,15 +1,15 @@
 /**
    Measurement units
  */
-module unit;
+module uctl.unit;
 
 import std.math: PI;
 import std.traits: Unqual, isInstanceOf;
-import num: isNum;
-import fix: fix, asfix, isFixed, isNumer;
+import uctl.num: isNum;
+import uctl.fix: fix, asfix, isFixed, isNumer;
 
 version(unittest) {
-  import test: assert_eq, unittests;
+  import uctl.test: assert_eq, unittests;
 
   mixin unittests;
 }

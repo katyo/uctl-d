@@ -3,13 +3,13 @@
 
    This module provide some utils which helps generate lookup tables easy.
 */
-module lt;
+module uctl.lt;
 
-import num: isFloat;
-import fix: isFixed, fix, asfix;
+import uctl.num: isFloat;
+import uctl.fix: isFixed, fix, asfix;
 
 version(unittest) {
-  import test: assert_eq, unittests;
+  import uctl.test: assert_eq, unittests;
   import std.math: PI, sin;
 
   enum auto eps = 1e-7;

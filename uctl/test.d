@@ -1,7 +1,7 @@
 /**
    Extra utilities for testing
  */
-module test;
+module uctl.test;
 
 import std.traits: isCallable, Parameters, ReturnType;
 import std.math: fmax, fabs;
@@ -9,9 +9,9 @@ import std.math: fmax, fabs;
 import core.stdc.stdio: snprintf;
 import core.stdc.assert_: __assert;
 
-import num: isInt, isFloat, fmtOf;
-import fix: fix, isFixed, isSameFixed, isNumer;
-import unit: Val, isUnits, hasUnits;
+import uctl.num: isInt, isFloat, fmtOf;
+import uctl.fix: fix, asfix, isFixed, isSameFixed, isNumer;
+import uctl.unit: Val, isUnits, hasUnits;
 
 /**
    Unittests runner mixin
@@ -31,7 +31,9 @@ mixin template unittests() {
   }
 }
 
-mixin unittests;
+version(unittest) {
+  mixin unittests;
+}
 
 /**
    Assert equality of integer values
@@ -106,8 +108,6 @@ void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) 
 
 /// Test `assert_eq`
 nothrow @nogc unittest {
-  import fix: asfix;
-
   int i = 123;
   assert_eq(i, 123);
 

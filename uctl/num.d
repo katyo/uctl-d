@@ -1,14 +1,14 @@
 /**
    Various numeric utilities
  */
-module num;
+module uctl.num;
 
 import std.traits: isFloatingPoint, isIntegral, isSigned, isUnsigned;
 import std.algorithm: clamp;
 
 version(unittest) {
   import std.meta: AliasSeq;
-  import test: assert_eq, unittests;
+  import uctl.test: assert_eq, unittests;
 
   mixin unittests;
 }
