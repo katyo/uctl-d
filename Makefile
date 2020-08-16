@@ -9,6 +9,8 @@ MODULES += \
   uctl.util.val \
   uctl.util.dl \
   uctl.util.lt \
+  uctl.filt.package \
+  uctl.filt.ema \
   uctl.test
 
 SOURCES = $(patsubst %,%.d,$(subst .,/,$(MODULES)))
