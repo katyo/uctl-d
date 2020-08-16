@@ -208,6 +208,9 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   /// Zero value
   enum self zero = from_raw(0);
 
+  /// Number is literal
+  enum bool islit = fabs(rmin - rmax) < real_t.epsilon;
+
   /// Number is positive
   /// (both rmin and rmax greater than zero)
   enum bool ispos = rmin > 0 && rmax > 0;
@@ -332,7 +335,7 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
     alias R = fix!(Rrmin, Rrmax, Rbits);
 
     static if (hasfrac) {
-      return R(this % asfix!(1));
+      return R(this % asfix!1.0);
     } else {
       return R.zero;
     }
@@ -424,7 +427,7 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
     enum uint Rbits = max2(bits, T.bits);
 
-    alias R = fix!(rmin, rmax, bits);
+    alias R = fix!(Rrmin, Rrmax, Rbits);
 
     enum uint op_bits = T.bits + R.bits;
     enum uint op_exp = T.exp + R.exp;
@@ -442,10 +445,15 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   auto opBinary(string op, T)(const T other) if (op == "%" && is(T) && isFixed!T) {
     static assert(((T.rmin < 0 && T.rmax < 0) || (T.rmin > 0 && T.rmax > 0)), "Fixed-point remainder is undefined for divider which can be zero.");
 
-    enum real_t rlim = fmax(fabs(T.rmin), fabs(T.rmax));
+    enum real_t Trlim = fmax(fabs(T.rmin), fabs(T.rmax));
 
-    enum real_t Rrmin = isntneg ? 0.0 : -rlim;
-    enum real_t Rrmax = isntpos ? 0.0 : rlim;
+    static if (islit && T.islit && false) {
+      enum real_t Rrmin = rmin % Trlim;
+      enum real_t Rrmax = Rrmin;
+    } else {
+      enum real_t Rrmin = isntneg ? 0.0 : -Trlim;
+      enum real_t Rrmax = isntpos ? 0.0 : Trlim;
+    }
 
     enum uint Rbits = T.bits;
 
