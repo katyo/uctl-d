@@ -7,7 +7,7 @@
 
    You can select best-fit function according to specific use case.
  */
-module uctl.trig;
+module uctl.math.trig;
 
 import uctl.num: isFloat;
 import uctl.fix: fix, asfix, isFixed;

@@ -3,7 +3,7 @@
 
    This module provide some utils which helps generate lookup tables easy.
 */
-module uctl.lt;
+module uctl.util.lt;
 
 import uctl.num: isFloat;
 import uctl.fix: isFixed, fix, asfix;

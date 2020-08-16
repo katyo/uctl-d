@@ -7,7 +7,7 @@ module uctl;
 
 public import uctl.num;
 public import uctl.fix;
-public import uctl.unit;
-public import uctl.math;
-public import uctl.util;
-public import uctl.test;
+import uctl.unit;
+import uctl.math;
+import uctl.util;
+import uctl.test;

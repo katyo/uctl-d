@@ -1,7 +1,7 @@
 /**
    Various numeric utilities
  */
-module uctl.util;
+module uctl.util.val;
 
 import uctl.num: isNum;
 import uctl.fix: fix, asfix, isFixed, isNumer;
