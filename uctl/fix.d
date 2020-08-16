@@ -756,6 +756,11 @@ nothrow @nogc unittest {
 
 /// Multiplication
 nothrow @nogc unittest {
+  assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(4.5), fix!(-4000, 2000)(5.625));
+  assert_eq(fix!(-100, 200)(-1.25) * fix!(-20, 10)(4.5), fix!(-4000, 2000)(-5.625));
+  assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(-4.5), fix!(-4000, 2000)(-5.625));
+  assert_eq(fix!(-100, 200)(-1.25) * fix!(-20, 10)(-4.5), fix!(-4000, 2000)(5.625));
+
   version(fixRoundToNearest) {
     assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.625));
     assert_eq(asfix!(1.25) * asfix!(5.3), asfix!(6.625));
@@ -770,11 +775,21 @@ nothrow @nogc unittest {
 /// Division
 nothrow @nogc unittest {
   assert_eq(fix!(-4000, 2000)(6.625) / fix!(1, 10)(5.3), fix!(-4000, 2000)(1.25));
+  assert_eq(fix!(-4000, 2000)(-6.625) / fix!(1, 10)(5.3), fix!(-4000, 2000)(-1.25));
+  assert_eq(fix!(-4000, 2000)(6.625) / fix!(1, 10)(-5.3), fix!(-4000, 2000)(-1.25));
+  assert_eq(fix!(-4000, 2000)(-6.625) / fix!(1, 10)(-5.3), fix!(-4000, 2000)(1.25));
+
+  assert_eq(asfix!0.1 / asfix!4.0, asfix!0.025);
+  assert_eq(asfix!1.25 / asfix!0.5, asfix!2.5);
 }
 
 /// Remainder
 nothrow @nogc unittest {
   assert_eq(fix!(-100, 50)(11.25) % fix!(1, 20)(3.5), fix!(-20, 20)(0.75));
+  assert_eq(fix!(-100, 50)(11.25) % fix!(1, 20)(-3.5), fix!(-20, 20)(0.75));
+  assert_eq(fix!(-100, 50)(-11.25) % fix!(1, 20)(3.5), fix!(-20, 20)(-0.75));
+
+  //assert_eq(asfix!1.25 % asfix!0.5, asfix!0.25);
 }
 
 /// Comparison
