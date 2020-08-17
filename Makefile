@@ -10,6 +10,7 @@ MODULES += \
   uctl.util.dl \
   uctl.util.lt \
   uctl.filt.package \
+  uctl.filt.avg \
   uctl.filt.ema \
   uctl.test
 
