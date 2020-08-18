@@ -1,11 +1,52 @@
 /**
-   Generic trigonometry functions
+   ## Generic trigonometry functions
 
    Trigonometric functions which uses polynomial approximation and compatible with both floating point and fixed point types.
 
    Depending from polynomial order that functions is differ in terms of precision and speed: functions of higher order has more precision and lower speed elsewhere functions of lower order has less precision and higher speed.
 
    You can select best-fit function according to specific use case.
+
+   $(TABLE_ROWS
+   Approximation error vs polynomial order
+   * + Polynomial order
+     + Maximum error
+   * + 2nd
+     + ~0.056
+   * + 3rd
+     + ~0.020
+   * + 4th
+     + ~0.003
+   * + 5th
+     + ~0.0002)
+
+   #### 2nd-order (quadratic) interpolation
+
+   $(MATH sin(x) = \frac{4}{π} x - \frac{4}{π^2} x^2 = (\frac{4}{π} - \frac{4}{π^2} x) x)
+
+   let $(MATH x = \frac{π}{2} z)
+
+   then $(MATH sin(\frac{π}{2} z) = 2 z - z^2 = (2 - z) z)
+
+   #### 3rd-order (cubic) interpolation
+
+   $(MATH sin(x) = \frac{3}{π} x - \frac{4}{π^3} x^3 = (\frac{3}{π} - \frac{4}{π^3} x^2) x)
+
+   let $(MATH x = \frac{π}{2} z)
+
+   then $(MATH sin(\frac{π}{2} z) = \frac{3 z - z^3}{2} = \frac{(3 - z^2) z}{2} = (\frac{3}{2} - \frac{z^2}{2}) z)
+
+   #### 4th-order interpolation
+
+   $(MATH sin(x) = cos(x - \frac{π}{2}))
+
+   let $(MATH x = \frac{π}{2} z)
+
+   then $(MATH sin(z) = cos(z - 1))
+
+   so $(MATH cos(z) = 1 - (2 - \frac{π}{4}) z^2 + (1 - \frac{π}{4}) z^4)
+
+   or $(MATH cos(z) = 1 - ((2 - \frac{π}{4}) - (1 - \frac{π}{4}) z^2) z^2)
  */
 module uctl.math.trig;
 
@@ -22,7 +63,7 @@ version(unittest) {
 }
 
 /**
-   Generic sine function for half PI units using polynomial interpolation
+   Generic sine function for ½π units using polynomial interpolation
 
    Usage:
    ---
@@ -30,31 +71,7 @@ version(unittest) {
    // where order can be 2, 3, 4 or 5
    ---
 
-   Max. error: ~0.056 for 2nd-order, ~0.020 for 3rd-order, ~0.003 for 4th-order, ~0.0002 for 5th-order.
-
-   2nd-order (quadratic) interpolation:
-   ---
-   sin(x) = 4/π * x - 4/π^2 * x^2 = (4/π - 4/π^2 * x) * x
-   x = z * π/2
-   sin(z * π/2) = 2 * z - z^2 = (2 - z) * z
-   ---
-
-   3rd-order (cubic) interpolation:
-   ---
-   sin(x) = 3/π * x - 4/π^3 * x^3 = x * (3/π - 4/π^3 * x^2)
-   x = z * π/2
-   sin(z * π/2) = (z*3 - z^3)/2 = z * (3 - z^2) / 2 = (3/2 - z^2/2) * z
-   ---
-
-   4th-order interpolation:
-   ---
-   sin(x) = cos(x - π/2)
-   x = z * π/2
-   sin(z) = cos(z - 1)
-
-   cos(z) = 1 - (2 - π/4) * z^2 + (1 - π/4) * z^4
-   cos(z) = 1 - ((2 - π/4) - (1 - π/4) * z^2) * z^2
-   ---
+   See_Also: [cos]
 */
 auto sin(uint N, T, U)(const Val!(T, U) angle) if (N >= 2 && N <= 5 && (isFloat!T || isFixed!T) && isUnits!U && is(U.Class == Angle)) {
   static if (is(U == hpi)) {
@@ -336,7 +353,7 @@ nothrow @nogc unittest {
 }
 
 /**
-   Generic cosine function for half PI units using polynomial interpolation
+   Generic cosine function for ½π units using polynomial interpolation
 
    Usage:
    ---
@@ -344,7 +361,7 @@ nothrow @nogc unittest {
    // where order can be 2, 3, 4 or 5
    ---
 
-   See also: `sin`
+   See_Also: [sin]
  */
 auto cos(uint N, T, U)(const Val!(T, U) angle) if (N >= 2 && N <= 5 && (isFloat!T || isFixed!T) && isUnits!U && is(U.Class == Angle)) {
   static if (is(U == hpi)) {
