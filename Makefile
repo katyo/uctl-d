@@ -77,11 +77,7 @@ $(foreach module,$(MODULES),$(eval $(call module_rules,$(module))))
 test: $(TESTS)
 
 doc: $(SOURCES)
-	@mkdir -p doc
-	@ldc2 -preview=markdown -o- -D -Dd=doc -X -Xf=doc/db.json $^
-	@dub run ddox -- filter doc/db.json --only-documented
-	@cp -r $(HOME)/.dub/packages/ddox-*/ddox/public/* doc
-	@dub run ddox -- generate-html doc/db.json doc
+	adrdox -i --tex-math=katex -o $@ $(dir $<)
 
 clean:
 	@echo CLEAN ALL
