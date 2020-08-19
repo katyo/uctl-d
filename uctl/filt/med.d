@@ -81,7 +81,7 @@ nothrow @nogc unittest {
 /**
  * Apply median filter
  *
- * Apply filter to static array values directly.
+ * Apply filter to static array values using value picker
  *
  * Params:
  *   P = element picker function

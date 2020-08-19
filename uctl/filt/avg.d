@@ -93,7 +93,7 @@ nothrow @nogc unittest {
 /**
  * Apply average filter
  *
- * Apply filter to static array using specified accessor
+ * Apply filter to static array using value picker
  *
  * Params:
  *   P = value picker function
