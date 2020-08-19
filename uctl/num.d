@@ -13,6 +13,9 @@ version(unittest) {
   mixin unittests;
 }
 
+/// The __golden ratio__ constant
+enum real PHI = 1.61803398874989484820;
+
 /// Check when type or expr is floating-point number
 template isFloat(X...) if (X.length == 1) {
   static if (is(X[0])) {

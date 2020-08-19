@@ -9,6 +9,7 @@ MODULES += \
   uctl.util.val \
   uctl.util.dl \
   uctl.util.lt \
+  uctl.util.sort \
   uctl.filt.package \
   uctl.filt.avg \
   uctl.filt.ema \
