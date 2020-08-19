@@ -13,6 +13,7 @@ MODULES += \
   uctl.filt.package \
   uctl.filt.avg \
   uctl.filt.ema \
+  uctl.filt.med \
   uctl.test
 
 SOURCES = $(patsubst %,%.d,$(subst .,/,$(MODULES)))
