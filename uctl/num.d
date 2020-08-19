@@ -16,12 +16,18 @@ version(unittest) {
 /// The __golden ratio__ constant
 enum real PHI = 1.61803398874989484820;
 
-/// Check when type or expr is floating-point number
-template isFloat(X...) if (X.length == 1) {
-  static if (is(X[0])) {
-    enum bool isFloat = isFloatingPoint!(X[0]);
+/// Check that type or expr is floating-point number
+template isFloat(X...) {
+  static if (X.length == 1) {
+    static if (is(X[0])) {
+      enum bool isFloat = isFloatingPoint!(X[0]);
+    } else {
+      enum bool isFloat = isFloat!(typeof(X[0]));
+    }
+  } else static if (X.length > 1) {
+    enum bool isFloat = isFloat!(X[0]) && isFloat!(X[1..$]);
   } else {
-    enum bool isFloat = isFloat!(typeof(X[0]));
+    enum bool isFloat = false;
   }
 }
 
@@ -31,6 +37,8 @@ nothrow @nogc @safe unittest {
   assert(isFloat!double);
   assert(isFloat!real);
   assert(isFloat!1.0);
+  assert(isFloat!(float, double));
+  assert(isFloat!(float, double, real));
 
   assert(!isFloat!byte);
   assert(!isFloat!int);
@@ -42,14 +50,21 @@ nothrow @nogc @safe unittest {
   assert(!isFloat!char);
   assert(!isFloat!'a');
   assert(!isFloat!"abc");
+  assert(!isFloat!(float, int));
 }
 
-/// Check when type or expr is integer number
-template isInt(X...) if (X.length == 1) {
-  static if (is(X[0])) {
-    enum bool isInt = isIntegral!(X[0]);
+/// Check that type or expr is integer number
+template isInt(X...) {
+  static if (X.length == 1) {
+    static if (is(X[0])) {
+      enum bool isInt = isIntegral!(X[0]);
+    } else {
+      enum bool isInt = isInt!(typeof(X[0]));
+    }
+  } else static if (X.length > 1) {
+    enum bool isInt = isInt!(X[0]) && isInt!(X[1..$]);
   } else {
-    enum bool isInt = isInt!(typeof(X[0]));
+    enum bool isInt = false;
   }
 }
 
@@ -62,6 +77,7 @@ nothrow @nogc @safe unittest {
   assert(isInt!uint);
   assert(isInt!ulong);
   assert(isInt!1);
+  assert(isInt!(int, ubyte, short, ulong));
 
   assert(!isInt!float);
   assert(!isInt!double);
@@ -70,11 +86,39 @@ nothrow @nogc @safe unittest {
   assert(!isInt!char);
   assert(!isInt!'a');
   assert(!isInt!"abc");
+  assert(!isInt!(int, float));
 }
 
-/// Check when type or expr is number
-template isNum(X...) if (X.length == 1) {
-  enum bool isNum = isInt!(X[0]) || isFloat!(X[0]);
+/// Check that types or expressions is numbers of same kind (int or float)
+template isNum(X...) {
+  static if (X.length == 1) {
+    enum bool isNum = isInt!(X[0]) || isFloat!(X[0]);
+  } else static if (X.length > 1) {
+    enum bool isNum = isNum!(X[0]) && isNum!(X[1..$]);
+  } else {
+    enum bool isNum = false;
+  }
+}
+
+/// Test `isNum`
+nothrow @nogc @safe unittest {
+  assert(isNum!(byte, int));
+  assert(isNum!(float, double));
+  assert(isNum!(byte, int, float));
+  assert(isNum!(float, double, int));
+}
+
+/// Check that types or expressions is numbers of same kind (int or float)
+template isAlikeNum(X...) {
+  enum bool isAlikeNum = isInt!(X) || isFloat!(X);
+}
+
+/// Test `isAlikeNum`
+nothrow @nogc @safe unittest {
+  assert(isAlikeNum!(byte, int));
+  assert(isAlikeNum!(float, double));
+  assert(!isAlikeNum!(byte, int, float));
+  assert(!isAlikeNum!(float, double, int));
 }
 
 /// Get number of bits of specified type or value

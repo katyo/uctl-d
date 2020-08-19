@@ -35,17 +35,19 @@ version(unittest) {
  * Params:
  *   A = filter weights type
  */
-struct Param(A = float) if (isNumer!A) {
+struct Param(A_ = float) if (isNumer!A_) {
   alias Self = typeof(this);
 
-  /// The value of `α` parameter
-  A alpha = 1.0;
+  alias A = A_;
 
   static if (isFixed!A) {
     alias Acmpl = typeof(asfix!1.0 - alpha);
   } else {
     alias Acmpl = A;
   }
+
+  /// The value of `α` parameter
+  A alpha = 1.0;
 
   /// The value of `1-α` (complementary `α`)
   Acmpl cmpl_alpha = 0.0;
@@ -73,7 +75,7 @@ struct Param(A = float) if (isNumer!A) {
    * Adjust parameters gain
    */
   const pure nothrow @nogc @safe
-  auto opBinary(string op, G)(const G gain) if ((op == "*" || op == "/") && isNumer!G) {
+  auto opBinary(string op, G)(const G gain) if ((op == "*" || op == "/") && isNumer!(A, G)) {
     return Param(alpha * gain, cmpl_alpha * gain);
   }
 }
@@ -140,7 +142,7 @@ auto param_from_samples(N)(const N n) if (isNumer!N) {
  * See_Also: `param_from_alpha`.
  */
 pure nothrow @nogc @safe
-auto param_from_time(T, P)(const T time, const P period) if (isNumer!T && isNumer!P) {
+auto param_from_time(T, P)(const T time, const P period) if (isNumer!(T, P)) {
   auto alpha = (period + period) / (time + period);
 
   return param_from_alpha(alpha);
@@ -158,7 +160,7 @@ auto param_from_time(T, P)(const T time, const P period) if (isNumer!T && isNume
  * See_Also: `param_from_alpha`.
  */
 pure nothrow @nogc @safe
-auto param_from_pt1(T, P)(const T time, const P period) if (isNumer!T && isNumer!P) {
+auto param_from_pt1(T, P)(const T time, const P period) if (isNumer!(T, P)) {
   auto alpha = period / (time + period);
   return param_from_alpha(alpha);
 }
@@ -170,7 +172,7 @@ auto param_from_pt1(T, P)(const T time, const P period) if (isNumer!T && isNumer
  *   P = parameters type
  *   T = input value type
  */
-struct State(P = Param!float, T = float) if (isInstanceOf!(Param, P) && isNumer!T) {
+struct State(P = Param!float, T = float) if (isInstanceOf!(Param, P) && isNumer!(P.A, T)) {
   alias Self = typeof(this);
 
   /// Output value type

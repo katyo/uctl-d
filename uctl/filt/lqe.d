@@ -51,7 +51,7 @@ version(unittest) {
      N = noise type
      F2 = square factor type
 */
-struct Param(F_, H_, Q_, R_) if (isNumer!F_ && isNumer!H_ && isNumer!Q_ && isNumer!R_) {
+struct Param(F_, H_, Q_, R_) if (isNumer!(F_, H_, Q_, R_)) {
   alias F = F_;
   alias H = H_;
   alias Q = Q_;
@@ -88,11 +88,11 @@ struct Param(F_, H_, Q_, R_) if (isNumer!F_ && isNumer!H_ && isNumer!Q_ && isNum
 }
 
 /// Create LQE parameters from coefficients
-auto param_from(F, H, Q, R)(F f, H h, Q q, R r) if (isNumer!F && isNumer!H && isNumer!Q && isNumer!R) {
+auto param_from(F, H, Q, R)(F f, H h, Q q, R r) if (isNumer!(F, H, Q, R)) {
   return Param!(F, H, Q, R)(f, h, q, r);
 }
 
-template fix_sqrt_t(T) if (isFixed!T) {
+private template fix_sqrt_t(T) if (isFixed!T) {
   import std.math: sqrt;
   static assert(T.isntneg, "Square root is undefined for negative values.");
   alias fix_sqrt_t = fix!(sqrt(T.rmin), sqrt(T.rmax));
@@ -105,17 +105,15 @@ template fix_sqrt_t(T) if (isFixed!T) {
      P = parameters type
      T = input value type
 */
-struct State(alias P, T) if (isInstanceOf!(Param, P)) {
+struct State(alias P, T) if (isInstanceOf!(Param, P) && isNumer!(P.F, T)) {
   /// Result type
   alias R = T;
 
   /// Covariance type
   static if (isFixed!T) {
-    //alias C = fix!(-1, 1);
     alias Cq = typeof((P.F2() * P.F2() - asfix!2 * P.F2() + asfix!1) * P.R() * P.R() + (asfix!2 * P.F2() + asfix!2) * P.H2() * P.Q() * P.R() + P.H2() * P.H2() * P.Q());
     alias Cp = typeof((fix_sqrt_t!Cq() + (P.F2() - asfix!1) * P.R() - P.H2() * P.Q()) / (asfix!2 * P.F2() * P.H2()));
     alias C = fix!(Cp.rmin*2, Cp.rmax*2);
-    //pragma(msg, C.stringof);
   } else {
     alias C = T;
   }

@@ -908,12 +908,18 @@ nothrow @nogc unittest {
   enum auto b = asfix!(1/1e-3);
 }
 
-/// Checks that type or value is fixed-point number
-template isFixed(X...) if (X.length == 1) {
-  static if (is(X[0])) {
-    enum bool isFixed = isInstanceOf!(fix, X[0]);
+/// Checks that types or expressions is fixed-point number
+template isFixed(X...) {
+  static if (X.length == 1) {
+    static if (is(X[0])) {
+      enum bool isFixed = isInstanceOf!(fix, X[0]);
+    } else {
+      enum bool isFixed = isFixed!(typeof(X[0]));
+    }
+  } else static if (X.length > 1) {
+    enum bool isFixed = isFixed!(X[0]) && isFixed!(X[1..$]);
   } else {
-    enum bool isFixed = isFixed!(typeof(X[0]));
+    enum bool isFixed = false;
   }
 }
 
@@ -921,12 +927,15 @@ template isFixed(X...) if (X.length == 1) {
 nothrow @nogc @safe unittest {
   assert(isFixed!(fix!(0, 1)));
   assert(isFixed!(fix!(0, 1)(1.23)));
+  assert(isFixed!(fix!(0, 1), fix!(-1, 2)));
+
   assert(!isFixed!float);
   assert(!isFixed!double);
   assert(!isFixed!real);
   assert(!isFixed!int);
   assert(!isFixed!1.23);
   assert(!isFixed!123);
+  assert(!isFixed!(fix!(0, 1), float));
 }
 
 /// Checks that fixed-point types is same
@@ -951,9 +960,20 @@ nothrow @nogc @safe unittest {
   assert(!isSameFixed!(double, double));
 }
 
-/// Check when type or expr is numeric
-template isNumer(X...) if (X.length == 1) {
-  enum bool isNumer = isFloat!(X[0]) || isInt!(X[0]) || isFixed!(X[0]);
+/// Check that types or expressions is numeric
+template isNumer(X...) {
+  static if (X.length == 1) {
+    enum bool isNumer = isFloat!(X[0]) || isInt!(X[0]) || isFixed!(X[0]);
+  } else static if (X.length > 1) {
+    enum bool isNumer = isNumer!(X[0]) && isNumer!(X[1..$]);
+  } else {
+    enum bool isNumer = false;
+  }
+}
+
+/// Check that types or expressions is numeric of same kind
+template isAlikeNumer(X...) {
+  enum bool isAlikeNumer = isFloat!(X) || isInt!(X) || isFixed!(X);
 }
 
 /// Check that fixed-point number is constant
