@@ -8,9 +8,9 @@
 module uctl.filt.avg;
 
 import std.math: isPowerOf2;
-import std.functional: unaryFun;
-import std.traits: isCallable, Parameters, ReturnType;
+import std.traits: ReturnType, Unqual;
 import uctl.fix: fix, asfix, isNumer, isFixed;
+import uctl.util: isPicker, ident_picker;
 
 version(unittest) {
   import std.algorithm: map;
@@ -32,8 +32,8 @@ version(unittest) {
  *   data = array of elements
  * Returns: Filtered value
  */
-auto apply(uint N, T, alias P = ident!T)(ref const T[N] data) if (isCallable!P && Parameters!P.length == 1 && isNumer!(ReturnType!P)) {
-  alias R = ReturnType!((T v) => P(v));
+auto apply(uint N, T, alias P = ident_picker!T)(ref T[N] data) if (isPicker!(P, T) && isNumer!(ReturnType!P) && N > 0) {
+  alias R = Unqual!(ReturnType!P);
 
   static if (isFixed!T) {
     alias A = typeof(R() * asfix!N);
@@ -41,27 +41,31 @@ auto apply(uint N, T, alias P = ident!T)(ref const T[N] data) if (isCallable!P &
     alias A = R;
   }
 
-  A acc = 0;
-
-  foreach (nth; 0 .. N) {
-    acc += P(data[nth]);
-  }
-
-  static if (isFixed!T) {
-    enum auto div = asfix!N;
-    enum auto mul = asfix!(1.0 / N);
+  static if (N == 1) {
+    return P(data[0]);
   } else {
-    enum auto div = cast(R) N;
-    enum auto mul = cast(R) 1.0 / cast(R) N;
-  }
+    A acc = 0;
 
-  static if (isPowerOf2(N)) {
-    auto res = acc / div;
-  } else {
-    auto res = acc * mul;
-  }
+    foreach (nth; 0 .. N) {
+      acc += P(data[nth]);
+    }
 
-  return cast(R) res;
+    static if (isFixed!T) {
+      enum auto div = asfix!N;
+      enum auto mul = asfix!(1.0 / N);
+    } else {
+      enum auto div = cast(R) N;
+      enum auto mul = cast(R) 1.0 / cast(R) N;
+    }
+
+    static if (isPowerOf2(N)) {
+      auto res = acc / div;
+    } else {
+      auto res = acc * mul;
+    }
+
+    return cast(R) res;
+  }
 }
 
 /// Test average filter (floating-point)
@@ -87,27 +91,18 @@ nothrow @nogc unittest {
 }
 
 /**
- * Identity value accessor
- *
- * Accessor which simply give value as is.
- */
-private T ident(T)(T v) {
-  return v;
-}
-
-/**
  * Apply average filter
  *
  * Apply filter to static array using specified accessor
  *
  * Params:
- *   P = accessor function
+ *   P = value picker function
  *   N = number of elements
  *   T = element type
  *   data = array of elements
  * Returns: Filtered value
  */
-auto apply(alias P, uint N, T)(ref const T[N] data) if (isCallable!P && Parameters!P.length == 1 && isNumer!(ReturnType!P)) {
+auto apply(alias P, uint N, T)(ref T[N] data) if (isPicker!(P, T) && isNumer!(ReturnType!P) && N > 0) {
   return apply!(N, T, P)(data);
 }
 
@@ -121,5 +116,13 @@ nothrow @nogc unittest {
 
   static immutable auto s = [A(true, 0.0, 1), A(true, 0.25, 5), A(false, -1.75, 2)].staticArray;
 
-  assert_eq(apply!((A a) => a.b)(s), -0.5);
+  assert_eq(apply!(ref (ref immutable A a) => a.b)(s), -0.5);
+
+  static const auto s1 = [A(true, 0.0, 1), A(true, 0.25, 5), A(false, -1.75, 2)].staticArray;
+
+  assert_eq(apply!(ref (ref immutable A a) => a.b)(s), -0.5);
+
+  static auto s2 = [A(true, 0.0, 1), A(true, 0.25, 5), A(false, -1.75, 2)].staticArray;
+
+  assert_eq(apply!(ref (ref A a) => a.b)(s2), -0.5);
 }
