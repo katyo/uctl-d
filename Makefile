@@ -13,6 +13,7 @@ MODULES += \
   uctl.filt.package \
   uctl.filt.avg \
   uctl.filt.ema \
+  uctl.filt.lqe \
   uctl.filt.med \
   uctl.test
 
