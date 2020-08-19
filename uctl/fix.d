@@ -961,19 +961,19 @@ nothrow @nogc @safe unittest {
 }
 
 /// Check that types or expressions is numeric
-template isNumer(X...) {
+template isAnyNumer(X...) {
   static if (X.length == 1) {
-    enum bool isNumer = isFloat!(X[0]) || isInt!(X[0]) || isFixed!(X[0]);
+    enum bool isAnyNumer = isFloat!(X[0]) || isInt!(X[0]) || isFixed!(X[0]);
   } else static if (X.length > 1) {
-    enum bool isNumer = isNumer!(X[0]) && isNumer!(X[1..$]);
+    enum bool isAnyNumer = isAnyNumer!(X[0]) && isAnyNumer!(X[1..$]);
   } else {
-    enum bool isNumer = false;
+    enum bool isAnyNumer = false;
   }
 }
 
 /// Check that types or expressions is numeric of same kind
-template isAlikeNumer(X...) {
-  enum bool isAlikeNumer = isFloat!(X) || isInt!(X) || isFixed!(X);
+template isNumer(X...) {
+  enum bool isNumer = isFloat!(X) || isInt!(X) || isFixed!(X);
 }
 
 /// Check that fixed-point number is constant

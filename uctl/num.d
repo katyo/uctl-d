@@ -90,35 +90,35 @@ nothrow @nogc @safe unittest {
 }
 
 /// Check that types or expressions is numbers of same kind (int or float)
-template isNum(X...) {
+template isAnyNum(X...) {
   static if (X.length == 1) {
-    enum bool isNum = isInt!(X[0]) || isFloat!(X[0]);
+    enum bool isAnyNum = isInt!(X[0]) || isFloat!(X[0]);
   } else static if (X.length > 1) {
-    enum bool isNum = isNum!(X[0]) && isNum!(X[1..$]);
+    enum bool isAnyNum = isAnyNum!(X[0]) && isAnyNum!(X[1..$]);
   } else {
-    enum bool isNum = false;
+    enum bool isAnyNum = false;
   }
 }
 
-/// Test `isNum`
+/// Test `isAnyNum`
 nothrow @nogc @safe unittest {
-  assert(isNum!(byte, int));
-  assert(isNum!(float, double));
-  assert(isNum!(byte, int, float));
-  assert(isNum!(float, double, int));
+  assert(isAnyNum!(byte, int));
+  assert(isAnyNum!(float, double));
+  assert(isAnyNum!(byte, int, float));
+  assert(isAnyNum!(float, double, int));
 }
 
 /// Check that types or expressions is numbers of same kind (int or float)
-template isAlikeNum(X...) {
-  enum bool isAlikeNum = isInt!(X) || isFloat!(X);
+template isNum(X...) {
+  enum bool isNum = isInt!(X) || isFloat!(X);
 }
 
 /// Test `isAlikeNum`
 nothrow @nogc @safe unittest {
-  assert(isAlikeNum!(byte, int));
-  assert(isAlikeNum!(float, double));
-  assert(!isAlikeNum!(byte, int, float));
-  assert(!isAlikeNum!(float, double, int));
+  assert(isNum!(byte, int));
+  assert(isNum!(float, double));
+  assert(!isNum!(byte, int, float));
+  assert(!isNum!(float, double, int));
 }
 
 /// Get number of bits of specified type or value
