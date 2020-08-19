@@ -10,9 +10,11 @@ MODULES += \
   uctl.util.dl \
   uctl.util.lt \
   uctl.util.sort \
+  uctl.util.win \
   uctl.filt.package \
   uctl.filt.avg \
   uctl.filt.ema \
+  uctl.filt.fir \
   uctl.filt.lqe \
   uctl.filt.med \
   uctl.test
