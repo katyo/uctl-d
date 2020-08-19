@@ -1,36 +1,36 @@
-/*!
+/**
   ## LQE (Kalman) filter
 
-  This module implements **Linear Quadratic Estimation** (LQE) filter which also known as Kalman filter.
+  This module implements Linear Quadratic Estimation (LQE) filter which also known as Kalman filter.
 
   Filter has four parameters:
 
   $(LIST
-    * `F` - factor of actual value to previous actual value
-    * `H` - factor of measured value to actual value
-    * `Q` - measurement noise
-    * `R` - environment noise
+    * `F` - state-transition model (factor of actual value to previous actual value)
+    * `H` - observation model (factor of measured value to actual value)
+    * `Q` - covariance of the process noise (measurement noise)
+    * `R` - covariance of the observation (environment noise)
   )
 
   Filter consists of two stages:
 
-  $(ORDERED_LIST
-    * Prediction
+  $(NUMBERED_LIST
+    * Predict
     $(LIST
-      * Predict state as _X0 = F * X_
-      * Predict covariance _P0 = F^2 * P + Q_
+      * Predict state as $(MATH X_0 = F X)
+      * Predict covariance $(MATH P_0 = F^2 P + Q)
     )
-
-    * Correction
+    * Update
     $(LIST
-      * Calculate gain as _K = H * P0 / (H^2 * P0 + R)_
-      * Calculate covariance as _P = (1 - K * H) * P0_
-      * Calculate state as _X = X0 + K * (X - H * X0)_
+      * Innovation covariance as $(MATH S = H^2 P_0 + R)
+      * Calculate optimal gain as $(MATH K = P_0 H S^-1)
+      * Update estimate covariance as $(MATH P = (1 - K H) P_0)
+      * Update state estimate as $(MATH X = X_0 + K (X - H X_0))
     )
   )
 
   See_Also:
-    [Kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) article.
+    [Kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) wikipedia article.
 */
 module uctl.filt.lqe;
 
