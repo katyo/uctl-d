@@ -21,6 +21,13 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-    
+
+    - uses: dlang-community/setup-dlang@v1
+      with:
+        compiler: ldc-latest
+
     - name: Run D-Scanner (D language linter) with reviewdog
       uses: dgellow/action-dscanner@v1.0.1
+
+    - name: Run tests
+      run: make test
