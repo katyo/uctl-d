@@ -30,7 +30,7 @@ struct PFDL(uint L, T) {
   /// Line values
   private val_t[len] val;
 
-  /// Initialize delay line using optional initial value
+  /// Initialize delay line using initial value
   const pure nothrow @nogc @safe
   this(const val_t initial) {
     val[0..$] = initial;
