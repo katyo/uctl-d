@@ -15,6 +15,7 @@ import uctl.fix: isNumer;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
+  import uctl.fix: fix;
 
   mixin unittests;
 }
@@ -64,7 +65,7 @@ alias boxcar(uint N, W) = rectangular!(N, W);
 /// Dirichlet window function (alias for [rectangular])
 alias dirichlet(uint N, W) = rectangular!(N, W);
 
-/// Test window function
+/// Test rectangular window function (float)
 nothrow @nogc unittest {
   static immutable w = boxcar!(5, float);
 
@@ -73,6 +74,20 @@ nothrow @nogc unittest {
 
   foreach (i; 0 .. w.L) {
     assert_eq(w[i], 1.0);
+  }
+}
+
+/// Test rectangular window function (fixed)
+nothrow @nogc unittest {
+  alias X = fix!(0, 5);
+
+  static immutable w = boxcar!(5, X);
+
+  assert_eq(w.N, 5);
+  assert_eq(w.L, 6);
+
+  foreach (i; 0 .. w.L) {
+    assert_eq(w[i], cast(X) 1.0);
   }
 }
 
@@ -98,6 +113,32 @@ alias triangular1(uint N, W) = triangular!(N, N + 1, W);
 
 /// Triangular window function with L = N + 2
 alias triangular2(uint N, W) = triangular!(N, N + 2, W);
+
+/// Test triangular window function (float)
+nothrow @nogc unittest {
+  static immutable w = bartlett!(5, float);
+
+  assert_eq(w[0], 0.0);
+  assert_eq(w[1], 0.4, 1e-8);
+  assert_eq(w[2], 0.8, 1e-7);
+  assert_eq(w[3], 0.8, 1e-7);
+  assert_eq(w[4], 0.4, 1e-8);
+  assert_eq(w[5], 0.0);
+}
+
+/// Test triangular window function (fixed)
+nothrow @nogc unittest {
+  alias X = fix!(-1, 1);
+
+  static immutable w = bartlett!(5, X);
+
+  assert_eq(w[0], cast(X) 0.0);
+  assert_eq(w[1], cast(X) 0.4);
+  assert_eq(w[2], cast(X) 0.8);
+  assert_eq(w[3], cast(X) 0.8);
+  assert_eq(w[4], cast(X) 0.4);
+  assert_eq(w[5], cast(X) 0.0);
+}
 
 /// Parzen window function
 template parzen(uint N, W) {
