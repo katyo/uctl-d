@@ -1,5 +1,7 @@
 # Generic control library for low-end hadrware
 
+[![Language: D](https://img.shields.io/github/languages/top/katyo/uctl-d.svg)](https://dlang.org/)
+![Code size](https://img.shields.io/github/languages/code-size/katyo/uctl-d.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://github.com/katyo/uctl-d/workflows/CI/badge.svg)](https://github.com/katyo/uctl-d/actions?query=workflow%3ACI)
 
