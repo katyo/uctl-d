@@ -3,6 +3,8 @@
  */
 module uctl.util.dl;
 
+import std.traits: Unqual;
+
 version(unittest) {
   import uctl.test: assert_eq, unittests;
 
@@ -17,7 +19,7 @@ version(unittest) {
 */
 struct PFDL(uint L, T) {
   /// The type of values
-  alias val_t = T;
+  alias val_t = Unqual!T;
 
   /// The length of line
   enum uint len = L;
