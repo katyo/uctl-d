@@ -3,7 +3,7 @@
  */
 module uctl.fix;
 
-import std.traits: isInstanceOf;
+import std.traits: Unqual, isInstanceOf;
 import std.algorithm.comparison: max;
 import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
 import uctl.num: isInt, isFloat, isNum, bitsOf, filledBits;
@@ -879,6 +879,32 @@ private template cmp(A, B) if (isFixed!A && isFixed!B) {
   enum uint bits = max2(A.bits, B.bits);
 
   alias cmp = fix!(rmin, rmax, bits);
+}
+
+/// Create numeric literal of same class
+template asnum(T, real val) if (isNumer!T) {
+  enum auto asnum = asnum!(val, T);
+}
+
+/// Create numeric literal of same class
+template asnum(real val, T) if (isNumer!T) {
+  static if (isFixed!T) {
+    enum auto asnum = asfix!val;
+  } else {
+    enum auto asnum = cast(Unqual!T) val;
+  }
+}
+
+/// Test asnum
+nothrow @nogc unittest {
+  assert(is(typeof(asnum!(1.0, float)) == float));
+  assert(is(typeof(asnum!(float, 0.0)) == float));
+  assert(is(typeof(asnum!(1.0, int)) == int));
+  assert(is(typeof(asnum!(int, 0.0)) == int));
+
+  alias X = fix!(-1, 1);
+  assert(is(typeof(asnum!(1.0, X)) == fix!1));
+  assert(is(typeof(asnum!(X, 0.0)) == fix!0));
 }
 
 /// Create fixed-point constant from an arbitrary number
