@@ -83,6 +83,8 @@ test: $(TESTS)
 
 doc: $(SOURCES)
 	adrdox -i --tex-math=katex -o $@ $(dir $<)
+	cd plot && octave plot_all.m
+	mv plot/*.svg $@
 
 clean:
 	@echo CLEAN ALL

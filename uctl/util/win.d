@@ -3,6 +3,8 @@
 
    This module defines window function weights type and initializers for some well known widely used window functions.
 
+   ![Window functions](win_funcs.svg)
+
    See_Also:
      [Window function](https://en.wikipedia.org/wiki/Window_function) wikipedia article.
  */
