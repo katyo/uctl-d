@@ -19,6 +19,10 @@ MODULES += \
   uctl.filt.med \
   uctl.test
 
+PLOTS += \
+  trig_errs \
+  win_funcs \
+
 SOURCES = $(patsubst %,%.d,$(subst .,/,$(MODULES)))
 TESTS = $(patsubst %,test.%,$(filter-out %.package,$(MODULES)))
 
@@ -61,6 +65,8 @@ mod.$(1) := $$(subst .,/,$(1))
 src.$(1) := $$(patsubst %,%.d,$$(mod.$(1)))
 obj.$(1) := $$(patsubst %,obj/%.o,$$(mod.$(1)))
 
+test: test.$(1)
+
 test.$(1): $$(src.$(1)) prepare
 	@echo TEST $(1)
 	@ldc2 -od=obj -of=obj/$(1) $(DFLAGS) -unittest $$<
@@ -79,15 +85,23 @@ endef
 
 $(foreach module,$(MODULES),$(eval $(call module_rules,$(module))))
 
-test: $(TESTS)
+define plot_rules
+plot: plot.$(1)
 
-doc: $(SOURCES)
+plot.$(1): doc/$(1).svg
+
+doc/$(1).svg: plot/$(1).m uctl
+	cd $$(dir $$<) && octave $$(notdir $$<)
+	mv plot/$(1).svg $$@
+endef
+
+$(foreach plot,$(PLOTS),$(eval $(call plot_rules,$(plot))))
+
+doc: $(SOURCES) plot
 	adrdox -i --tex-math=katex -o $@ $(dir $<)
-	cd plot && octave plot_all.m
-	mv plot/*.svg $@
 
 clean:
 	@echo CLEAN ALL
 	@rm -rf obj doc
 
-.PHONY: test doc clean
+.PHONY: test plot doc clean

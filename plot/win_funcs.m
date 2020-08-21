@@ -26,7 +26,9 @@ for i = 1:length(funcs)
                         'enum uint N = ', size, ';',
                         'static immutable w = ', func, '!(N, double);',
                         'foreach (i; 0 .. N+1) {',
-                        '  printf("%g %g\n", cast(double)i / cast(double)N, w[i]);',
+                        '  auto x = cast(double)i / cast(double)N;',
+                        '  auto y = w[i];',
+                        '  printf("%g %g\n", x, y);',
                         '}'));
   x = data(:,1);
   y = data(:,2);

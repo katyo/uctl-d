@@ -20,6 +20,8 @@
    * + 5th
      + ~0.0002)
 
+   ![Approximation erros](trig_errs.svg)
+
    #### 2nd-order (quadratic) interpolation
 
    $(MATH sin(x) = \frac{4}{π} x - \frac{4}{π^2} x^2 = (\frac{4}{π} - \frac{4}{π^2} x) x)
@@ -50,12 +52,13 @@
  */
 module uctl.math.trig;
 
+import std.math: PI;
 import uctl.num: isFloat;
 import uctl.fix: fix, asfix, isFixed;
 import uctl.unit: Val, to, isUnits, Angle, hpi;
 
 version(unittest) {
-  import std.math: PI, sin, cos;
+  import std.math: sin, cos;
   import uctl.unit: as, rad;
   import uctl.test: assert_eq, max_abs_error, mean_sqr_error, unittests;
 
