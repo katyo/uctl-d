@@ -140,6 +140,19 @@ nothrow @nogc unittest {
   assert_eq(w[5], cast(X) 0.0);
 }
 
+/// Bartlett-Hann window function
+template bartlett_hann(uint N, W) {
+  enum real a0 = 0.62;
+  enum real a1 = 0.48;
+  enum real a2 = 0.38;
+  enum real PI2 = PI * 2;
+  alias func = (uint n) {
+    const auto d = cast(real) n / cast(real) (N + 1);
+    return a0 - a1 * fabs(d - cast(real) 0.5) - a2 * cos(PI2 * d);
+  };
+  alias bartlett_hann = window_generate!(N, W, func);
+}
+
 /// Parzen window function
 template parzen(uint N, W) {
   enum uint L = N + 1;
@@ -177,8 +190,8 @@ template sine(uint N, W) {
 template hann(uint N, W) {
   enum real f = cast(real) PI / cast(real) N;
   alias func = (uint n) {
-    const auto s = f * n;
-    return sin(s * s);
+    const auto s = sin(f * n);
+    return s * s;
   };
   alias hann = window_generate!(N, W, func);
 }
@@ -198,13 +211,6 @@ template cosine(uint N, W, real a0 = 0, real a1 = 0, real a2 = 0, real a3 = 0, r
 template hamming(uint N, W) {
   enum real a0 = 25.0 / 46.0;
   enum real a1 = 1.0 - a0;
-  alias hamming = cosine!(N, W, a0, a1);
-}
-
-/// Hamming window (zero-phase version)
-template hamming(uint N, W) {
-  enum real a0 = 25.0 / 46.0;
-  enum real a1 = a0 - 1.0;
   alias hamming = cosine!(N, W, a0, a1);
 }
 
@@ -246,12 +252,22 @@ template blackman_harris(uint N, W) {
 
 /// Flat top window function
 template flat_top(uint N, W) {
+  enum real a0 = 0.21557895;
+  enum real a1 = 0.41663158;
+  enum real a2 = 0.277263158;
+  enum real a3 = 0.083578947;
+  enum real a4 = 0.006947368;
+  alias flat_top = cosine!(N, W, a0, a1, a2, a3, a4);
+}
+
+/// Flat top window function
+template flat_top2(uint N, W) {
   enum real a0 = 1.0;
   enum real a1 = 1.93;
   enum real a2 = 1.29;
   enum real a3 = 0.388;
   enum real a4 = 0.028;
-  alias flat_top = cosine!(N, W, a0, a1, a2, a3, a4);
+  alias flat_top2 = cosine!(N, W, a0, a1, a2, a3, a4);
 }
 
 /// Rife-Vincent window function of Class I with K = 1
@@ -267,7 +283,7 @@ template rife_vincent1(uint N, W) {
 template rife_vincent2(uint N, W) {
   enum real a0 = 1.0;
   enum real a1 = 4.0 / 3.0;
-  enum real a1 = 1.0 / 3.0;
+  enum real a2 = 1.0 / 3.0;
   alias rife_vincent2 = cosine!(N, W, a0, a1, a2);
 }
 
