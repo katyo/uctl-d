@@ -69,7 +69,7 @@ void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T max_e
    Assert equality of fixed-point values
 */
 nothrow @nogc
-void assert_eq(T, S, string file = __FILE__, int line = __LINE__)(T a, S b, T max_error = T.zero) if (isFixed!T && isFixed!S && isSameFixed!(T, S)) {
+void assert_eq(T, S, string file = __FILE__, int line = __LINE__)(T a, S b, S max_error = S.zero) if (isFixed!T && isFixed!S && isSameFixed!(T, S)) {
   enum string F = "%0.10g (%i)";
 
   auto d = a.raw > b.raw ? a.raw - b.raw : b.raw - a.raw;
@@ -94,7 +94,7 @@ void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) 
    Assert equality of floating-point values with units
 */
 nothrow @nogc
-void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b, T max_error = T.epsilon) if (isFloat!T && isFloat!S && isUnits!U && is(T == S)) {
+void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b, S max_error = S.epsilon) if (isFloat!T && isFloat!S && isUnits!U && is(T == S)) {
   assert_eq!(T, file, line)(a.raw, b.raw, max_error);
 }
 
@@ -102,7 +102,7 @@ void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) 
    Assert equality of fixed-point values with units
 */
 nothrow @nogc
-void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b, T max_error = T.zero) if (isFixed!T && isFixed!S && isUnits!U && isSameFixed!(T, S)) {
+void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b, S max_error = S.zero) if (isFixed!T && isFixed!S && isUnits!U && isSameFixed!(T, S)) {
   assert_eq!(T, S, file, line)(a.raw, b.raw, max_error);
 }
 
