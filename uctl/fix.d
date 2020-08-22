@@ -6,7 +6,7 @@ module uctl.fix;
 import std.traits: Unqual, isInstanceOf;
 import std.algorithm.comparison: max;
 import std.math: fabs, fmin, fmax, pow, log2, floor, ceil;
-import uctl.num: isInt, isFloat, isNum, bitsOf, filledBits;
+import uctl.num: isInt, isFloat, isNum, intType, bitsOf, filledBits;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
@@ -59,33 +59,12 @@ do {
 }
 
 /**
-   Select mantissa type
-
-   Selects appropriate mantissa type by width in bits.
-*/
-private template raw_type(uint bits) {
-  static if (bits <= 8 && is(byte)) {
-    alias raw_type = byte;
-  } else static if (bits <= 16 && is(short)) {
-    alias raw_type = short;
-  } else static if (bits <= 32 && is(int)) {
-    alias raw_type = int;
-  } else static if (bits <= 64 && is(long)) {
-    alias raw_type = long;
-  } else static if (bits <= 128 && is(cent)) {
-    alias raw_type = cent;
-  } else {
-    static assert(0, "Unsupported bits width: " ~ bits.stringof);
-  }
-}
-
-/**
   Convert mantissa bits only
 
   Converts mantissa type to `rbits`.
 */
 private pure nothrow @nogc @safe
-raw_type!(rbits) raw_to(uint rbits, T)(T raw) if (is(T) && isInt!T) {
+intType!(rbits) raw_to(uint rbits, T)(T raw) if (is(T) && isInt!T) {
   return cast(typeof(return)) raw;
 }
 
@@ -95,7 +74,7 @@ raw_type!(rbits) raw_to(uint rbits, T)(T raw) if (is(T) && isInt!T) {
    Converts mantissa exponent from `exp` to `rexp`.
 */
 private pure nothrow @nogc @safe
-raw_type!(bitsOf!T) raw_to(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
+intType!(bitsOf!T) raw_to(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
   return raw.raw_to!(exp, rexp, bitsOf!T);
 }
 
@@ -105,7 +84,7 @@ raw_type!(bitsOf!T) raw_to(int exp, int rexp, T)(T raw) if (is(T) && isInt!T) {
    Converts mantissa exponent from `exp` to `rexp` and bits to `rbits`.
 */
 private pure nothrow @nogc @safe
-raw_type!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T) && isInt!T) {
+intType!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T) && isInt!T) {
   enum uint bits = bitsOf!T;
 
   static if (rexp < exp && rbits > bits) {
@@ -234,7 +213,7 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   enum bool hasfrac = exp < 0;
 
   /// Mantissa type
-  alias raw_t = raw_type!(bits);
+  alias raw_t = intType!(bits);
 
   enum raw_t intmask = filledBits!(raw_t, -exp, bits);
 

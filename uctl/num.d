@@ -113,12 +113,65 @@ template isNum(X...) {
   enum bool isNum = isInt!(X) || isFloat!(X);
 }
 
-/// Test `isAlikeNum`
+/// Test `isNum`
 nothrow @nogc @safe unittest {
   assert(isNum!(byte, int));
   assert(isNum!(float, double));
   assert(!isNum!(byte, int, float));
   assert(!isNum!(float, double, int));
+}
+
+/// Select appropriate integer type by width in bits
+template intType(uint bits, bool unsigned = false) {
+  static if (unsigned) {
+    alias intType = unsignedOf!(intType!bits);
+  } else {
+    static if (bits <= 8 && is(byte)) {
+      alias intType = byte;
+    } else static if (bits <= 16 && is(short)) {
+      alias intType = short;
+    } else static if (bits <= 32 && is(int)) {
+      alias intType = int;
+    } else static if (bits <= 64 && is(long)) {
+      alias intType = long;
+    } else static if (bits <= 128 && is(cent)) {
+      alias intType = cent;
+    } else {
+      static assert(0, "Unsupported bits width: " ~ bits.stringof);
+    }
+  }
+}
+
+/// Test `intType`
+nothrow @nogc @safe unittest {
+  assert(is(intType!(0) == byte));
+  assert(is(intType!(1) == byte));
+  assert(is(intType!(7) == byte));
+  assert(is(intType!(8) == byte));
+  assert(is(intType!(9) == short));
+  assert(is(intType!(15) == short));
+  assert(is(intType!(16) == short));
+  assert(is(intType!(17) == int));
+  assert(is(intType!(31) == int));
+  assert(is(intType!(32) == int));
+  assert(is(intType!(33) == long));
+  assert(is(intType!(63) == long));
+  assert(is(intType!(64) == long));
+
+  static if (is(cent)) {
+    assert(is(intType!(64) == cent));
+    assert(is(intType!(127) == cent));
+    assert(is(intType!(128) == cent));
+  }
+
+  assert(is(intType!(8, true) == ubyte));
+  assert(is(intType!(16, true) == ushort));
+  assert(is(intType!(32, true) == uint));
+  assert(is(intType!(64, true) == ulong));
+
+  static if (is(ucent)) {
+    assert(is(intType!(128) == ucent));
+  }
 }
 
 /// Get number of bits of specified type or value
