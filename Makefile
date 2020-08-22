@@ -5,6 +5,7 @@ MODULES += \
   uctl.unit \
   uctl.math.package \
   uctl.math.trig \
+  uctl.math.log \
   uctl.util.package \
   uctl.util.val \
   uctl.util.dl \
