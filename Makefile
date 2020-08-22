@@ -23,9 +23,6 @@ PLOTS += \
   trig_errs \
   win_funcs \
 
-SOURCES = $(patsubst %,%.d,$(subst .,/,$(MODULES)))
-TESTS = $(patsubst %,test.%,$(filter-out %.package,$(MODULES)))
-
 #DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundDown
 #DFLAGS += -d-version=fixRoundToZero
@@ -52,11 +49,6 @@ ifeq ($(filter release,$(DENV)),)
 DFLAGS += -Os -release
 endif
 
-info:
-	@echo MODULES=$(MODULES)
-	@echo SOURCES=$(SOURCES)
-	@echo TESTS=$(TESTS)
-
 prepare:
 	@mkdir -p obj
 
@@ -65,6 +57,7 @@ mod.$(1) := $$(subst .,/,$(1))
 src.$(1) := $$(patsubst %,%.d,$$(mod.$(1)))
 obj.$(1) := $$(patsubst %,obj/%.o,$$(mod.$(1)))
 
+ifeq ($(filter %.package,$(1)),)
 test: test.$(1)
 
 test.$(1): $$(src.$(1)) prepare
@@ -81,6 +74,7 @@ dump.$(1): $$(src.$(1)) prepare
 	@echo DUMP $(1)
 	@ldc2 -od=obj -of=obj/$(1) $(DFLAGS) -unittest $$<
 	@objdump -D -S obj/$(1) | less
+endif
 endef
 
 $(foreach module,$(MODULES),$(eval $(call module_rules,$(module))))
