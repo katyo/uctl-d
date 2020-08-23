@@ -224,8 +224,7 @@ nothrow @nogc unittest {
  */
 void comb_sort(uint N, T, alias C = ident_picker!T, alias S = C)(ref T[N] data) if (isPicker!(C, T) && isPicker!(S, T) && isMutable!(ReturnType!S)) {
   import std.math: E, pow;
-  import uctl.num: PHI;
-  import uctl.fix: fix, asfix;
+  import uctl.num: PHI, fix, asfix;
 
   enum auto fact = asfix!(1.0 - pow(E, -PHI));
 

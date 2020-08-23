@@ -53,8 +53,7 @@
 module uctl.math.trig;
 
 import std.math: PI;
-import uctl.num: isFloat;
-import uctl.fix: fix, asfix, isFixed;
+import uctl.num: isFloat, fix, asfix, isFixed;
 import uctl.unit: Val, to, isUnits, Angle, hpi;
 
 version(unittest) {

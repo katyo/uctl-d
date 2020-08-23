@@ -9,8 +9,7 @@
 module uctl.math.log;
 
 import std.math: std_log2 = log2, LOG2E, LOG2T;
-import uctl.num: isFloat;
-import uctl.fix: fix, asfix, asnum, isNumer, isFixed;
+import uctl.num: isFloat, fix, asfix, asnum, isNumer, isFixed;
 
 version(unittest) {
   import std.math: pow;

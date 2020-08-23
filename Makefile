@@ -1,7 +1,6 @@
 MODULES += \
   uctl.package \
   uctl.num \
-  uctl.fix \
   uctl.unit \
   uctl.math.package \
   uctl.math.trig \
@@ -92,8 +91,10 @@ endef
 
 $(foreach plot,$(PLOTS),$(eval $(call plot_rules,$(plot))))
 
-doc: $(SOURCES) plot
-	adrdox -i --tex-math=katex -o $@ $(dir $<)
+doc_gen: uctl
+	adrdox -i --tex-math=katex -o doc $<
+
+doc: doc_gen plot
 
 clean:
 	@echo CLEAN ALL

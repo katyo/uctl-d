@@ -21,7 +21,7 @@
 module uctl.filt.ema;
 
 import std.traits: isInstanceOf;
-import uctl.fix: fix, asfix, isNumer, isFixed;
+import uctl.num: fix, asfix, isNumer, isFixed;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;

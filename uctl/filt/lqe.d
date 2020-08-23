@@ -35,7 +35,7 @@
 module uctl.filt.lqe;
 
 import std.traits: isInstanceOf;
-import uctl.fix: isNumer, isFixed, fix, asfix;
+import uctl.num: isNumer, isFixed, fix, asfix;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;

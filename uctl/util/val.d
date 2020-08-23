@@ -3,8 +3,7 @@
  */
 module uctl.util.val;
 
-import uctl.num: isNum;
-import uctl.fix: fix, asfix, isFixed, isNumer;
+import uctl.num: isNum, fix, asfix, isFixed, isNumer;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;

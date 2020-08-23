@@ -9,8 +9,7 @@ import std.math: fmax, fabs;
 import core.stdc.stdio: snprintf;
 import core.stdc.assert_: __assert;
 
-import uctl.num: isInt, isFloat, fmtOf;
-import uctl.fix: fix, asfix, isFixed, isSameFixed, isNumer;
+import uctl.num: isInt, isFloat, fmtOf, fix, asfix, isFixed, isSameFixed, isNumer;
 import uctl.unit: Val, isUnits, hasUnits;
 
 /**

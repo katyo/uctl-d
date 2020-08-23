@@ -12,12 +12,11 @@ module uctl.util.win;
 
 import std.traits: Unqual, Parameters, ReturnType;
 import std.math: fabs, sin, cos, PI;
-import uctl.num: isNum;
-import uctl.fix: isNumer;
+import uctl.num: isNum, isNumer;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
-  import uctl.fix: fix;
+  import uctl.num: fix;
 
   mixin unittests;
 }

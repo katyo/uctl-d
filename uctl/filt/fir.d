@@ -13,7 +13,7 @@ module uctl.filt.fir;
 import std.traits: Unqual, isInstanceOf;
 import std.math: PI, sin;
 
-import uctl.fix: fix, asfix, isNumer, isFixed;
+import uctl.num: fix, asfix, isNumer, isFixed;
 import uctl.util.win: Window;
 import uctl.util.dl: PFDL;
 

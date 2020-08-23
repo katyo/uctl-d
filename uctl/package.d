@@ -39,10 +39,3 @@ In my experience currently $(I D) is a best choice to achieve the goals pursued 
 
 */
 module uctl;
-
-public import uctl.num;
-public import uctl.fix;
-import uctl.unit;
-import uctl.math;
-import uctl.util;
-import uctl.test;

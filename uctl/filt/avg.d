@@ -9,7 +9,7 @@ module uctl.filt.avg;
 
 import std.math: isPowerOf2;
 import std.traits: ReturnType, Unqual;
-import uctl.fix: fix, asfix, isNumer, isFixed;
+import uctl.num: fix, asfix, isNumer, isFixed;
 import uctl.util: isPicker, ident_picker;
 
 version(unittest) {

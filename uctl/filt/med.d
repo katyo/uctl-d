@@ -10,13 +10,13 @@ module uctl.filt.med;
 
 import std.traits: ReturnType;
 import avg = uctl.filt.avg;
-import uctl.fix: isNumer;
+import uctl.num: isNumer;
 import uctl.util: ident_picker, isPicker, isMutable, bubble_sort;
 
 version(unittest) {
   import std.algorithm: map;
   import std.array: staticArray;
-  import uctl.fix: fix, asfix;
+  import uctl.num: fix, asfix;
   import uctl.test: assert_eq, unittests;
 
   mixin unittests;

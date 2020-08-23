@@ -5,8 +5,7 @@
 */
 module uctl.util.lt;
 
-import uctl.num: isFloat;
-import uctl.fix: isFixed, fix, asfix;
+import uctl.num: isFloat, isFixed, fix, asfix;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
