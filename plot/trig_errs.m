@@ -11,13 +11,14 @@ for i = 1:length(orders)
   order = orders(i);
   data = str2num(eval_d('import uctl.math.trig;',
                         'import uctl.unit;',
-                        'import std.math;',
+                        'import std.math: PI;',
                         'enum uint N = ', size, ';',
+                        'enum double S = PI / (2 * N);',
                         'foreach (i; 0 .. N+1) {',
-                        '  auto x = cast(double)i * cast(double)(PI/2) / cast(double)N;',
-                        '  auto y = sin!', order, '(x.as!rad);',
+                        '  auto x = (cast(double)i * S).as!rad;',
+                        '  auto y = sin!', order, '(x);',
                         '  auto yr = sin(x);',
-                        '  printf("%g %g %g\n", x, y, yr);',
+                        '  printf("%g %g %g\n", x.raw, y, yr);',
                         '}'));
   x = data(:,1);
   y = data(:,2);
