@@ -106,12 +106,53 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
 }
 
 /// Check that some value or type has measurement units
-template hasUnits(X...) if (X.length == 1) {
-  static if (is(X[0])) {
-    enum bool hasUnits = isInstanceOf!(Val, X[0]);
+template hasUnits(X...) {
+  static if (X.length == 1) {
+    static if (is(X[0])) {
+      enum bool hasUnits = isInstanceOf!(Val, X[0]);
+    } else {
+      enum bool hasUnits = hasUnits!(typeof(X));
+    }
+  } else static if (X.length == 2) {
+    static if (hasUnits!(X[0])) {
+      static if (isUnits!(X[1])) {
+        enum bool hasUnits = is(X[0].units == X[1]);
+      } else static if (isUnitsClass!(X[1])) {
+        enum bool hasUnits = is(X[0].units.Class == X[1]);
+      } else {
+        enum bool hasUnits = false;
+      }
+    } else {
+      enum bool hasUnits = false;
+    }
   } else {
-    enum bool hasUnits = hasUnits!(typeof(X));
+    enum bool hasUnits = false;
   }
+}
+
+/// Test `hasUnits`
+nothrow @nogc @safe unittest {
+  struct NoVal(T) { T val; }
+
+  assert(hasUnits!(Val!(float, rad)));
+  assert(!hasUnits!(NoVal!(float)));
+
+  assert(hasUnits!(Val!(float, rad), rad));
+  assert(!hasUnits!(Val!(float, rad), deg));
+
+  assert(hasUnits!(Val!(float, rad), Angle));
+  assert(!hasUnits!(Val!(float, rad), Length));
+
+  assert(hasUnits!(12.as!rad));
+
+  assert(hasUnits!(12.as!rad, rad));
+  assert(!hasUnits!(12.as!rad, deg));
+
+  assert(hasUnits!(12.as!rad.to!deg, deg));
+  assert(!hasUnits!(12.as!rad.to!deg, rad));
+
+  assert(hasUnits!(12.as!rad, Angle));
+  assert(!hasUnits!(12.as!rad, Length));
 }
 
 /// Add measurement units to raw value
