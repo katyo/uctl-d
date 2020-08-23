@@ -65,6 +65,30 @@ version(unittest) {
 }
 
 /**
+   Generic sine function using std sin
+*/
+auto sin(A)(const A angle) if (hasUnits!(A, Angle) && isFloat!(A.raw_t)) {
+  return sin(angle.to!rad.raw);
+}
+
+/// Test generic sine
+nothrow @nogc unittest {
+  assert_eq(sin(30.0.as!deg), 0.5);
+}
+
+/**
+   Generic cosine function using std cos
+*/
+auto cos(A)(const A angle) if (hasUnits!(A, Angle) && isFloat!(A.raw_t)) {
+  return cos(angle.to!rad.raw);
+}
+
+/// Test generic cosine
+nothrow @nogc unittest {
+  assert_eq(cos(60.0.as!deg), 0.5);
+}
+
+/**
    Generic sine function for ½π units using polynomial interpolation
 
    Usage:
