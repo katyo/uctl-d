@@ -89,6 +89,10 @@ nothrow @nogc unittest {
   assert_eq(cos(60.0.as!deg), 0.5);
 }
 
+template isTrigPolyOrder(uint N) {
+  enum bool isTrigPolyOrder = N >= 2 && N <= 5;
+}
+
 /**
    Generic sine function for ½π units using polynomial interpolation
 
@@ -100,130 +104,132 @@ nothrow @nogc unittest {
 
    See_Also: [cos]
 */
-auto sin(uint N, A)(const A angle) if (N >= 2 && N <= 5 && hasUnits!(A, Angle) && (isFloat!(A.raw_t) || isFixed!(A.raw_t))) {
-  alias T = A.raw_t;
-  alias U = A.units;
+template sin(uint N) if (isTrigPolyOrder!N) {
+  auto sin(A)(const A angle) if (hasUnits!(A, Angle) && (isFloat!(A.raw_t) || isFixed!(A.raw_t))) {
+    alias T = A.raw_t;
+    alias U = A.units;
 
-  static if (isFloat!T) {
-    alias Z = T;
-    alias R = T;
-  }
-  static if (isFixed!T) {
-    alias Z = fix!(-4, 4);
-    alias R = fix!(-1, 1);
-  }
-  alias C(real v) = asnum!(v, Z);
+    static if (isFloat!T) {
+      alias Z = T;
+      alias R = T;
+    }
+    static if (isFixed!T) {
+      alias Z = fix!(-4, 4);
+      alias R = fix!(-1, 1);
+    }
+    alias C(real v) = asnum!(v, Z);
 
-  auto x = angle.to!hpi.raw;
+    auto x = angle.to!hpi.raw;
 
-  static if (N == 4) {
-    auto x_ = C!1 - x; // sin -> cos
-  } else {
-    auto x_ = x;
-  }
-
-  auto z = cast(Z) (x_ % C!4); // x %= 2π
-
-  auto n = false;
-
-  static if (N == 2) { // 2nd-order
-    if (z < cast(Z) 0) { // z < 0
-      n = true;
-      z = -z;
+    static if (N == 4) {
+      auto x_ = C!1 - x; // sin -> cos
+    } else {
+      auto x_ = x;
     }
 
-    if (z > cast(Z) 2) { // x > π
-      n = !n;
-      z = cast(Z) (z - C!2); // x -= π
+    auto z = cast(Z) (x_ % C!4); // x %= 2π
+
+    auto n = false;
+
+    static if (N == 2) { // 2nd-order
+      if (z < cast(Z) 0) { // z < 0
+        n = true;
+        z = -z;
+      }
+
+      if (z > cast(Z) 2) { // x > π
+        n = !n;
+        z = cast(Z) (z - C!2); // x -= π
+      }
+
+      auto y = cast(R) ((C!2 - z) * z);
+
+      return cast(R) (n ? -y : y);
     }
 
-    auto y = cast(R) ((C!2 - z) * z);
+    static if (N == 3) { // 3rd-order
+      /*
+        Qsinx: sin(x) = 3/%pi * x - 4/%pi^3 * x^3$
+        Qsinz: Qsinx, x = z * %pi/2$
+        factor(Qsinz);
+      */
+      if (z < cast(Z) 0) { // x < 0
+        n = true;
+        z = -z;
+      }
 
-    return cast(R) (n ? -y : y);
-  }
+      if (z > cast(Z) 2) { // x > π
+        n = !n;
+        z = cast(Z) (z - C!2); // x -= π
+      }
 
-  static if (N == 3) { // 3rd-order
-    /*
-      Qsinx: sin(x) = 3/%pi * x - 4/%pi^3 * x^3$
-      Qsinz: Qsinx, x = z * %pi/2$
-      factor(Qsinz);
-    */
-    if (z < cast(Z) 0) { // x < 0
-      n = true;
-      z = -z;
+      if (z > cast(Z) 1) { // x > π/2
+        z = cast(Z) (C!2 - z); // x = π - x
+      }
+
+      if (n) {
+        z = -z;
+      }
+
+      return cast(R) ((C!1.5 - C!0.5 * z * z) * z);
     }
 
-    if (z > cast(Z) 2) { // x > π
-      n = !n;
-      z = cast(Z) (z - C!2); // x -= π
+    static if (N == 4) { // 4th-order
+      /*
+        cos(z) = 1 - ((2 - π/4) - (1 - π/4) * z^2) * z^2
+      */
+      enum auto a = 1.0;
+      enum auto b = 2.0 - PI/4.0;
+      enum auto c = 1.0 - PI/4.0;
+
+      if (z < cast(Z) 0) { // x < 0
+        z = -z; // x = -x
+      }
+
+      if (z > cast(Z) 1 && z < cast(Z) 3) { // x > π/2 && x < 3π/2
+        n = true; // regate result
+      }
+
+      z = cast (Z) (z % C!2); // x %= 2π
+
+      if (z > cast(Z) 1) { // x < π/2
+        z = cast(Z) (C!2 - z); // x = π - x
+      }
+
+      auto z2 = z * z;
+
+      auto y = cast(R) (C!a - (C!b - C!c * z2) * z2);
+
+      return cast(R) (n ? -y : y);
     }
 
-    if (z > cast(Z) 1) { // x > π/2
-      z = cast(Z) (C!2 - z); // x = π - x
+    static if (N == 5) { // 5th-order
+      enum real a = 4.0 * (3.0 / PI - 9.0 / 16.0);
+      enum real b = 2.0 * a - 5.0 / 2.0;
+      enum real c = a - 3.0 / 2.0;
+
+      if (z < cast(Z) 0) { // x < 0
+        n = true;
+        z = -z;
+      }
+
+      if (z > cast(Z) 2) { // x > π
+        n = !n;
+        z = cast(Z) (z - C!2); // x -= π
+      }
+
+      if (z > cast(Z) 1) { // x > π/2
+        z = cast(Z) (C!2 - z); // x = π - x
+      }
+
+      if (n) {
+        z = -z;
+      }
+
+      auto z2 = z * z;
+
+      return cast(R) ((C!a - (C!b - C!c * z2) * z2) * z);
     }
-
-    if (n) {
-      z = -z;
-    }
-
-    return cast(R) ((C!1.5 - C!0.5 * z * z) * z);
-  }
-
-  static if (N == 4) { // 4th-order
-    /*
-      cos(z) = 1 - ((2 - π/4) - (1 - π/4) * z^2) * z^2
-    */
-    enum auto a = 1.0;
-    enum auto b = 2.0 - PI/4.0;
-    enum auto c = 1.0 - PI/4.0;
-
-    if (z < cast(Z) 0) { // x < 0
-      z = -z; // x = -x
-    }
-
-    if (z > cast(Z) 1 && z < cast(Z) 3) { // x > π/2 && x < 3π/2
-      n = true; // regate result
-    }
-
-    z = cast (Z) (z % C!2); // x %= 2π
-
-    if (z > cast(Z) 1) { // x < π/2
-      z = cast(Z) (C!2 - z); // x = π - x
-    }
-
-    auto z2 = z * z;
-
-    auto y = cast(R) (C!a - (C!b - C!c * z2) * z2);
-
-    return cast(R) (n ? -y : y);
-  }
-
-  static if (N == 5) { // 5th-order
-    enum real a = 4.0 * (3.0 / PI - 9.0 / 16.0);
-    enum real b = 2.0 * a - 5.0 / 2.0;
-    enum real c = a - 3.0 / 2.0;
-
-    if (z < cast(Z) 0) { // x < 0
-      n = true;
-      z = -z;
-    }
-
-    if (z > cast(Z) 2) { // x > π
-      n = !n;
-      z = cast(Z) (z - C!2); // x -= π
-    }
-
-    if (z > cast(Z) 1) { // x > π/2
-      z = cast(Z) (C!2 - z); // x = π - x
-    }
-
-    if (n) {
-      z = -z;
-    }
-
-    auto z2 = z * z;
-
-    return cast(R) ((C!a - (C!b - C!c * z2) * z2) * z);
   }
 }
 
@@ -280,9 +286,11 @@ nothrow @nogc unittest {
    ---
 
    See_Also: [sin]
- */
-auto cos(uint N, A)(const A angle) if (N >= 2 && N <= 5 && hasUnits!(A, Angle) && (isFloat!(A.raw_t) || isFixed!(A.raw_t))) {
-  return sin!N(asnum!(1, A.raw_t).as!hpi - angle.to!hpi);
+*/
+template cos(uint N) if (isTrigPolyOrder!N) {
+  auto cos(A)(const A angle) if (hasUnits!(A, Angle) && (isFloat!(A.raw_t) || isFixed!(A.raw_t))) {
+    return sin!N(asnum!(1, A.raw_t).as!hpi - angle.to!hpi);
+  }
 }
 
 /// Test cosine for floating-point
