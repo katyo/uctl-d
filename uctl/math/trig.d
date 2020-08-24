@@ -65,6 +65,31 @@ version(unittest) {
   mixin unittests;
 }
 
+/// Check that function is like a sine or cosine
+template isSinOrCos(alias S, A) {
+  static if (hasUnits!(A, Angle) && __traits(compiles, (A a) => S(a))) {
+    alias S2 = (A a) => S(a);
+    alias R = ReturnType!S2;
+    static if (isFixed!R) {
+      enum bool isSinOrCos = R.rmin == -1.0 && R.rmax == 1.0;
+    } else {
+      enum bool isSinOrCos = true;
+    }
+  } else {
+    enum bool isSinOrCos = false;
+  }
+}
+
+nothrow @nogc @safe unittest {
+  alias X = fix!(-5, 5);
+
+  assert(isSinOrCos!(sin!2, Val!(float, rad)));
+  assert(isSinOrCos!(sin!5, Val!(X, deg)));
+
+  assert(!isSinOrCos!(std_sin, float));
+  assert(!isSinOrCos!((Val!(X, rad) a) => a.raw, Val!(X, rad)));
+}
+
 /**
    Generic sine function using std sin
 */
