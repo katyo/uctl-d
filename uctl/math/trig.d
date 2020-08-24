@@ -8,7 +8,7 @@
    You can select best-fit function according to specific use case.
 
    $(TABLE_ROWS
-   Approximation error vs polynomial order
+   Approximation errors
    * + Polynomial order
      + Maximum error
    * + 2nd
@@ -44,11 +44,9 @@
 
    let $(MATH x = \frac{π}{2} z)
 
-   then $(MATH sin(z) = cos(z - 1))
+   then $(MATH sin(\frac{π}{2} z) = cos(\frac{π}{2} (z - 1)))
 
-   so $(MATH cos(z) = 1 - (2 - \frac{π}{4}) z^2 + (1 - \frac{π}{4}) z^4)
-
-   or $(MATH cos(z) = 1 - ((2 - \frac{π}{4}) - (1 - \frac{π}{4}) z^2) z^2)
+   $(MATH cos(\frac{π}{2} z) = 1 - (2 - \frac{π}{4}) z^2 + (1 - \frac{π}{4}) z^4 = 1 - ((2 - \frac{π}{4}) - (1 - \frac{π}{4}) z^2) z^2)
  */
 module uctl.math.trig;
 
@@ -85,13 +83,28 @@ nothrow @nogc @safe unittest {
 
   assert(isSinOrCos!(sin!2, Val!(float, rad)));
   assert(isSinOrCos!(sin!5, Val!(X, deg)));
+  assert(isSinOrCos!(sin, Val!(float, rad)));
 
   assert(!isSinOrCos!(std_sin, float));
   assert(!isSinOrCos!((Val!(X, rad) a) => a.raw, Val!(X, rad)));
+  assert(!isSinOrCos!(sin, Val!(X, deg)));
 }
 
 /**
-   Generic sine function using std sin
+   Generic sine function backed by std sin
+
+   Usage:
+   ---
+   auto angle = 1.23.as!rad;
+   auto result = sin(angle);
+   ---
+
+   Params:
+   A = Angle type (should have angle units)
+
+   Preferred angle units is `rad` other angle units will be implicitly casted to `rad`.
+
+   See_Also: [cos]
 */
 auto sin(A)(const A angle) if (hasUnits!(A, Angle) && isFloat!(A.raw_t)) {
   return std_sin(angle.to!rad.raw);
@@ -103,7 +116,20 @@ nothrow @nogc unittest {
 }
 
 /**
-   Generic cosine function using std cos
+   Generic cosine function backed by std cos
+
+   Usage:
+   ---
+   auto angle = 1.23.as!rad;
+   auto result = cos(angle);
+   ---
+
+   Params:
+   A = Angle type (should have angle units)
+
+   Preferred angle units is `rad` other angle units will be implicitly casted to `rad`.
+
+   See_Also: [sin]
 */
 auto cos(A)(const A angle) if (hasUnits!(A, Angle) && isFloat!(A.raw_t)) {
   return std_cos(angle.to!rad.raw);
@@ -119,13 +145,23 @@ template isTrigPolyOrder(uint N) {
 }
 
 /**
-   Generic sine function for ½π units using polynomial interpolation
+   Generic sine function using polynomial interpolation
 
    Usage:
    ---
-   auto result = sin!order(angle);
-   // where order can be 2, 3, 4 or 5
+   auto angle = 1.23.as!rad;
+   // directly
+   auto result = sin!N(angle);
+   // by alias
+   alias mysin = sin!N;
+   auto result = mysin(angle);
    ---
+
+   Params:
+   N = Polynomial order (can be 2, 3, 4 or 5)
+   A = Angle type (should have angle units)
+
+   Preferred angle units is `hpi` other angle units will be implicitly casted to `hpi`.
 
    See_Also: [cos]
 */
@@ -302,13 +338,23 @@ nothrow @nogc unittest {
 }
 
 /**
-   Generic cosine function for ½π units using polynomial interpolation
+   Generic cosine function using polynomial interpolation
 
    Usage:
    ---
-   auto result = cos!order(angle);
-   // where order can be 2, 3, 4 or 5
+   auto angle = 1.23.as!rad;
+   // directly
+   auto result = cos!N(angle);
+   // by alias
+   alias mycos = cos!N;
+   auto result = mycos(angle);
    ---
+
+   Params:
+   N = Polynomial order (can be 2, 3, 4 or 5)
+   A = Angle type (should have angle units)
+
+   Preferred angle units is `hpi` other angle units will be implicitly casted to `hpi`.
 
    See_Also: [sin]
 */
