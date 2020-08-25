@@ -17,6 +17,8 @@ MODULES += \
   uctl.filt.fir \
   uctl.filt.lqe \
   uctl.filt.med \
+  uctl.regul.package \
+  uctl.regul.pid \
   uctl.trans.package \
   uctl.trans.clarke \
   uctl.trans.park \
