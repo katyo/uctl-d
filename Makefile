@@ -22,6 +22,8 @@ MODULES += \
   uctl.trans.package \
   uctl.trans.clarke \
   uctl.trans.park \
+  uctl.simul.package \
+  uctl.simul.htr \
   uctl.test
 
 PLOTS += \
