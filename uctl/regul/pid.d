@@ -121,7 +121,7 @@ template isParam(X...) {
   }
 }
 
-/// Test `isParams`
+/// Test `isParam`
 nothrow @nogc unittest {
   assert(isParam!(Param!(PO, float)));
   assert(isParam!(Param!(PI, float, float, float)));
@@ -168,7 +168,14 @@ struct Param(C, P_) if (isClass!(C, PO) && isNumer!P_) {
     p = p_;
   }
 
-  /// Convert to PI parameters by adding integral factor
+  /**
+     Convert to PI parameters by adding integral factor
+
+     Params:
+     E = Integral error type
+     I = Integral factor type
+     i = Integral factor
+  */
   const pure nothrow @nogc @safe
   Param!(PI, P, I, E) with_I(E, I)(const I i) if (isNumer!(P, E, I)) {
     return Param!(PI, P, I, E)(p, i);
@@ -178,15 +185,23 @@ struct Param(C, P_) if (isClass!(C, PO) && isNumer!P_) {
      Convert to PI parameters by adding integral factor in time units
 
      Params:
+     dt = Sampling (or control step) period
+     E = Integral error type
+     I = Integral time type
      i = Integral time
-     s = Sampling (or control step) period
   */
   const pure nothrow @nogc @safe
-  Param!(PI, P, typeof(asnum!(s, I) / I()), E) with_I(real s, E, I)(const I i) if (isNumer!(P, I, E)) {
-    return with_I(asnum!(s, I) / i);
+  Param!(PI, P, typeof(I() * asnum!(dt, I)), E) with_I(real dt, E, I)(const I i) if (isNumer!(P, I, E)) {
+    return with_I!E(i * asnum!(dt, I));
   }
 
-  /// Convert to PD parameters by adding derivative factor
+  /**
+     Convert to PD parameters by adding derivative factor
+
+     Params:
+     D = Derivative factor type
+     d = Derivative factor
+  */
   const pure nothrow @nogc @safe
   Param!(PD, P, D) with_D(D)(const D d) if (isNumer!(P, D)) {
     return Param!(PD, P, D)(p, d);
@@ -196,12 +211,13 @@ struct Param(C, P_) if (isClass!(C, PO) && isNumer!P_) {
      Convert to PD parameters by adding derivative factor in time units
 
      Params:
+     dt = Sampling (or control step) period
+     D = Derivative time type
      d = Derivative time
-     s = Sampling (or control step) period
   */
   const pure nothrow @nogc @safe
-  Param!(PI, P, typeof(D() * asnum!(1.0 / s, D))) with_D(real s, D)(const D d) if (isNumer!(P, D)) {
-    return with_D(d * asnum!(1.0 / s, D));
+  Param!(PI, P, typeof(D() * asnum!(1.0 / dt, D))) with_D(real dt, D)(const D d) if (isNumer!(P, D)) {
+    return with_D(d * asnum!(1.0 / dt, D));
   }
 }
 
@@ -251,9 +267,16 @@ Param!(PO, P) mk(alias C, P)(const P p = 0.0) if (isClass!(C, PO) && isNumer!P) 
 
 /// Test Proportional regulator parameters
 nothrow @nogc unittest {
-  auto po = mk!PO(0.36);
-  assert(is(typeof(po) == Param!(PO, double)));
-  assert_eq(po.p, 0.36);
+  static immutable auto po = mk!PO(0.36f);
+  assert(is(typeof(po) == immutable Param!(PO, float)));
+  assert_eq(po.p, 0.36f);
+
+  enum auto dt = 0.1;
+
+  static immutable auto pi = po.with_I!(dt, float)(12.0f);
+  assert(is(typeof(pi) == immutable Param!(PI, float, float, float)));
+  assert_eq(pi.p, 0.36f);
+  assert_eq(pi.i, 1.2f);
 }
 
 /**
@@ -316,15 +339,21 @@ struct Param(C, P_, I_, E_) if (isClass!(C, PI) && isNumer!(P_, I_, E_)) {
      Set integral factor in time units
 
      Params:
-     it = Integral time
-     s = Sampling (or control step) period
+     dt = Sampling (or control step) period
+     i_ = Integral time
   */
   pure nothrow @nogc @safe
-  void set_I(real s)(const typeof(asnum!(s, I) / I()) it) {
-    i = cast(I) (asmum!(s, I) / it);
+  void set_I(real dt)(const typeof(I() * asnum!(1.0 / dt, I)) i_) {
+    i = cast(I) (i_ * asmum!(dt, I));
   }
 
-  /// Convert to PID parameters by adding derivative factor
+  /**
+     Convert to PID parameters by adding derivative factor
+
+     Params:
+     D = Derivative factor type
+     d = Derivative factor
+  */
   const pure nothrow @nogc @safe
   Param!(PID, P, I, D, E) with_D(D)(const D d) if (isNumer!(P, I, D, E)) {
     return Param!(PID, P, I, D, E)(p, i, d);
@@ -334,12 +363,13 @@ struct Param(C, P_, I_, E_) if (isClass!(C, PI) && isNumer!(P_, I_, E_)) {
      Convert to PID parameters by adding derivative factor in time units
 
      Params:
+     dt = Sampling (or control step) period
+     D = Derivative time type
      d = Derivative time
-     s = Sampling (or control step) period
   */
   const pure nothrow @nogc @safe
-  Param!(PID, P, I, typeof(D() * asnum!(1.0 / s, D)), E) with_D(real s, D)(const D d) if (isNumer!(P, I, D, E)) {
-    return with_D(d * asnum!(1.0 / s, D));
+  Param!(PID, P, I, typeof(D() * asnum!(1.0 / dt, D)), E) with_D(real dt, D)(const D d) if (isNumer!(P, I, D, E)) {
+    return with_D(d * asnum!(1.0 / dt, D));
   }
 }
 
@@ -356,13 +386,13 @@ nothrow @nogc unittest {
   assert_eq(pid.i, 0.18);
   assert_eq(pid.d, 0.38);
 
-  enum auto S = 0.125;
+  enum auto dt = 0.125;
 
-  auto pid2 = pi.with_D!S(0.25);
+  auto pid2 = pi.with_D!dt(0.25);
   assert(is(typeof(pid2) == Param!(PID, double, double, double, double)));
   assert_eq(pid2.d, 2.0);
 
-  pid2.set_D!S(0.5);
+  pid2.set_D!dt(0.5);
   assert_eq(pid2.d, 4.0);
 }
 
@@ -384,14 +414,14 @@ nothrow @nogc unittest {
   assert_eq(pid.i, I(0.18));
   assert_eq(pid.d, D(0.38));
 
-  enum auto S = 0.125;
-  alias Dt = fix!(0, 0.125);
+  enum auto dt = 0.125;
+  alias D_ = fix!(0, 0.125);
 
-  auto pid2 = pi.with_D!S(Dt(0.0625));
+  auto pid2 = pi.with_D!dt(D_(0.0625));
   assert(is(typeof(pid2) == Param!(PID, P, I, D, E)));
   assert_eq(pid2.d, D(0.5));
 
-  pid2.set_D!S(Dt(0.03125));
+  pid2.set_D!dt(D_(0.03125));
   assert_eq(pid2.d, D(0.25));
 }
 
@@ -447,15 +477,22 @@ struct Param(C, P_, D_) if (isClass!(C, PD) && isNumer!(P_, D_)) {
      Set derivative factor in time units
 
      Params:
-     dt = Derivative time
-     s = Sampling (or control step) period
+     dt = Sampling (or control step) period
+     d_ = Derivative time
   */
   pure nothrow @nogc @safe
-  void set_D(real s)(const typeof(D() * asnum!(s, D)) dt) {
-    d = cast(D) (dt * asnum!(1.0 / s, D));
+  void set_D(real dt)(const typeof(D() * asnum!(dt, D)) d_) {
+    d = cast(D) (d_ * asnum!(1.0 / dt, D));
   }
 
-  /// Convert to PID parameters by adding integral factor
+  /**
+     Convert to PID parameters by adding integral factor
+
+     Params:
+     E = Integral error type
+     I = Integral factor type
+     i = Integral factor
+  */
   const pure nothrow @nogc @safe
   Param!(PID, P, I, D, E) with_I(E, I)(const I i) if (isNumer!(P, I, D, E)) {
     return Param!(PID, P, I, D, E)(p, i, d);
@@ -465,12 +502,14 @@ struct Param(C, P_, D_) if (isClass!(C, PD) && isNumer!(P_, D_)) {
      Convert to PID parameters by adding integral factor in time units
 
      Params:
+     dt = Sampling (or control step) period
+     E = Integral error type
+     I = Integral factor type
      i = Integral time
-     s = Sampling (or control step) period
   */
   const pure nothrow @nogc @safe
-  Param!(PID, P, typeof(asnum!(s, I) / I()), D, E) with_I(real s, E, I)(const I i) if (isNumer!(P, I, D, E)) {
-    return with_I!E(asnum!(s, I) / i);
+  Param!(PID, P, typeof(I() * asnum!(dt, I)), D, E) with_I(real dt, E, I)(const I i) if (isNumer!(P, I, D, E)) {
+    return with_I!E(i * asnum!(dt, I));
   }
 }
 
@@ -487,20 +526,20 @@ nothrow @nogc unittest {
   assert_eq(pid.i, 0.14);
   assert_eq(pid.d, 0.42);
 
-  enum auto S = 0.125;
+  enum auto dt = 0.125;
 
-  auto pid2 = pd.with_I!(S, double)(2.0);
+  auto pid2 = pd.with_I!(dt, double)(0.5);
   assert(is(typeof(pid2) == Param!(PID, double, double, double, double)));
   assert_eq(pid2.i, 0.0625);
 
-  pid2.set_I!S(0.5);
-  assert_eq(pid2.i, 0.25);
+  pid2.set_I!dt(0.25);
+  assert_eq(pid2.i, 0.03125);
 }
 
 /// Test Proportional Derivative regulator parameters (fixed-point)
 nothrow @nogc unittest {
   alias P = fix!(-1, 1);
-  alias I = fix!(0.03125, 1);
+  alias I = fix!(0, 1);
   alias D = fix!(0, 1);
   alias E = fix!(-10, 10);
 
@@ -512,18 +551,18 @@ nothrow @nogc unittest {
   auto pid = pd.with_I!E(I(0.14));
   assert(is(typeof(pid) == Param!(PID, P, I, D, E)));
   assert_eq(pid.p, P(0.24));
-  assert_eq(pid.i, D(0.14));
-  assert_eq(pid.d, I(0.42));
+  assert_eq(pid.i, I(0.14));
+  assert_eq(pid.d, D(0.42));
 
-  enum auto S = 0.125;
-  alias It = fix!(0.125, 4.0);
+  enum auto dt = 0.125;
+  alias I_ = fix!(0.0, 8.0);
 
-  auto pid2 = pd.with_I!(S, E)(It(2.0));
+  auto pid2 = pd.with_I!(dt, E)(I_(0.5));
   assert(is(typeof(pid2) == Param!(PID, P, I, D, E)));
   assert_eq(pid2.i, I(0.0625));
 
-  pid2.set_I!S(It(0.5));
-  assert_eq(pid2.i, I(0.25));
+  pid2.set_I!dt(I_(0.25));
+  assert_eq(pid2.i, I(0.03125));
 }
 
 /// Create Proportional Derivative regulator parameters
@@ -597,24 +636,24 @@ struct Param(C, P_, I_, D_, E_) if (isClass!(C, PID) && isNumer!(P_, I_, D_, E_)
      Set integral factor in time units
 
      Params:
-     it = Integral time
-     s = Sampling (or control step) period
+     dt = Sampling (or control step) period
+     i_ = Integral time
   */
   pure nothrow @nogc @safe
-  void set_I(real s)(const typeof(asnum!(s, I) / I()) it) {
-    i = cast(I) (asnum!(s, I) / it);
+  void set_I(real dt)(const typeof(I() * asnum!(1.0 / dt, I)) i_) {
+    i = cast(I) (i_ * asnum!(dt, I));
   }
 
   /**
      Set derivative factor in time units
 
      Params:
-     dt = Derivative time
-     s = Sampling (or control step) period
+     dt = Sampling (or control step) period
+     d_ = Derivative time
   */
   pure nothrow @nogc @safe
-  void set_D(real s)(const typeof(D() * asnum!(s, D)) dt) {
-    d = cast(D) (dt * asnum!(1.0 / s, D));
+  void set_D(real dt)(const typeof(D() * asnum!(dt, D)) d_) {
+    d = cast(D) (d_ * asnum!(1.0 / dt, D));
   }
 }
 
@@ -626,12 +665,12 @@ nothrow @nogc unittest {
   assert_eq(pid.i, 0.25);
   assert_eq(pid.d, 0.11);
 
-  enum auto S = 0.125;
+  enum auto dt = 0.125;
 
-  pid.set_I!S(2.0);
+  pid.set_I!dt(0.5);
   assert_eq(pid.i, 0.0625);
 
-  pid.set_D!S(0.25);
+  pid.set_D!dt(0.25);
   assert_eq(pid.d, 2.0);
 }
 
