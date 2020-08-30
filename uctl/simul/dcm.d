@@ -57,6 +57,8 @@
    Motor identification:
 
    $(MATH \Psi_s = \frac{U_r - R_r i_r}{\omega_r})
+
+   ![Simulation example](sim_dcm.svg)
  */
 module uctl.simul.dcm;
 

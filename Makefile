@@ -30,7 +30,8 @@ MODULES += \
 PLOTS += \
   trig_errs \
   win_funcs \
-  sim_pid_htr
+  sim_pid_htr \
+  sim_dcm
 
 #DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundDown
