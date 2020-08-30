@@ -24,6 +24,7 @@ MODULES += \
   uctl.trans.park \
   uctl.simul.package \
   uctl.simul.htr \
+  uctl.simul.dcm \
   uctl.test
 
 PLOTS += \
