@@ -29,6 +29,7 @@ MODULES += \
 PLOTS += \
   trig_errs \
   win_funcs \
+  sim_pid_htr
 
 #DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundDown

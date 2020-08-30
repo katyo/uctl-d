@@ -5,6 +5,8 @@
 
    The Proportional (P), Proportional Integral (PI) and Proportional Derivative (PD) variants are also supported.
 
+   ![PID Control of heater block vs contant power](sim_pid_htr.svg)
+
    See_Also:
    [PID controller](https://en.wikipedia.org/wiki/PID_controller) wikipedia article.
  */
