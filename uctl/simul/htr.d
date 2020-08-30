@@ -146,6 +146,15 @@ struct Param(C_, M_, R_, T_, D_) if (isNumer!(C_, M_, R_, T_, D_)) {
   }
 }
 
+/// Check for parameters
+template isParam(X...) if (X.length == 1) {
+  static if (is(X[0])) {
+    enum bool isParam = isInstanceOf!(Param, X[0]);
+  } else {
+    enum bool isParam = isParam!(typeof(X[0]));
+  }
+}
+
 /// Create heater parameters
 pure nothrow @nogc @safe
 Param!(C, M, R, T, D) mk(alias P, C, M, R, T, D)(C C_, M m_, R R_, T Ta, D dt) if (isNumer!(C, M, R, T, D) && __traits(isSame, P, Param)) {
@@ -173,8 +182,12 @@ nothrow @nogc unittest {
 /**
    Heater model state
  */
-struct State(P_, T_) if (isInstanceOf!(Param, P_) && isNumer!(P_.T, T_)) {
-  alias P = P_;
+struct State(alias P_, T_) if (isParam!P_ && isNumer!(P_.T, T_)) {
+  static if (is(P_)) {
+    alias P = P_;
+  } else {
+    alias P = typeof(P_);
+  }
   alias T = T_;
 
   /// Current temperature of heating block
@@ -207,7 +220,7 @@ nothrow @nogc unittest {
   alias T = fix!(-30, 400);
 
   static immutable auto p = mk!Param(asfix!990.0, asfix!6.75e-3, asfix!8.4, asfix!25.0, asfix!0.1);
-  static auto s = State!(typeof(p), T)(T(22.5));
+  static auto s = State!(p, T)(T(22.5));
 
   assert_eq(s.apply(p, asfix!40.0), T(23.10195947));
   assert_eq(s.apply(p, asfix!40.0), T(23.70284843));

@@ -696,7 +696,15 @@ nothrow @nogc unittest {
 }
 
 /// The state of regulator
-struct State(alias P, E_) if (isParam!P && isNumer!(P.P, E_)) {
+struct State(alias P_, E_) if (isParam!P_ && isNumer!(P_.P, E_)) {
+  static if (is(P_)) {
+    /// Parameters type
+    alias P = P_;
+  } else {
+    /// Parameters type
+    alias P = typeof(P_);
+  }
+
   /// Class of regulator
   alias C = P.Class;
 
@@ -786,7 +794,7 @@ struct State(alias P, E_) if (isParam!P && isNumer!(P.P, E_)) {
 /// Test Proportional regulator
 nothrow @nogc unittest {
   static immutable auto p = mk!PO(0.125);
-  static auto s = State!(typeof(p), double)();
+  static auto s = State!(p, double)();
 
   assert_eq(s.apply(p, 1.0), 0.125);
   assert_eq(s.apply(p, 1.0), 0.125);
@@ -801,7 +809,7 @@ nothrow @nogc unittest {
   alias R = fix!(-10, 10);
 
   static immutable auto p = mk!PO(P(0.125));
-  static auto s = State!(typeof(p), T)();
+  static auto s = State!(p, T)();
 
   assert_eq(s.apply(p, T(1.0)), R(0.125));
   assert_eq(s.apply(p, T(1.0)), R(0.125));
