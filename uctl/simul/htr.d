@@ -78,7 +78,9 @@
    Because $(MATH \frac{C m R}{dt + C m R} < 1)
    so $(MATH T_d \frac{C m R}{dt + C m R} \rightarrow 0)
    and then $(MATH \dot{T} \rightarrow T_a)
- */
+
+   ![Hotend simulation example](sim_htr.svg)
+*/
 module uctl.simul.htr;
 
 import std.traits: isInstanceOf;
