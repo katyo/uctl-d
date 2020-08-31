@@ -22,12 +22,14 @@ I = data(:,5);
 
 subplot(6,1,1);
 plot(t, U);
+set(gca, 'ytick', 0:5:15);
 ##xlabel("t, S");
 ylabel("U, V");
 ##title("Supply voltage");
 
 subplot(6,1,2);
 plot(t, T);
+set(gca, 'ytick', 0:0.05:0.2);
 ##xlabel("t, S");
 ylabel("T, Nm");
 ##title("Load torque");
