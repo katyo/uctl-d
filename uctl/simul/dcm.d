@@ -102,6 +102,7 @@ struct Param(real dt_, R_, L_, F_, J_) if (isNumer!(R_, L_, F_, J_)) {
   alias F = F_;
   alias J = J_;
 
+  enum auto rdt = dt_;
   enum auto dt = asnum!(dt_, R);
 
   alias DtInvL = typeof(dt / L());

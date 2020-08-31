@@ -96,19 +96,20 @@ version(unittest) {
 /**
    Heater parameters
  */
-struct Param(C_, M_, R_, T_, D_) if (isNumer!(C_, M_, R_, T_, D_)) {
+struct Param(real dt_, C_, M_, R_) if (isNumer!(C_, M_, R_)) {
   alias C = C_;
   alias M = M_;
   alias R = R_;
-  alias T = T_;
-  alias D = D_;
+
+  enum rdt = dt_;
+  enum dt = asnum!(dt_, C);
 
   alias CmR = typeof(C() * M() * R());
-  alias InvCmRdt = typeof(asnum!(1, T) / (CmR() + D()));
+  alias InvCmRdt = typeof(asnum!(1, C) / (CmR() + dt));
 
-  alias PA = typeof(T() * D() * InvCmRdt());
+  alias PA = typeof(dt * InvCmRdt());
   alias PB = typeof(CmR() * InvCmRdt());
-  alias PC = typeof(R() * D() * InvCmRdt());
+  alias PC = typeof(R() * dt * InvCmRdt());
 
   /// Term `a` value
   PA a;
@@ -121,26 +122,25 @@ struct Param(C_, M_, R_, T_, D_) if (isNumer!(C_, M_, R_, T_, D_)) {
      Initialize heater parameters
 
      Params:
+     dt_ = Simulation step period
      C_ = Thermal capacity of heating block
      m_ = Mass of heating block
      R_ = Thermal resistance of heating block
-     Ta = Ambient temperature
-     dt = Simulation step period
 
      Example (typical FDM-printer aluminium hotend):
      ```
      import uctl.simul.htr;
 
-     static immutable auto p = mk!Param(990.0, 6.75e-3, 8.4, 25.0, 0.1);
+     static immutable auto p = mk!(Param, 0.1)(990.0, 6.75e-3, 8.4);
      ```
    */
   const pure nothrow @nogc @safe
-  this(C C_, M m_, R R_, T Ta, D dt) {
+  this(C C_, M m_, R R_) {
     auto CmR = C_ * m_ * R_;
-    auto inv_CmR_dt = asnum!(1, T) / (dt + CmR);
+    auto inv_CmR_dt = asnum!(1, C) / (dt + CmR);
 
-    // A = Ta * dt / (dt + CmR)
-    a = Ta * dt * inv_CmR_dt;
+    // A = dt / (dt + CmR)
+    a = dt * inv_CmR_dt;
     // B = CmR / (dt + CmR)
     b = CmR * inv_CmR_dt;
     // C = R * dt / (dt + CmR)
@@ -159,32 +159,34 @@ template isParam(X...) if (X.length == 1) {
 
 /// Create heater parameters
 pure nothrow @nogc @safe
-Param!(C, M, R, T, D) mk(alias P, C, M, R, T, D)(C C_, M m_, R R_, T Ta, D dt) if (isNumer!(C, M, R, T, D) && __traits(isSame, P, Param)) {
-  return Param!(C, M, R, T, D)(C_, m_, R_, Ta, dt);
+Param!(dt, C, M, R) mk(alias P, real dt, C, M, R)(C C_, M m_, R R_) if (isNumer!(C, M, R) && __traits(isSame, P, Param)) {
+  return Param!(dt, C, M, R)(C_, m_, R_);
 }
 
 /// Test heater parameters (floating-point)
 nothrow @nogc unittest {
-  static immutable auto p = mk!Param(990.0, 6.75e-3, 8.4, 25.0, 0.1);
+  enum auto dt = 0.1;
+  static immutable auto p = mk!(Param, dt)(990.0, 6.75e-3, 8.4);
 
-  assert_eq(p.a, 0.04445788058, 1e-10);
+  assert_eq(p.a, 0.001778315223, 1e-10);
   assert_eq(p.b, 0.9982216838, 1e-9);
   assert_eq(p.c, 0.01493784787, 1e-10);
 }
 
 /// Test heater parameters (fixed-point)
 nothrow @nogc unittest {
-  static immutable auto p = mk!Param(asfix!990.0, asfix!6.75e-3, asfix!8.4, asfix!25.0, asfix!0.1);
+  enum auto dt = 0.1;
+  static immutable auto p = mk!(Param, dt)(asfix!990.0, asfix!6.75e-3, asfix!8.4);
 
-  assert_eq(p.a, asfix!0.04445788058, fix!(0.04445788058)(1e-10));
-  assert_eq(p.b, asfix!0.9982216838, fix!(0.9982216838)(1e-10));
-  assert_eq(p.c, asfix!0.01493784787, fix!(0.01493784787)(1e-10));
+  assert_eq(p.a, asfix!0.001778315223);
+  assert_eq(p.b, asfix!0.9982216838);
+  assert_eq(p.c, asfix!0.014937847875);
 }
 
 /**
    Heater model state
  */
-struct State(alias P_, T_) if (isParam!P_ && isNumer!(P_.T, T_)) {
+struct State(alias P_, T_) if (isParam!P_ && isNumer!(P_.C, T_)) {
   static if (is(P_)) {
     alias P = P_;
   } else {
@@ -200,31 +202,41 @@ struct State(alias P_, T_) if (isParam!P_ && isNumer!(P_.T, T_)) {
     temp = t0;
   }
 
-  // Evaluate simulation step
+  /**
+     Evaluate simulation step
+
+     Params:
+     W = Applied power type
+     power = Applied power
+     env_temp = Ambient temperature
+  */
   pure nothrow @nogc @safe
-  T apply(W)(const ref P param, const W power) {
-    return temp = cast(T) (param.a + param.b * temp + param.c * power);
+  T apply(W)(const ref P param, const W power, const T env_temp) {
+    return temp = cast(T) (param.a * env_temp + param.b * temp + param.c * power);
   }
 }
 
 /// Test heater simulation (floating-point)
 nothrow @nogc unittest {
-  static immutable auto p = mk!Param(990.0, 6.75e-3, 8.4, 25.0, 0.1);
+  enum auto dt = 0.1;
+
+  static immutable auto p = mk!(Param, dt)(990.0, 6.75e-3, 8.4);
   static auto s = State!(typeof(p), double)(22.5);
 
-  assert_eq(s.apply(p, 40.0), 23.10195947, 1e-6);
-  assert_eq(s.apply(p, 40.0), 23.70284843, 1e-6);
-  assert_eq(s.apply(p, 30.0), 24.15329027, 1e-6);
+  assert_eq(s.apply(p, 40.0, 25.0), 23.10195947, 1e-6);
+  assert_eq(s.apply(p, 40.0, 25.0), 23.70284843, 1e-6);
+  assert_eq(s.apply(p, 30.0, 25.0), 24.15329027, 1e-6);
 }
 
 /// Test heater simulation (fixed-point)
 nothrow @nogc unittest {
   alias T = fix!(-30, 400);
+  enum auto dt = 0.1;
 
-  static immutable auto p = mk!Param(asfix!990.0, asfix!6.75e-3, asfix!8.4, asfix!25.0, asfix!0.1);
+  static immutable auto p = mk!(Param, dt)(asfix!990.0, asfix!6.75e-3, asfix!8.4);
   static auto s = State!(p, T)(T(22.5));
 
-  assert_eq(s.apply(p, asfix!40.0), T(23.10195947));
-  assert_eq(s.apply(p, asfix!40.0), T(23.70284843));
-  assert_eq(s.apply(p, asfix!30.0), T(24.15329027));
+  assert_eq(s.apply(p, asfix!40.0, T(25.0)), T(23.10195947));
+  assert_eq(s.apply(p, asfix!40.0, T(25.0)), T(23.70284843));
+  assert_eq(s.apply(p, asfix!30.0, T(25.0)), T(24.15329027));
 }
