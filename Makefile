@@ -25,6 +25,7 @@ MODULES += \
   uctl.simul.package \
   uctl.simul.htr \
   uctl.simul.dcm \
+  uctl.simul.thr \
   uctl.test
 
 PLOTS += \
