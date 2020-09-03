@@ -23,7 +23,7 @@ version(unittest) {
 
    See_Also: [log], [log10].
 */
-auto log2(T)(T x) if (isNumer!T) {
+auto log2(T)(const T x) if (isNumer!T) {
   static if (isFixed!T) {
     static assert(T.rmin > 0, "Logarithm is negative infinity for values which can be zero. Argument has type " ~ T.stringof);
 
@@ -77,15 +77,16 @@ auto log2(T)(T x) if (isNumer!T) {
       return -T.infinity;
     }
 
+    T x1 = x;
     T y = 0;
 
-    while (x < 1) {
-      x *= 2;
+    while (x1 < 1) {
+      x1 *= 2;
       y -= 1;
     }
 
-    while (x >= 2) {
-      x /= 2;
+    while (x1 >= 2) {
+      x1 /= 2;
       y += 1;
     }
 
@@ -98,9 +99,9 @@ auto log2(T)(T x) if (isNumer!T) {
     }
 
     foreach (i; 0 .. prec) {
-      x = x * x;
-      if (x >= 2) {
-        x /= 2;
+      x1 = x1 * x1;
+      if (x1 >= 2) {
+        x1 /= 2;
         y += b;
       }
       b /= 2;
@@ -165,7 +166,7 @@ nothrow @nogc unittest {
 
    See_Also: [log2], [log10].
 */
-auto log(T)(T x) if (isNumer!T) {
+auto log(T)(const T x) if (isNumer!T) {
   enum auto inv_log2_e = asnum!(1.0 / LOG2E, T);
 
   return log2(x) * inv_log2_e;
@@ -176,7 +177,7 @@ auto log(T)(T x) if (isNumer!T) {
 
    See_Also: [log2], [log].
 */
-auto log10(T)(T x) if (isNumer!T) {
+auto log10(T)(const T x) if (isNumer!T) {
   enum auto inv_log2_10 = asnum!(1.0 / LOG2T, T);
 
   return log2(x) * inv_log2_10;
