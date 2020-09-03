@@ -32,7 +32,8 @@ PLOTS += \
   win_funcs \
   sim_htr \
   sim_pid_htr \
-  sim_dcm
+  sim_dcm \
+  thr_fit
 
 #DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundDown
