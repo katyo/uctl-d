@@ -89,7 +89,7 @@ import uctl.math.log: log;
 version(unittest) {
   import uctl.test: assert_eq, unittests;
   import uctl.num: asfix, fix;
-  import uctl.unit: to, as, Celsius, Kelvin;
+  import uctl.unit: as, degC;
 
   mixin unittests;
 }
@@ -176,9 +176,9 @@ nothrow @nogc unittest {
   // a = -0.00400110693, b = 0.00077306258, c = -0.00000099773
   static immutable ntc100k = mk!(calcT!SteinhartHart)(-0.00400110693, 0.00077306258, -0.00000099773);
 
-  assert_eq(ntc100k.t(100e3), 23.0094033.as!Celsius.to!Kelvin.raw, 1e-5);
-  assert_eq(ntc100k.t(24e3), 87.5718161.as!Celsius.to!Kelvin.raw, 1e-6);
-  assert_eq(ntc100k.t(82e3), 29.8317295.as!Celsius.to!Kelvin.raw, 1e-6);
+  assert_eq(ntc100k.t(100e3), 23.0094033.as!degC.to!degK.raw, 1e-5);
+  assert_eq(ntc100k.t(24e3), 87.5718161.as!degC.to!degK.raw, 1e-6);
+  assert_eq(ntc100k.t(82e3), 29.8317295.as!degC.to!degK.raw, 1e-6);
 }
 
 /// Test NTC 100K thermistor (fixed-point)
@@ -189,9 +189,9 @@ nothrow @nogc unittest {
   alias R = fix!(15e3, 150e3);
   alias T = fix!(230, 580);
 
-  assert_eq(ntc100k.t(R(100e3)), T(23.0094033.as!Celsius.to!Kelvin.raw));
-  assert_eq(ntc100k.t(R(24e3)), T(87.5718161.as!Celsius.to!Kelvin.raw));
-  assert_eq(ntc100k.t(R(82e3)), T(29.8317295.as!Celsius.to!Kelvin.raw));
+  assert_eq(ntc100k.t(R(100e3)), T(23.0094033.as!degC.to!degK.raw));
+  assert_eq(ntc100k.t(R(24e3)), T(87.5718161.as!degC.to!degK.raw));
+  assert_eq(ntc100k.t(R(82e3)), T(29.8317295.as!degC.to!degK.raw));
 }
 
 /// Thermistor parameters for simplified β-model
@@ -256,21 +256,21 @@ Param!(M, R, T, B) mk(alias M, R, T, B)(const R r0, const T t0, const B beta) if
 /// Test NTC 100K thermistor (floating-point)
 nothrow @nogc unittest {
   // R0 = 100KΩ, T0 = 25°C, β = 3950
-  static immutable ntc100k = mk!(calcT!Beta)(100e3f, 25f.as!Celsius.to!Kelvin.raw, 3950f);
+  static immutable ntc100k = mk!(calcT!Beta)(100e3f, 25f.as!degC.to!degK.raw, 3950f);
 
   assert_eq(ntc100k.inv_r0, 9.999999996e-6f);
   assert_eq(ntc100k.inv_t0, 0.003354016433f);
   assert_eq(ntc100k.inv_beta, 0.0002531645569f);
 
-  assert_eq(ntc100k.t(100e3f), 25.0f.as!Celsius.to!Kelvin.raw);
-  assert_eq(ntc100k.t(24e3f), 60.9940613f.as!Celsius.to!Kelvin.raw);
-  assert_eq(ntc100k.t(82e3f), 29.5339876f.as!Celsius.to!Kelvin.raw);
+  assert_eq(ntc100k.t(100e3f), 25.0f.as!degC.to!degK.raw);
+  assert_eq(ntc100k.t(24e3f), 60.9940613f.as!degC.to!degK.raw);
+  assert_eq(ntc100k.t(82e3f), 29.5339876f.as!degC.to!degK.raw);
 }
 
 /// Test NTC 100K thermistor (fixed-point)
 nothrow @nogc unittest {
   // R0 = 100KΩ, T0 = 25°C, β = 3950
-  static immutable ntc100k = mk!(calcT!Beta)(asfix!100e3, asfix!25.as!Celsius.to!Kelvin.raw, asfix!3950);
+  static immutable ntc100k = mk!(calcT!Beta)(asfix!100e3, asfix!25.as!degC.to!degK.raw, asfix!3950);
 
   assert_eq(ntc100k.inv_r0, asfix!9.999999996e-6);
   assert_eq(ntc100k.inv_t0, asfix!0.003354016433);
@@ -279,9 +279,9 @@ nothrow @nogc unittest {
   alias R = fix!(15e3, 150e3);
   alias T = fix!(290, 350);
 
-  assert_eq(ntc100k.t(R(100e3)), T(25.0.as!Celsius.to!Kelvin.raw));
-  assert_eq(ntc100k.t(R(24e3)), T(60.9940613.as!Celsius.to!Kelvin.raw));
-  assert_eq(ntc100k.t(R(82e3)), T(29.5339876.as!Celsius.to!Kelvin.raw));
+  assert_eq(ntc100k.t(R(100e3)), T(25.0.as!degC.to!degK.raw));
+  assert_eq(ntc100k.t(R(24e3)), T(60.9940613.as!degC.to!degK.raw));
+  assert_eq(ntc100k.t(R(82e3)), T(29.5339876.as!degC.to!degK.raw));
 }
 
 /// Create parameters for simplified β-model of thermistor using two points $(MATH [R_x, T_x])
@@ -298,21 +298,21 @@ template mk(alias M, R0, T0, R1, T1) if (isModel!(M, Beta) && isNumer!(R0, T0, R
 /// Test NTC 100K thermistor (floating-point)
 nothrow @nogc unittest {
   // Points: [100KΩ, 25°C], [24KΩ, 61°C]
-  static immutable ntc100k = mk!(calcT!Beta)(100e3f, 25f.as!Celsius.to!Kelvin.raw, 24e3f, 61f.as!Celsius.to!Kelvin.raw);
+  static immutable ntc100k = mk!(calcT!Beta)(100e3f, 25f.as!degC.to!degK.raw, 24e3f, 61f.as!degC.to!degK.raw);
 
   assert_eq(ntc100k.inv_r0, 1e-5f);
   assert_eq(ntc100k.inv_t0, 0.00335402, 1e-6);
   assert_eq(ntc100k.inv_beta, 0.000253202, 1e-6);
 
-  assert_eq(ntc100k.t(100e3f), 25f.as!Celsius.to!Kelvin.raw);
-  assert_eq(ntc100k.t(24e3f), 61f.as!Celsius.to!Kelvin.raw);
-  //assert_eq(ntc100k.t(82e3), 29.3844505.as!Celsius.to!Kelvin.raw);
+  assert_eq(ntc100k.t(100e3f), 25f.as!degC.to!degK.raw);
+  assert_eq(ntc100k.t(24e3f), 61f.as!degC.to!degK.raw);
+  //assert_eq(ntc100k.t(82e3), 29.3844505.as!degC.to!degK.raw);
 }
 
 /// Test NTC 100K thermistor (fixed-point)
 nothrow @nogc unittest {
   // Points: [100KΩ, 24°C], [24KΩ, 80°C]
-  static immutable ntc100k = mk!(calcT!Beta)(asfix!100e3, asfix!(25.as!Celsius.to!Kelvin.raw), asfix!24e3, asfix!(61.as!Celsius.to!Kelvin.raw));
+  static immutable ntc100k = mk!(calcT!Beta)(asfix!100e3, asfix!(25.as!degC.to!degK.raw), asfix!24e3, asfix!(61.as!degC.to!degK.raw));
 
   assert_eq(ntc100k.inv_r0, asfix!9.999999996e-6);
   assert_eq(ntc100k.inv_t0, asfix!0.003355704697);
@@ -321,7 +321,7 @@ nothrow @nogc unittest {
   alias R = fix!(15e3, 150e3);
   alias T = fix!(290, 350);
 
-  assert_eq(ntc100k.t(R(100e3)), T(25.as!Celsius.to!Kelvin.raw));
-  assert_eq(ntc100k.t(R(24e3)), T(61.as!Celsius.to!Kelvin.raw));
-  assert_eq(ntc100k.t(R(82e3)), T(29.3844505.as!Celsius.to!Kelvin.raw));
+  assert_eq(ntc100k.t(R(100e3)), T(25.as!degC.to!degK.raw));
+  assert_eq(ntc100k.t(R(24e3)), T(61.as!degC.to!degK.raw));
+  assert_eq(ntc100k.t(R(82e3)), T(29.3844505.as!degC.to!degK.raw));
 }

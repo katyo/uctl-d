@@ -301,9 +301,9 @@ alias nJ = Units!("Nano Joule", Energy, 1e-9);
 alias KJ = Units!("Kilo Joule", Energy, 1e3);
 alias MJ = Units!("Mega Joule", Energy, 1e6);
 
-alias Kelvin = Units!("Kelvin", Temperature);
-alias Celsius = Units!("Celsius", Temperature, 1.0, 273.15);
-alias Fahrenheit = Units!("Fahrenheit", Temperature, 5.0/9.0, 459.67);
+alias degK = Units!("Kelvin", Temperature);
+alias degC = Units!("Celsius", Temperature, 1.0, 273.15);
+alias degF = Units!("Fahrenheit", Temperature, 5.0/9.0, 459.67);
 
 alias sec = Units!("Second", Time);
 alias msec = Units!("Milli Second", Time, 1e-3);
