@@ -339,11 +339,11 @@ template fmtOf(X...) if (X.length == 1) {
       } else {
         static assert(false, "Unsupported formatting of integer type: " ~ T.stringof);
       }
-        enum string fmtOf = "%f";
-        enum string fmtOf = "%g";
     } else static if (isFloat!(T)) {
       static if (is(T == float)) {
+        enum string fmtOf = "%0.9f";
       } else static if (is(T == double)) {
+        enum string fmtOf = "%0.18g";
       } else {
         static assert(false, "Unsupported formatting of floating-point type: " ~ T.stringof);
       }
@@ -363,8 +363,8 @@ nothrow @nogc @safe unittest {
   assert(fmtOf!int == "%d");
   assert(fmtOf!ulong == "%llu");
   assert(fmtOf!long == "%lld");
-  assert(fmtOf!float == "%f");
-  assert(fmtOf!double == "%g");
+  assert(fmtOf!float == "%0.9f");
+  assert(fmtOf!double == "%0.18g");
 
   short a;
   assert(fmtOf!a == "%hd");
