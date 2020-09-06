@@ -155,6 +155,39 @@ nothrow @nogc @safe unittest {
   assert(!hasUnits!(12.as!rad, Length));
 }
 
+/// Get raw value type
+template rawTypeOf(X...) if (X.length == 1) {
+  static if (is(X[0])) {
+    static if (hasUnits!(X[0])) {
+      alias rawTypeOf = X[0].raw_t;
+    } else {
+      alias rawTypeOf = X[0];
+    }
+  } else {
+    alias rawTypeOf = rawTypeOf!(typeof(X[0]));
+  }
+}
+
+/// Test `rawTypeOf`
+nothrow @nogc @safe unittest {
+  assert(is(rawTypeOf!int == int));
+  assert(is(rawTypeOf!(Val!(int, mm)) == int));
+  assert(is(rawTypeOf!1 == int));
+  assert(is(rawTypeOf!(1.as!mm) == int));
+
+  assert(is(rawTypeOf!(float) == float));
+  assert(is(rawTypeOf!(Val!(float, mm)) == float));
+  assert(is(rawTypeOf!1f == float));
+  assert(is(rawTypeOf!(1f.as!mm) == float));
+
+  alias X = fix!(0, 10);
+
+  assert(is(rawTypeOf!(X) == X));
+  assert(is(rawTypeOf!(Val!(X, mm)) == X));
+  assert(is(rawTypeOf!(X(1)) == X));
+  assert(is(rawTypeOf!(X(1).as!mm) == X));
+}
+
 /// Add measurement units to raw value
 pure nothrow @nogc @safe
 Val!(T, U) as(U, T)(T val) if (is(T) && isNumer!T && is(U) && isUnits!U) {
