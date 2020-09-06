@@ -317,33 +317,35 @@ nothrow @nogc unittest {
  */
 template fmtOf(X...) if (X.length == 1) {
   static if (is(X[0])) {
-    static if (isInt!(X[0])) {
-      static if (is(X[0] == ubyte)) {
+    alias T = Unqual!(X[0]);
+
+    static if (isInt!(T)) {
+      static if (is(T == ubyte)) {
         enum string fmtOf = cast(string) "%hhu";
-      } else static if (is(X[0] == byte)) {
+      } else static if (is(T == byte)) {
         enum string fmtOf = cast(string) "%hhd";
-      } else static if (is(X[0] == ushort)) {
+      } else static if (is(T == ushort)) {
         enum string fmtOf = cast(string) "%hu";
-      } else static if (is(X[0] == short)) {
+      } else static if (is(T == short)) {
         enum string fmtOf = cast(string) "%hd";
-      } else static if (is(X[0] == uint)) {
+      } else static if (is(T == uint)) {
         enum string fmtOf = cast(string) "%u";
-      } else static if (is(X[0] == int)) {
+      } else static if (is(T == int)) {
         enum string fmtOf = cast(string) "%d";
-      } else static if (is(X[0] == ulong)) {
+      } else static if (is(T == ulong)) {
         enum string fmtOf = cast(string) "%llu";
-      } else static if (is(X[0] == long)) {
+      } else static if (is(T == long)) {
         enum string fmtOf = cast(string) "%lld";
       } else {
-        static assert(false, "Unsupported formatting of integer type: " ~ X[0].stringof);
+        static assert(false, "Unsupported formatting of integer type: " ~ T.stringof);
       }
-    } else static if (isFloat!(X[0])) {
-      static if (is(X[0] == float)) {
         enum string fmtOf = "%f";
-      } else static if (is(X[0] == double)) {
         enum string fmtOf = "%g";
+    } else static if (isFloat!(T)) {
+      static if (is(T == float)) {
+      } else static if (is(T == double)) {
       } else {
-        static assert(false, "Unsupported formatting of floating-point type: " ~ X[0].stringof);
+        static assert(false, "Unsupported formatting of floating-point type: " ~ T.stringof);
       }
     }
   } else {
