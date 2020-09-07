@@ -332,8 +332,8 @@ alias pH = Units!("Pico Henry", Inductance, 1e-12);
 
 alias W = Units!("Watt", Power);
 alias mW = Units!("Milli Watt", Power, 1e-3);
-alias uW = Units!("uW", Power, 1e-6);
-alias nW = Units!("nW", Power, 1e-9);
+alias uW = Units!("Micro Watt", Power, 1e-6);
+alias nW = Units!("Nano Watt", Power, 1e-9);
 alias KW = Units!("Kilo Watt", Power, 1e3);
 alias MW = Units!("Mega Watt", Power, 1e6);
 
