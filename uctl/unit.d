@@ -278,6 +278,22 @@ alias um = Units!("Micro meter", Length, 1e-6);
 alias nm = Units!("Nano meter", Length, 1e-9);
 alias Km = Units!("Kilo meter", Length, 1e3);
 
+alias m2 = Units!("Square meter", Area);
+alias dm2 = Units!("Square deci meter", Area, 1e-2);
+alias cm2 = Units!("Square centi meter", Area, 1e-4);
+alias mm2 = Units!("Square milli meter", Area, 1e-6);
+alias um2 = Units!("Square micro meter", Area, 1e-12);
+alias nm2 = Units!("Square nano meter", Area, 1e-18);
+alias Km2 = Units!("Square kilo meter", Area, 1e6);
+
+alias m3 = Units!("Cubic meter", Area);
+alias dm3 = Units!("Cubic deci meter", Area, 1e-3);
+alias cm3 = Units!("Cubic centi meter", Area, 1e-6);
+alias mm3 = Units!("Cubic milli meter", Area, 1e-9);
+alias um3 = Units!("Cubic micro meter", Area, 1e-18);
+alias nm3 = Units!("Cubic nano meter", Area, 1e-27);
+alias Km3 = Units!("Cubic kilo meter", Area, 1e9);
+
 alias rev = Units!("Revolution", Angle);
 alias hpi = Units!("Half PI", Angle, 1.0/4.0);
 alias deg = Units!("Degree", Angle, 1.0/360.0);
