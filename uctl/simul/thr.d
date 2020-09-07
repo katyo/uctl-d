@@ -84,6 +84,7 @@ module uctl.simul.thr;
 import std.traits: isInstanceOf;
 import std.math: E;
 import uctl.num: isNumer, asnum;
+import uctl.unit: hasUnits, to, Resistance, Ohm, Temperature, degK;
 import uctl.math.log: log;
 
 version(unittest) {
@@ -159,9 +160,15 @@ struct Param(alias M, A, B, C) if (isModel!(M, SteinhartHart) && isNumer!(A, B, 
   static if (M.calcT) {
     /// Calculate temperature from resistance
     const pure nothrow @nogc @safe
-    auto t(R)(const R r) {
+    auto t(R)(const R r) if (isNumer!(R, A)) {
       auto lnR = log(r);
       return asnum!(1, R) / (a + b * lnR + c * lnR * lnR * lnR);
+    }
+
+    /// Calculate temperature from resistance
+    const pure nothrow @nogc @safe
+    auto t(R)(const R r) if (hasUnits!(R, Resistance) && isNumer!(R.raw_t, A)) {
+      return t(r.to!Ohm.raw).as!degK;
     }
   }
 }
@@ -195,10 +202,18 @@ nothrow @nogc unittest {
 }
 
 /// Thermistor parameters for simplified β-model
-struct Param(alias M, R, T, B) if (isModel!(M, Beta) && isNumer!(R, T, B)) {
+struct Param(alias M, R, T, B) if (isModel!(M, Beta) && (isNumer!(R, T, B) || hasUnits!(R, Resistance) && hasUnits!(T, Temperature) && isNumer!(R.raw_t, T.raw_t, B))) {
   static if (M.calcT) {
-    alias InvR = typeof(asnum!(1, R) / R());
-    alias InvT = typeof(asnum!(1, T) / T());
+    static if (hasUnits!R) {
+      alias InvR = typeof(asnum!(1, R.raw_t) / R.raw_t());
+    } else {
+      alias InvR = typeof(asnum!(1, R) / R());
+    }
+    static if (hasUnits!T) {
+      alias InvT = typeof(asnum!(1, T.raw_t) / T.raw_t());
+    } else {
+      alias InvT = typeof(asnum!(1, T) / T());
+    }
     alias InvB = typeof(asnum!(1, B) / B());
 
     InvR inv_r0;
@@ -236,6 +251,12 @@ struct Param(alias M, R, T, B) if (isModel!(M, Beta) && isNumer!(R, T, B)) {
     auto t(R_)(const R_ r) if (isNumer!(R_, R)) {
       return asnum!(1, R) / (inv_t0 + inv_beta * log(r * inv_r0));
     }
+
+    /// Calculate temperature from resistance
+    const pure nothrow @nogc @safe
+    auto t(R_)(const R_ r) if (hasUnits!(R_, Resistance) && isNumer!(R_.raw_t, R)) {
+      return t(r.to!Ohm.raw).as!degK;
+    }
   }
 
   static if (M.calcR) {
@@ -243,6 +264,12 @@ struct Param(alias M, R, T, B) if (isModel!(M, Beta) && isNumer!(R, T, B)) {
     const pure nothrow @nogc @safe
     auto r(T_)(const T_ t) if (isNumer!(T_, T)) {
       return r0 * exp(beta / t - beta_inv_t0);
+    }
+
+    /// Calculate resistance from temperature
+    const pure nothrow @nogc @safe
+    auto r(T_)(const T_ t) if (hasUnits!(T_, Temperature) && isNumer!(T_.raw_t, T)) {
+      return r(t.to!degK).as!Ohm;
     }
   }
 }
