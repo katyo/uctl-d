@@ -35,7 +35,7 @@
 module uctl.filt.lqe;
 
 import std.traits: isInstanceOf;
-import uctl.num: isNumer, isFixed, fix, asfix;
+import uctl.num: isNumer, isFixed, fix, asnum, asfix, typeOf;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
@@ -52,6 +52,8 @@ version(unittest) {
      F2 = square factor type
 */
 struct Param(F_, H_, Q_, R_) if (isNumer!(F_, H_, Q_, R_)) {
+  alias Self = typeof(this);
+
   alias F = F_;
   alias H = H_;
   alias Q = Q_;
@@ -76,6 +78,7 @@ struct Param(F_, H_, Q_, R_) if (isNumer!(F_, H_, Q_, R_)) {
   /**
      Init LQE parameters
   */
+  const pure nothrow @nogc @safe
   this(F f_, H h_, Q q_, R r_) {
     f = f_;
     h = h_;
@@ -88,7 +91,8 @@ struct Param(F_, H_, Q_, R_) if (isNumer!(F_, H_, Q_, R_)) {
 }
 
 /// Create LQE parameters from coefficients
-auto param_from(F, H, Q, R)(F f, H h, Q q, R r) if (isNumer!(F, H, Q, R)) {
+pure nothrow @nogc @safe
+Param!(F, H, Q, R) mk(alias P, F, H, Q, R)(const F f, const H h, const Q q, const R r) if (__traits(isSame, P, Param) && isNumer!(F, H, Q, R)) {
   return Param!(F, H, Q, R)(f, h, q, r);
 }
 
@@ -105,7 +109,16 @@ private template fix_sqrt_t(T) if (isFixed!T) {
      P = parameters type
      T = input value type
 */
-struct State(alias P, T) if (isInstanceOf!(Param, P) && isNumer!(P.F, T)) {
+struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.F, T_)) {
+  /// Parameters type
+  alias P = typeOf!P_;
+
+  /// Self type
+  alias Self = typeof(this);
+
+  /// Input value type
+  alias T = T_;
+
   /// Result type
   alias R = T;
 
@@ -123,12 +136,9 @@ struct State(alias P, T) if (isInstanceOf!(Param, P) && isNumer!(P.F, T)) {
   /// Covariance
   C p = 0;
 
+  pure nothrow @nogc @safe
   auto apply(ref const P param, const T value) {
-    static if (isFixed!T) {
-      enum auto one = asfix!1;
-    } else {
-      enum auto one = 1;
-    }
+    enum auto one = asnum!(1, T);
 
     // Predict state: X0 = F * X
     auto x0 = param.f * value;
@@ -154,8 +164,8 @@ struct State(alias P, T) if (isInstanceOf!(Param, P) && isNumer!(P.F, T)) {
 
 /// Test LQE filter (floating-point)
 nothrow @nogc unittest {
-  static immutable auto param = param_from(0.6, 0.5, 0.2, 0.4);
-  static auto state = State!(typeof(param), double)();
+  static immutable auto param = mk!Param(0.6, 0.5, 0.2, 0.4);
+  static auto state = State!(param, double)();
 
   assert_eq(state.apply(param, 0.123456), 0.0658432);
   assert_eq(state.apply(param, 1.01246), 0.54008947, 1e-7);
@@ -166,8 +176,8 @@ nothrow @nogc unittest {
 nothrow @nogc unittest {
   alias X = fix!(-10, 10);
 
-  static immutable auto param = param_from(asfix!0.6, asfix!0.5, asfix!0.2, asfix!0.4);
-  static auto state = State!(typeof(param), X)();
+  static immutable auto param = mk!Param(asfix!0.6, asfix!0.5, asfix!0.2, asfix!0.4);
+  static auto state = State!(param, X)();
 
   assert_eq(state.apply(param, cast(X) 0.123456), cast(X) 0.0658432, cast(X) 1e-8);
   assert_eq(state.apply(param, cast(X) 1.01246), cast(X) 0.54008947, cast(X) 1e-8);

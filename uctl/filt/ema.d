@@ -21,10 +21,11 @@
 module uctl.filt.ema;
 
 import std.traits: isInstanceOf;
-import uctl.num: fix, asfix, isNumer, isFixed;
+import uctl.num: fix, asnum, isNumer, isFixed, typeOf;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
+  import uctl.num: asfix;
 
   mixin unittests;
 }
@@ -36,8 +37,10 @@ version(unittest) {
  *   A = filter weights type
  */
 struct Param(A_ = float) if (isNumer!A_) {
+  /// Self type
   alias Self = typeof(this);
 
+  /// Alpha type
   alias A = A_;
 
   static if (isFixed!A) {
@@ -63,12 +66,7 @@ struct Param(A_ = float) if (isNumer!A_) {
   const pure nothrow @nogc @safe
   this(const A alpha_) {
     alpha = alpha_;
-
-    static if (isFixed!A) {
-      cmpl_alpha = asfix!1.0 - alpha_;
-    } else {
-      cmpl_alpha = 1.0 - alpha_;
-    }
+    cmpl_alpha = asnum!(1, A) - alpha_;
   }
 
   /**
@@ -79,6 +77,35 @@ struct Param(A_ = float) if (isNumer!A_) {
     return Param(alpha * gain, cmpl_alpha * gain);
   }
 }
+
+/// Params with gain
+nothrow @nogc unittest {
+  static immutable auto param = mk!Alpha(0.6) * 1.2;
+
+  assert_eq(param.alpha, 0.72, 1e-6);
+  assert_eq(param.cmpl_alpha, 0.48, 1e-6);
+}
+
+/// Filter parameters flavor
+struct Flavor(string name_) {
+  enum string name = name_;
+}
+
+/// Check for parameters flavor
+template isFlavor(X...) if (X.length == 1 || X.length == 2) {
+  static if (X.length == 1) {
+    static if (is(X[0])) {
+      enum bool isFlavor = isInstanceOf!(Flavor, X[0]);
+    } else {
+      enum bool isFlavor = isFlavor!(typeof(X[0]));
+    }
+  } else {
+    enum bool isFlavor = isFlavor!(X[0]) && is(X[0] == X[1]);
+  }
+}
+
+/// Filter parameters using `α` factor
+alias Alpha = Flavor!("Alpha factor");
 
 /**
  * Init EMA parameters using `α` factor
@@ -93,9 +120,20 @@ struct Param(A_ = float) if (isNumer!A_) {
  * Filter formula: $(MATH y = α x + (1 - α) y_{z^{-1}})
  */
 pure nothrow @nogc @safe
-auto param_from_alpha(A)(const A alpha) if (isNumer!A) {
+Param!A mk(F, A)(const A alpha) if (isFlavor!(F, Alpha) && isNumer!A) {
   return Param!A(alpha);
 }
+
+/// Test params from alpha
+nothrow @nogc unittest {
+  static immutable auto param = mk!Alpha(0.6);
+
+  assert_eq(param.alpha, 0.6, 1e-6);
+  assert_eq(param.cmpl_alpha, 0.4, 1e-6);
+}
+
+/// Filter parameters using number of samples to smooth
+alias Samples = Flavor!("Number of samples");
 
 /**
  * Init EMA parameters using number of samples
@@ -111,21 +149,37 @@ auto param_from_alpha(A)(const A alpha) if (isNumer!A) {
  *
  * Filter formula: $(MATH y = \frac{2}{n + 1} x + \frac{n - 1}{n + 1} y_{z^{-1}})
  *
- * See_Also: `param_from_alpha`.
+ * See_Also: [mk].
  */
 pure nothrow @nogc @safe
-auto param_from_samples(N)(const N n) if (isNumer!N) {
+auto mk(F, N)(const N n) if (isFlavor!(F, Samples) && isNumer!N) {
   // α = 2 / (n + 1)
-  static if (isFixed!N) {
-    auto alpha = asfix!2.0 / (n + asfix!1.0);
-  } else {
-    auto alpha = 2.0 / (n + 1.0);
-  }
-  return param_from_alpha(alpha);
+  auto alpha = asnum!(2, N) / (n + asnum!(1, N));
+
+  return mk!Alpha(alpha);
 }
 
+/// Params from samples
+nothrow @nogc unittest {
+  static immutable auto param = mk!Samples(2.0);
+
+  assert_eq(param.alpha, 0.6666667, 1e-6);
+  assert_eq(param.cmpl_alpha, 0.3333333, 1e-6);
+}
+
+/// Params from samples (fixed)
+nothrow @nogc unittest {
+  static immutable auto param = mk!Samples(asfix!2.0);
+
+  assert_eq(param.alpha, asfix!0.6666666665);
+  assert_eq(param.cmpl_alpha, asfix!0.3333333335);
+}
+
+/// Filter parameters using time window to smooth
+alias Time = Flavor!("Time window");
+
 /**
- * Init EMA parameters using time factor
+ * Init EMA parameters using time window
  *
  * Params:
  *   time = The smooth time value
@@ -139,14 +193,36 @@ auto param_from_samples(N)(const N n) if (isNumer!N) {
  *
  * Filter formula: $(MATH y = \frac{2 P}{T + P} x + \frac{T - P}{T + P} y_{z^{-1}})
  *
- * See_Also: `param_from_alpha`.
+ * See_Also: [mk].
  */
 pure nothrow @nogc @safe
-auto param_from_time(T, P)(const T time, const P period) if (isNumer!(T, P)) {
-  auto alpha = (period + period) / (time + period);
+auto mk(F, real dt, T)(const T time) if (isFlavor!(F, Time) && isNumer!T) {
+  /// α = 2 * dt / (t + dt)
+  auto alpha = asnum!(dt + dt, T) / (time + asnum!(dt, T));
 
-  return param_from_alpha(alpha);
+  return mk!Alpha(alpha);
 }
+
+/// Test params from time window
+nothrow @nogc unittest {
+  enum auto dt = 0.1;
+  static immutable auto param = mk!(Time, dt)(4.0);
+
+  assert_eq(param.alpha, 0.0487805, 1e-6);
+  assert_eq(param.cmpl_alpha, 0.951219, 1e-6);
+}
+
+/// Test params from time window (fixed)
+nothrow @nogc unittest {
+  enum auto dt = 0.1;
+  static immutable auto param = mk!(Time, dt)(asfix!4.0);
+
+  assert_eq(param.alpha, asfix!0.0487804878);
+  assert_eq(param.cmpl_alpha, asfix!0.9512195126);
+}
+
+/// Filter parameters using 1st-order transmission behavior
+alias PT1 = Flavor!("PT1 model");
 
 /**
  * Init EMA parameters as 1st-order transmission behavior.
@@ -157,12 +233,22 @@ auto param_from_time(T, P)(const T time, const P period) if (isNumer!(T, P)) {
  *
  * Filter formula: $(MATH y = \frac{P}{P + T} x + \frac{T}{P + T} y_{z^{-1}})
  *
- * See_Also: `param_from_alpha`.
+ * See_Also: [mk].
  */
 pure nothrow @nogc @safe
-auto param_from_pt1(T, P)(const T time, const P period) if (isNumer!(T, P)) {
-  auto alpha = period / (time + period);
-  return param_from_alpha(alpha);
+auto mk(F, real dt, T)(const T time) if (isFlavor!(F, PT1) && isNumer!T) {
+  auto alpha = asnum!(dt, T) / (time + asnum!(dt, T));
+
+  return mk!Alpha(alpha);
+}
+
+/// Test params as PT1
+nothrow @nogc unittest {
+  enum auto dt = 0.1;
+  static immutable auto param = mk!(PT1, dt)(4.0);
+
+  assert_eq(param.alpha, 0.0243902, 1e-6);
+  assert_eq(param.cmpl_alpha, 0.97561, 1e-6);
 }
 
 /**
@@ -172,15 +258,18 @@ auto param_from_pt1(T, P)(const T time, const P period) if (isNumer!(T, P)) {
  *   P = parameters type
  *   T = input value type
  */
-struct State(P = Param!float, T = float) if (isInstanceOf!(Param, P) && isNumer!(P.A, T)) {
+struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.A, T_)) {
+  /// Parameters type
+  alias P = typeOf!P_;
+
+  /// Input value type
+  alias T = T_;
+
+  /// Self type
   alias Self = typeof(this);
 
   /// Output value type
-  static if (isFixed!T) {
-    alias R = typeof(P().alpha * T() + P().cmpl_alpha * T());
-  } else {
-    alias R = T;
-  }
+  alias R = typeof(P().alpha * T() + P().cmpl_alpha * T());
 
   /// The last output value
   R last_out = 0.0;
@@ -212,12 +301,8 @@ struct State(P = Param!float, T = float) if (isInstanceOf!(Param, P) && isNumer!
 
 /// Params from alpha
 nothrow @nogc unittest {
-  static immutable auto param = param_from_alpha(0.6);
-
-  assert_eq(param.alpha, 0.6, 1e-6);
-  assert_eq(param.cmpl_alpha, 0.4, 1e-6);
-
-  static auto state = State!(typeof(param))();
+  static immutable auto param = mk!Alpha(0.6);
+  static auto state = State!(param, double)();
 
   assert_eq(state.apply(param, 1.3), 0.78, 1e-6);
   assert_eq(state.apply(param, 0.8), 0.792, 1e-6);
@@ -225,22 +310,10 @@ nothrow @nogc unittest {
   assert_eq(state.apply(param, -0.3), -0.17328, 1e-6);
 }
 
-/// Params with gain
-nothrow @nogc unittest {
-  static immutable auto param = param_from_alpha(0.6) * 1.2;
-
-  assert_eq(param.alpha, 0.72, 1e-6);
-  assert_eq(param.cmpl_alpha, 0.48, 1e-6);
-}
-
 /// Params from samples
 nothrow @nogc unittest {
-  static immutable auto param = param_from_samples(2.0);
-
-  assert_eq(param.alpha, 0.6666667, 1e-6);
-  assert_eq(param.cmpl_alpha, 0.3333333, 1e-6);
-
-  static auto state = State!(param.Self)();
+  static immutable auto param = mk!Samples(2.0);
+  static auto state = State!(param, double)();
 
   assert_eq(state.apply(param, 1.0), 0.6666667, 1e-6);
   assert_eq(state.apply(param, 1.0), 0.8888889, 1e-6);
@@ -248,12 +321,10 @@ nothrow @nogc unittest {
 
 /// Params from time
 nothrow @nogc unittest {
-  static immutable auto param = param_from_time(4.0, 0.1);
+  enum auto dt = 0.1;
 
-  assert_eq(param.alpha, 0.0487805, 1e-6);
-  assert_eq(param.cmpl_alpha, 0.951219, 1e-6);
-
-  static auto state = State!(param.Self)();
+  static immutable auto param = mk!(Time, 0.1)(4.0);
+  static auto state = State!(param, double)();
 
   assert_eq(state.apply(param, 1.3), 0.06341463327, 1e-8);
   assert_eq(state.apply(param, 0.8), 0.09934562445, 1e-8);
@@ -261,24 +332,12 @@ nothrow @nogc unittest {
   assert_eq(state.apply(param, -0.3), 0.05205513909, 1e-8);
 }
 
-/// Params from pt1
-nothrow @nogc unittest {
-  static immutable auto param = param_from_pt1(4.0, 0.1);
-
-  assert_eq(param.alpha, 0.0243902, 1e-6);
-  assert_eq(param.cmpl_alpha, 0.97561, 1e-6);
-}
-
 /// Params from samples (fixed)
 nothrow @nogc unittest {
-  static immutable auto param = param_from_samples(asfix!2.0);
-
-  assert_eq(param.alpha, asfix!0.6666666665);
-  assert_eq(param.cmpl_alpha, asfix!0.3333333335);
-
   alias X = fix!(0, 1);
 
-  static auto state = State!(param.Self, X)();
+  static immutable auto param = mk!Samples(asfix!2.0);
+  static auto state = State!(param, X)();
 
   assert_eq(state.apply(param, cast(X) 1.0), cast(X) 0.666666666);
   assert_eq(state.apply(param, cast(X) 1.0), cast(X) 0.8888888881);
@@ -286,14 +345,11 @@ nothrow @nogc unittest {
 
 /// Params from time (fixed)
 nothrow @nogc unittest {
-  static immutable auto param = param_from_time(asfix!4.0, asfix!0.1);
-
-  assert_eq(param.alpha, asfix!0.0487804878);
-  assert_eq(param.cmpl_alpha, asfix!0.9512195126);
-
+  enum auto dt = 0.1;
   alias X = fix!(-1, 2);
 
-  static auto state = State!(param.Self, X)();
+  static immutable auto param = mk!(Time, dt)(asfix!4.0);
+  static auto state = State!(param, X)();
 
   assert_eq(state.apply(param, cast(X) 1.3), cast(X) 0.06341463327);
   assert_eq(state.apply(param, cast(X) 0.8), cast(X) 0.09934562445);
