@@ -1,5 +1,7 @@
 /**
-   Measurement units
+   ### Measurement units
+
+   Units grouped by classes. Units can be added to any numeric values using function [as]. The `.raw` field of [Val] can be used to get numeric value back. Units can be converted to another units of same class using function [to].
  */
 module uctl.unit;
 
@@ -17,9 +19,13 @@ version(unittest) {
    Value with measurement units
  */
 struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
+  /// Measurement units
   alias units = U;
+
+  /// Raw value type
   alias raw_t = Unqual!T;
 
+  /// Raw numeric value
   T raw;
 
   /// Wrap raw value to units
@@ -194,7 +200,7 @@ Val!(T, U) as(U, T)(T val) if (is(T) && isNumer!T && is(U) && isUnits!U) {
   return typeof(return)(val);
 }
 
-/// Convert angle values from some units to another
+/// Convert values from some units to another
 pure nothrow @nogc @safe
 auto to(U, T)(const T val) if (hasUnits!T && isUnits!(T.units) && isUnits!U && is(T.units.Class == U.Class)) {
   static if (is(T.units == U)) { // units is same
@@ -217,30 +223,51 @@ auto to(U, T)(const T val) if (hasUnits!T && isUnits!(T.units) && isUnits!U && i
   }
 }
 
+/// Linear units class
 alias Length = UnitsClass!("Length");
+/// Angular units class
 alias Angle = UnitsClass!("Angle");
 
+/// Linear velocity
 alias LinearVel = UnitsClass!("Linear Velocity");
+/// Angular velocity
 alias AngularVel = UnitsClass!("Angular Velocity");
+
+/// Linear acceleration
 alias LinearAccel = UnitsClass!("Linear Acceleration");
+/// Angular acceleration
 alias AngularAccel = UnitsClass!("Angular Acceleration");
+
+/// Linear jerk
 alias LinearJerk = UnitsClass!("Linear Jerk");
+/// Angular jerk
 alias AngularJerk = UnitsClass!("Angular Jerk");
 
+/// Area units class
 alias Area = UnitsClass!("Area");
+/// Volume units class
 alias Volume = UnitsClass!("Volume");
 
+/// Voltage units class
 alias Voltage = UnitsClass!("Voltage");
+/// Current units class
 alias Current = UnitsClass!("Current");
+/// Power units class
 alias Power = UnitsClass!("Power");
+/// Energy units class
 alias Energy = UnitsClass!("Energy");
 
+/// Resistance units class
 alias Resistance = UnitsClass!("Resistance");
+/// Capacitance units class
 alias Capacitance= UnitsClass!("Capacitance");
+/// Inductance units class
 alias Inductance = UnitsClass!("Inductance");
 
+/// Temperature units class
 alias Temperature = UnitsClass!("Temperature");
 
+/// Time units class
 alias Time = UnitsClass!("Time");
 
 alias m = Units!("Meter", Length);
@@ -411,9 +438,14 @@ nothrow @nogc unittest {
 
 /// Defines new measurement units
 struct Units(string name_, alias Class_, real factor_ = 1, real offset_ = 0) if (isUnitsClass!Class_) {
+  /// Units class
   alias Class = Class_;
+  /// Units name
   enum string name = name_;
+
+  /// Units multiplier factor
   enum real factor = factor_;
+  /// Units value offset
   enum real offset = offset_;
 }
 
@@ -424,6 +456,7 @@ template isUnits(X...) if (X.length == 1) {
 
 /// Defines new measurement units class
 struct UnitsClass(string name_) {
+  /// Units class name
   enum string name = name_;
 }
 
