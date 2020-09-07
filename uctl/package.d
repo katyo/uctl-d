@@ -39,3 +39,12 @@ In my experience currently $(I D) is a best choice to achieve the goals pursued 
 
 */
 module uctl;
+
+import uctl.filt;
+import uctl.trans;
+import uctl.regul;
+import uctl.simul;
+
+alias uctl.trans.mk mk;
+alias uctl.regul.mk mk;
+alias uctl.simul.mk mk;

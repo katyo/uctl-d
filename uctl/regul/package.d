@@ -5,4 +5,6 @@
  */
 module uctl.regul;
 
-import uctl.regul.pid;
+import uctl.regul.pid: mk;
+
+alias uctl.regul.pid.mk mk;
