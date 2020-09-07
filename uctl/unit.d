@@ -374,6 +374,13 @@ nothrow @nogc unittest {
   assert(3.125.as!sec.to!usec == 3125000.0.as!usec);
   assert(0.25.as!sec.to!usec == 250000.0.as!usec);
 
+  assert_eq(25.0.as!degC.to!degK, 298.15.as!degK);
+  assert_eq(298.15.as!degK.to!degC, 25.0.as!degC);
+  assert_eq(73.4.as!degF.to!degK, 296.15.as!degK, 1e-10);
+  assert_eq(296.15.as!degK.to!degF, 73.4.as!degF, 1e-10);
+  assert_eq(73.4.as!degF.to!degC, 23.0.as!degC, 1e-10);
+  assert_eq(23.0.as!degC.to!degF, 73.4.as!degF);
+
   alias X = fix!(-10, 10);
 
   assert(X(1.25).as!m.raw == X(1.25));
