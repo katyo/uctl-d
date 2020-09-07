@@ -17,6 +17,15 @@ version(unittest) {
 /// The __golden ratio__ constant
 enum real PHI = 1.61803398874989484820;
 
+/// Get type of anything
+template typeOf(X...) if (X.length == 1) {
+  static if (is(X[0])) {
+    alias typeOf = X[0];
+  } else {
+    alias typeOf = typeof(X[0]);
+  }
+}
+
 /// Check that type or expr is floating-point number
 template isFloat(X...) {
   static if (X.length == 1) {
