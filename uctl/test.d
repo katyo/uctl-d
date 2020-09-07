@@ -10,7 +10,7 @@ import core.stdc.stdio: snprintf;
 import core.stdc.assert_: __assert;
 
 import uctl.num: isInt, isFloat, fmtOf, fix, asfix, isFixed, isSameFixed, isNumer;
-import uctl.unit: Val, isUnits, hasUnits;
+import uctl.unit: hasUnits, rawTypeOf;
 
 /**
    Unittests runner mixin
@@ -31,78 +31,63 @@ mixin template unittests() {
 }
 
 version(unittest) {
+  import uctl.unit: as, cm, sec;
+
   mixin unittests;
 }
 
 /**
-   Assert equality of integer values
+   Unified assert equality of values
 */
-nothrow @nogc
-void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b) if (isInt!T) {
-  enum string F = fmtOf!T;
+void assert_eq(T, S, string file = __FILE__, int line = __LINE__)(const T a, const S b) if (hasUnits!T && hasUnits!S && is(T.units == S.units) && isNumer!(T.raw_t, S.raw_t) || isNumer!(T, S)) {
+  alias R = rawTypeOf!S;
 
-  if (a != b) {
-    char[64] buf;
-
-    snprintf(buf.ptr, buf.length, (F ~ " == " ~ F).ptr, a, b);
-    __assert(buf.ptr, file.ptr, line);
+  static if (isInt!R) {
+    enum R max_error = 0;
+  } else static if (isFloat!R) {
+    enum R max_error = R.epsilon;
+  } else static if (isFixed!R) {
+    enum R max_error = R.zero;
   }
+
+  assert_eq!(T, S, R, file, line)(a, b, max_error);
 }
 
 /**
-   Assert equality of floating-point values
+   Unified assert equality of values with `max_error`
 */
-nothrow @nogc
-void assert_eq(T, string file = __FILE__, int line = __LINE__)(T a, T b, T max_error = T.epsilon) if (isFloat!T) {
-  enum string F = fmtOf!T;
-
-  if (fabs(a - b) > max_error) {
-    char[64] buf;
-
-    snprintf(buf.ptr, buf.length, (F ~ " == " ~ F).ptr, a, b);
-    __assert(buf.ptr, file.ptr, line);
+void assert_eq(T, S, E, string file = __FILE__, int line = __LINE__)(const T a, const S b, const E max_error) if (hasUnits!T && hasUnits!S && is(T.units == S.units) && isNumer!(T.raw_t, S.raw_t, E) || isNumer!(T, S, E)) {
+  static if (hasUnits!T) {
+    alias T_ = T.raw_t;
+    auto a_ = a.raw;
+    auto b_ = cast(T_) b.raw;
+    auto e_ = cast(T_) max_error;
+  } else {
+    alias T_ = T;
+    auto a_ = a;
+    auto b_ = cast(T_) b;
+    auto e_ = cast(T_) max_error;
   }
-}
 
-/**
-   Assert equality of fixed-point values
-*/
-nothrow @nogc
-void assert_eq(T, S, string file = __FILE__, int line = __LINE__)(T a, S b, S max_error = S.zero) if (isFixed!T && isFixed!S && isSameFixed!(T, S)) {
-  enum string F = "%0.10g (%i)";
+  static if (isInt!T_ || isFloat!T_) {
+    enum string F = fmtOf!T_;
+  } else static if (isFixed!T_) {
+    enum string F = "%0.10g (%i)";
+  }
 
-  auto d = a.raw > b.raw ? a.raw - b.raw : b.raw - a.raw;
+  auto d_ = a_ > b_ ? a_ - b_ : b_ - a_;
 
-  if (d > max_error.raw) {
+  if (d_ > e_) {
     char[128] buf;
 
-    snprintf(buf.ptr, buf.length, (F ~ " == " ~ F ~ " (error > " ~ F ~ ")").ptr, cast(double) a, a.raw, cast(double) b, b.raw, cast(double) max_error, max_error.raw);
+    static if (isInt!T_ || isFloat!T_) {
+      snprintf(buf.ptr, buf.length, (F ~ " == " ~ F ~ " (error " ~ F ~ " > " ~ F ~ ")").ptr, a_, b_, d_, e_);
+    } else static if (isFixed!T_) {
+      snprintf(buf.ptr, buf.length, (F ~ " == " ~ F ~ " (error " ~ F ~ " > " ~ F ~ ")").ptr, cast(double) a_, a_.raw, cast(double) b_, b_.raw, cast(double) d_, d_.raw, cast(double) e_, e_.raw);
+    }
+
     __assert(buf.ptr, file.ptr, line);
   }
-}
-
-/**
-   Assert equality of integer values with units
-*/
-nothrow @nogc
-void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b) if (isInt!T && isInt!S && isUnits!U && is(T == S)) {
-  assert_eq!(T.raw_t, file, line)(a.raw, b.raw);
-}
-
-/**
-   Assert equality of floating-point values with units
-*/
-nothrow @nogc
-void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b, S max_error = S.epsilon) if (isFloat!T && isFloat!S && isUnits!U && is(T == S)) {
-  assert_eq!(T, file, line)(a.raw, b.raw, max_error);
-}
-
-/**
-   Assert equality of fixed-point values with units
-*/
-nothrow @nogc
-void assert_eq(T, S, U, string file = __FILE__, int line = __LINE__)(Val!(T, U) a, Val!(S, U) b, S max_error = S.zero) if (isFixed!T && isFixed!S && isUnits!U && isSameFixed!(T, S)) {
-  assert_eq!(T, S, file, line)(a.raw, b.raw, max_error);
 }
 
 /// Test `assert_eq`
@@ -110,11 +95,32 @@ nothrow @nogc unittest {
   int i = 123;
   assert_eq(i, 123);
 
-  double f = -12.3;
-  assert_eq(f, -12.3);
+  double d = -12.3;
+  assert_eq(d, -12.3);
 
-  fix!(0, 20) x = 12.3;
-  assert_eq(x, cast(typeof(x)) asfix!(12.3));
+  float f = 1.25;
+  assert_eq(f, 1.25);
+
+  assert_eq(1.2345678, 1.2345679, 1e-6);
+
+  alias X = fix!(0, 20);
+
+  X x = 12.3;
+  assert_eq(x, cast(X) asfix!12.3);
+
+  assert_eq(X(-1.25), cast(X)-1.25);
+}
+
+/// Test `assert_eq` with units
+nothrow @nogc unittest {
+  assert_eq(5.as!cm, 5.as!cm);
+
+  assert_eq(0.125.as!sec, 0.125.as!sec);
+  assert_eq(0.125.as!sec, 0.1251.as!sec, 1e-4);
+
+  alias X = fix!(0, 10);
+
+  assert_eq(X(12.3).as!cm, (cast(X) asfix!(12.3)).as!cm);
 }
 
 /**

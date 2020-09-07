@@ -932,13 +932,13 @@ nothrow @nogc unittest {
   assert_eq(cast(double) fix!(1000).step, 4.76837158203125e-7);
   assert_eq(cast(double) fix!(100000000).step, 0.0625);
   assert_eq(cast(double) fix!(1000000000).step, 0.5);
-  assert_eq(cast(double) fix!(10000000000).step, 8);
-  assert_eq(cast(double) fix!(100000000000).step, 64);
+  assert_eq(cast(double) fix!(10000000000).step, 8.0);
+  assert_eq(cast(double) fix!(100000000000).step, 64.0);
 }
 
 /// Casting to float and int
 nothrow @nogc unittest {
-  assert_eq(cast(double) fix!(-100, 100)(10), 10);
+  assert_eq(cast(double) fix!(-100, 100)(10), 10.0);
   assert_eq(cast(int) fix!(-100, 100)(10), 10);
   assert_eq(cast(float) fix!(-100, 100)(0.5), 0.5);
 
@@ -1021,7 +1021,7 @@ nothrow @nogc unittest {
   assert_eq(fix!(-1, 1)(-0.54).fracof, fix!(-1, 1)(-0.54));
   assert_eq(fix!(-2, 1)(-0.55).fracof, fix!(-1, 1)(-0.55));
 
-  assert_eq(fix!(-1, 2)(1.005).fracof, fix!(-1, 1)(0.005), fix!(-1, 1).step);
+  assert_eq(fix!(-1, 2)(1.005).fracof, fix!(-1, 1)(0.005), fix!(-1, 2).step);
   assert_eq(fix!(-2, 1)(-1.005).fracof, fix!(-1, 1)(-0.005), fix!(-1, 1).step);
 
   assert_eq(fix!(-1, 2)(1.001).fracof, fix!(-1, 1)(0.001), fix!(-1, 1).step);
@@ -1252,20 +1252,20 @@ template asfix(real val, uint bits = 32) {
 /// Test `asfix`
 nothrow @nogc unittest {
   assert_eq(asfix!0.exp, -31);
-  assert_eq(cast(double) asfix!0, 0);
+  assert_eq(cast(double) asfix!0, 0.0);
 
   assert_eq(asfix!1.exp, -30);
-  assert_eq(cast(double) asfix!1, 1);
+  assert_eq(cast(double) asfix!1, 1.0);
 
   assert_eq(asfix!0.1.exp, -34);
   assert_eq(cast(double) asfix!0.1, 0.09999999997671694);
 
   assert_eq(asfix!100.exp, -24);
-  assert_eq(cast(double) asfix!100, 100);
+  assert_eq(cast(double) asfix!100, 100.0);
 
   assert(is(typeof(asfix!(100, 64).raw) == long));
   assert_eq(asfix!(100, 64).exp, -56);
-  assert_eq(cast(double) asfix!(100, 64), 100);
+  assert_eq(cast(double) asfix!(100, 64), 100.0);
 
   enum auto a = asfix!(1e3);
   enum auto b = asfix!(1/1e-3);

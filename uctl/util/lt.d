@@ -58,16 +58,16 @@ R lt1(uint len, R, A, real start, real end, real function(real) pure nothrow @no
 nothrow @nogc unittest {
   alias sqr = lt1!(10, float, float, 0.0, 1.0, (x) => x * x);
 
-  assert_eq(sqr(0), 0);
+  assert_eq(sqr(0.0), 0.0);
   assert_eq(sqr(0.1), 0.01, 0.002);
   assert_eq(sqr(0.5), 0.25, 0.004);
-  assert_eq(sqr(1), 1);
+  assert_eq(sqr(1.0), 1.0);
 
   void test_as_func(float delegate(float) pure nothrow @safe @nogc f) {
-    assert_eq(f(0), 0);
+    assert_eq(f(0.0), 0.0);
     assert_eq(f(0.1), 0.01, 0.002);
     assert_eq(f(0.5), 0.25, 0.004);
-    assert_eq(f(1), 1);
+    assert_eq(f(1.0), 1.0);
   }
 
   test_as_func(&sqr);

@@ -90,7 +90,7 @@ struct PFDL(uint L, T) {
 
 /// Test delay line
 nothrow @nogc unittest {
-  PFDL!(5, float) dl;
+  PFDL!(5, int) dl;
 
   assert_eq(dl.latest, 0);
   assert_eq(dl.oldest, 0);
@@ -151,14 +151,14 @@ nothrow @nogc unittest {
 
 /// Test delay line
 nothrow @nogc unittest {
-  PFDL!(3, float) dl = 1;
+  PFDL!(3, int) dl = 1;
 
   assert_eq(dl.latest, 1);
   assert_eq(dl.oldest, 1);
   assert_eq(dl[0], 1);
   assert_eq(dl[1], 1);
   assert_eq(dl[2], 1);
-  assert_eq(cast(float) dl, 1);
+  assert_eq(cast(int) dl, 1);
 
   dl = 0;
 
@@ -167,7 +167,7 @@ nothrow @nogc unittest {
   assert_eq(dl[0], 0);
   assert_eq(dl[1], 1);
   assert_eq(dl[2], 1);
-  assert_eq(cast(float) dl, 1);
+  assert_eq(cast(int) dl, 1);
 
   dl = 1;
 
@@ -176,7 +176,7 @@ nothrow @nogc unittest {
   assert_eq(dl[0], 1);
   assert_eq(dl[1], 0);
   assert_eq(dl[2], 1);
-  assert_eq(cast(float) dl, 1);
+  assert_eq(cast(int) dl, 1);
 
   dl = 1;
 
@@ -185,7 +185,7 @@ nothrow @nogc unittest {
   assert_eq(dl[0], 1);
   assert_eq(dl[1], 1);
   assert_eq(dl[2], 0);
-  assert_eq(cast(float) dl, 0);
+  assert_eq(cast(int) dl, 0);
 
   dl = 0;
 
@@ -194,5 +194,5 @@ nothrow @nogc unittest {
   assert_eq(dl[0], 0);
   assert_eq(dl[1], 1);
   assert_eq(dl[2], 1);
-  assert_eq(cast(float) dl, 1);
+  assert_eq(cast(int) dl, 1);
 }

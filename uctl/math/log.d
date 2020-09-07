@@ -125,7 +125,7 @@ nothrow @nogc unittest {
 /// Test `log2` for x > 1 (floating-point)
 nothrow @nogc unittest {
   foreach (i; 1..10) {
-    assert_eq(log2(2.0f.pow(i)), i);
+    assert_eq(log2(2.0f.pow(i)), cast(float) i);
   }
 
   assert_eq(log2(1e1f), 3.321928094887362f);
