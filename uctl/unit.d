@@ -120,6 +120,10 @@
    * - Time
      - `year`
      - Year
+   * - Frequency
+     - `Hz`
+     - Hertz
+     - `KHz`, `MHz`, `GHz`
    )
  */
 module uctl.unit;
@@ -389,6 +393,9 @@ alias Temperature = UnitsClass!("Temperature");
 /// Time units class
 alias Time = UnitsClass!("Time");
 
+/// Frequency units class (1/period)
+alias Frequency = UnitsClass!("Frequency");
+
 alias m = Units!("Meter", Length);
 alias dm = Units!("DeciMeter", Length, 1e-1);
 alias cm = Units!("CentiMeter", Length, 1e-2);
@@ -431,6 +438,20 @@ alias uA = Units!("MicroAmpere", Current, 1e-6);
 alias nA = Units!("NanoAmpere", Current, 1e-9);
 alias KA = Units!("KiloAmpere", Current, 1e3);
 
+alias W = Units!("Watt", Power);
+alias mW = Units!("MilliWatt", Power, 1e-3);
+alias uW = Units!("MicroWatt", Power, 1e-6);
+alias nW = Units!("NanoWatt", Power, 1e-9);
+alias KW = Units!("KiloWatt", Power, 1e3);
+alias MW = Units!("MegaWatt", Power, 1e6);
+
+alias J = Units!("Joule", Energy);
+alias mJ = Units!("MilliJoule", Energy, 1e-3);
+alias uJ = Units!("MicroJoule", Energy, 1e-6);
+alias nJ = Units!("NanoJoule", Energy, 1e-9);
+alias KJ = Units!("KiloJoule", Energy, 1e3);
+alias MJ = Units!("MegaJoule", Energy, 1e6);
+
 alias Ohm = Units!("Ohm", Resistance);
 alias mOhm = Units!("MilliOhm", Resistance, 1e-3);
 alias uOhm = Units!("MicroOhm", Resistance, 1e-6);
@@ -449,20 +470,6 @@ alias uH = Units!("MicroHenry", Inductance, 1e-6);
 alias nH = Units!("NanoHenry", Inductance, 1e-9);
 alias pH = Units!("PicoHenry", Inductance, 1e-12);
 
-alias W = Units!("Watt", Power);
-alias mW = Units!("MilliWatt", Power, 1e-3);
-alias uW = Units!("MicroWatt", Power, 1e-6);
-alias nW = Units!("NanoWatt", Power, 1e-9);
-alias KW = Units!("KiloWatt", Power, 1e3);
-alias MW = Units!("MegaWatt", Power, 1e6);
-
-alias J = Units!("Joule", Energy);
-alias mJ = Units!("MilliJoule", Energy, 1e-3);
-alias uJ = Units!("MicroJoule", Energy, 1e-6);
-alias nJ = Units!("NanoJoule", Energy, 1e-9);
-alias KJ = Units!("KiloJoule", Energy, 1e3);
-alias MJ = Units!("MegaJoule", Energy, 1e6);
-
 alias degK = Units!("Kelvin", Temperature);
 alias degC = Units!("Celsius", Temperature, 1.0, 273.15);
 alias degF = Units!("Fahrenheit", Temperature, 5.0/9.0, 459.67);
@@ -477,6 +484,11 @@ alias day = Units!("Day", Time, 60*60*24);
 alias week = Units!("Week", Time, 60*60*24*7);
 alias mon = Units!("Month", Time, 60*60*24*30);
 alias year = Units!("Year", Time, 60*60*24*365);
+
+alias Hz = Units!("Hertz", Frequency);
+alias KHz = Units!("KiloHertz", Frequency, 1e3);
+alias MHz = Units!("MegaHertz", Frequency, 1e6);
+alias GHz = Units!("GigaHertz", Frequency, 1e9);
 
 /// Units wrapping and conversion
 nothrow @nogc unittest {
