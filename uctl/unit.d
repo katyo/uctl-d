@@ -2,6 +2,125 @@
    ### Measurement units
 
    Units grouped by classes. Units can be added to any numeric values using function [as]. The `.raw` field of [Val] can be used to get numeric value back. Units can be converted to another units of same class using function [to].
+
+   $(TABLE_ROWS
+   Units prefixes
+   * + Prefix
+     + Description
+     + Factor
+   * - `m`
+     - Milli
+     - 10e-3
+   * - `u`
+     - Micro
+     - 10e-6
+   * - `n`
+     - Nano
+     - 10e-9
+   * - `p`
+     - Pico
+     - 10e-12
+   * - `K`
+     - Kilo
+     - 10e3
+   * - `M`
+     - Mega
+     - 10e6
+   * - `G`
+     - Giga
+     - 10e9
+   )
+
+   $(TABLE_ROWS
+   Supported measurement units
+   * + Class
+     + Units
+     + Description
+     + Variants
+   * - Length
+     - `m`
+     - Meter
+     - `dm`, `cm`, `mm`, `um`, `nm`, `Km`
+   * - Area
+     - `m2`
+     - Square meter
+     - `dm2`, `cm2`, `mm2`, `um2`, `nm2`, `Km2`
+   * - Volume
+     - `m3`
+     - Cubic meter
+     - `dm3`, `cm3`, `mm3`, `um3`, `nm3`, `Km3`
+   * - Angle
+     - `deg`
+     - Degree
+   * - Angle
+     - `rad`
+     - Radian
+   * - Angle
+     - `hpi`
+     - Half PI (½π)
+   * - Angle
+     - `rev`
+     - Revolution
+   * - Voltage
+     - `V`
+     - Volt
+     - `mV`, `uV`, `nV`, `KV`, `MV`
+   * - Current
+     - A
+     - Ampere
+     - `mA`, `uA`, `nA`, `KA`
+   * - Resistance
+     - `Ohm`
+     - Ohm
+     - `mOhm`, `uOhm`, `KOhm`, `MOhm`
+   * - Capacitance
+     - `F`
+     - Farad
+     - `mF`, `uF`, `nF`, `pF`
+   * - Inductance
+     - `H`
+     - Henry
+     - `mH`, `uH`, `nH`, `pH`
+   * - Power
+     - `W`
+     - Watt
+     - `mW`, `uW`, `nW`, `KW`, `MW`
+   * - Energy
+     - `J`
+     - Joule
+     - `mJ`, `uJ`, `nJ`, `KJ`, `MJ`
+   * - Temperature
+     - `degK`
+     - Kelvin degree
+   * - Temperature
+     - `degC`
+     - Celsius degree
+   * - Temperature
+     - `degF`
+     - Fahrenheit degree
+   * - Time
+     - `sec`
+     - Second
+     - `msec`, `usec`, `nsec`
+   * - Time
+     - `min`
+     - Minute
+   * - Time
+     - `hour`
+     - Hour
+   * - Time
+     - `day`
+     - Day
+   * - Time
+     - `week`
+     - Week
+   * - Time
+     - `mon`
+     - Month
+   * - Time
+     - `year`
+     - Year
+   )
  */
 module uctl.unit;
 
@@ -271,28 +390,28 @@ alias Temperature = UnitsClass!("Temperature");
 alias Time = UnitsClass!("Time");
 
 alias m = Units!("Meter", Length);
-alias dm = Units!("Deci meter", Length, 1e-1);
-alias cm = Units!("Centi meter", Length, 1e-2);
-alias mm = Units!("Milli meter", Length, 1e-3);
-alias um = Units!("Micro meter", Length, 1e-6);
-alias nm = Units!("Nano meter", Length, 1e-9);
-alias Km = Units!("Kilo meter", Length, 1e3);
+alias dm = Units!("DeciMeter", Length, 1e-1);
+alias cm = Units!("CentiMeter", Length, 1e-2);
+alias mm = Units!("MilliMeter", Length, 1e-3);
+alias um = Units!("MicroMeter", Length, 1e-6);
+alias nm = Units!("NanoMeter", Length, 1e-9);
+alias Km = Units!("KiloMeter", Length, 1e3);
 
-alias m2 = Units!("Square meter", Area);
-alias dm2 = Units!("Square deci meter", Area, 1e-2);
-alias cm2 = Units!("Square centi meter", Area, 1e-4);
-alias mm2 = Units!("Square milli meter", Area, 1e-6);
-alias um2 = Units!("Square micro meter", Area, 1e-12);
-alias nm2 = Units!("Square nano meter", Area, 1e-18);
-alias Km2 = Units!("Square kilo meter", Area, 1e6);
+alias m2 = Units!("Square Meter", Area);
+alias dm2 = Units!("Square deciMeter", Area, 1e-2);
+alias cm2 = Units!("Square centiMeter", Area, 1e-4);
+alias mm2 = Units!("Square milliMeter", Area, 1e-6);
+alias um2 = Units!("Square microMeter", Area, 1e-12);
+alias nm2 = Units!("Square nanoMeter", Area, 1e-18);
+alias Km2 = Units!("Square kiloMeter", Area, 1e6);
 
-alias m3 = Units!("Cubic meter", Area);
-alias dm3 = Units!("Cubic deci meter", Area, 1e-3);
-alias cm3 = Units!("Cubic centi meter", Area, 1e-6);
-alias mm3 = Units!("Cubic milli meter", Area, 1e-9);
-alias um3 = Units!("Cubic micro meter", Area, 1e-18);
-alias nm3 = Units!("Cubic nano meter", Area, 1e-27);
-alias Km3 = Units!("Cubic kilo meter", Area, 1e9);
+alias m3 = Units!("Cubic Meter", Area);
+alias dm3 = Units!("Cubic deciMeter", Area, 1e-3);
+alias cm3 = Units!("Cubic centiMeter", Area, 1e-6);
+alias mm3 = Units!("Cubic milliMeter", Area, 1e-9);
+alias um3 = Units!("Cubic microMeter", Area, 1e-18);
+alias nm3 = Units!("Cubic nanoMeter", Area, 1e-27);
+alias Km3 = Units!("Cubic kiloMeter", Area, 1e9);
 
 alias rev = Units!("Revolution", Angle);
 alias hpi = Units!("Half PI", Angle, 1.0/4.0);
@@ -300,58 +419,58 @@ alias deg = Units!("Degree", Angle, 1.0/360.0);
 alias rad = Units!("Radian", Angle, 1.0/(PI*2));
 
 alias V = Units!("Volt", Voltage);
-alias mV = Units!("Milli Volt", Voltage, 1e-3);
-alias uV = Units!("Micro Volt", Voltage, 1e-6);
-alias nV = Units!("Nano Volt", Voltage, 1e-9);
-alias KV = Units!("Kilo Volt", Voltage, 1e3);
-alias MV = Units!("Mega Volt", Voltage, 1e3);
+alias mV = Units!("MilliVolt", Voltage, 1e-3);
+alias uV = Units!("MicroVolt", Voltage, 1e-6);
+alias nV = Units!("NanoVolt", Voltage, 1e-9);
+alias KV = Units!("KiloVolt", Voltage, 1e3);
+alias MV = Units!("MegaVolt", Voltage, 1e3);
 
 alias A = Units!("Ampere", Current);
-alias mA = Units!("Milli Ampere", Current, 1e-3);
-alias uA = Units!("Micro Ampere", Current, 1e-6);
-alias nA = Units!("Nano Ampere", Current, 1e-9);
-alias KA = Units!("Kilo Ampere", Current, 1e3);
+alias mA = Units!("MilliAmpere", Current, 1e-3);
+alias uA = Units!("MicroAmpere", Current, 1e-6);
+alias nA = Units!("NanoAmpere", Current, 1e-9);
+alias KA = Units!("KiloAmpere", Current, 1e3);
 
 alias Ohm = Units!("Ohm", Resistance);
-alias mOhm = Units!("Milli Ohm", Resistance, 1e-3);
-alias uOhm = Units!("Micro Ohm", Resistance, 1e-6);
-alias KOhm = Units!("Kilo Ohm", Resistance, 1e3);
-alias MOhm = Units!("Mega Ohm", Resistance, 1e6);
+alias mOhm = Units!("MilliOhm", Resistance, 1e-3);
+alias uOhm = Units!("MicroOhm", Resistance, 1e-6);
+alias KOhm = Units!("KiloOhm", Resistance, 1e3);
+alias MOhm = Units!("MegaOhm", Resistance, 1e6);
 
 alias F = Units!("Farad", Capacitance);
-alias mF = Units!("Milli Farad", Capacitance, 1e-3);
-alias uF = Units!("Micro Farad", Capacitance, 1e-6);
-alias nF = Units!("Nano Farad", Capacitance, 1e-9);
-alias pF = Units!("Pico Farad", Capacitance, 1e-12);
+alias mF = Units!("MilliFarad", Capacitance, 1e-3);
+alias uF = Units!("MicroFarad", Capacitance, 1e-6);
+alias nF = Units!("NanoFarad", Capacitance, 1e-9);
+alias pF = Units!("PicoFarad", Capacitance, 1e-12);
 
 alias H = Units!("Henry", Inductance);
-alias mH = Units!("Milli Henry", Inductance, 1e-3);
-alias uH = Units!("Micro Henry", Inductance, 1e-6);
-alias nH = Units!("Nano Henry", Inductance, 1e-9);
-alias pH = Units!("Pico Henry", Inductance, 1e-12);
+alias mH = Units!("MilliHenry", Inductance, 1e-3);
+alias uH = Units!("MicroHenry", Inductance, 1e-6);
+alias nH = Units!("NanoHenry", Inductance, 1e-9);
+alias pH = Units!("PicoHenry", Inductance, 1e-12);
 
 alias W = Units!("Watt", Power);
-alias mW = Units!("Milli Watt", Power, 1e-3);
-alias uW = Units!("Micro Watt", Power, 1e-6);
-alias nW = Units!("Nano Watt", Power, 1e-9);
-alias KW = Units!("Kilo Watt", Power, 1e3);
-alias MW = Units!("Mega Watt", Power, 1e6);
+alias mW = Units!("MilliWatt", Power, 1e-3);
+alias uW = Units!("MicroWatt", Power, 1e-6);
+alias nW = Units!("NanoWatt", Power, 1e-9);
+alias KW = Units!("KiloWatt", Power, 1e3);
+alias MW = Units!("MegaWatt", Power, 1e6);
 
 alias J = Units!("Joule", Energy);
-alias mJ = Units!("Milli Joule", Energy, 1e-3);
-alias uJ = Units!("Micro Joule", Energy, 1e-6);
-alias nJ = Units!("Nano Joule", Energy, 1e-9);
-alias KJ = Units!("Kilo Joule", Energy, 1e3);
-alias MJ = Units!("Mega Joule", Energy, 1e6);
+alias mJ = Units!("MilliJoule", Energy, 1e-3);
+alias uJ = Units!("MicroJoule", Energy, 1e-6);
+alias nJ = Units!("NanoJoule", Energy, 1e-9);
+alias KJ = Units!("KiloJoule", Energy, 1e3);
+alias MJ = Units!("MegaJoule", Energy, 1e6);
 
 alias degK = Units!("Kelvin", Temperature);
 alias degC = Units!("Celsius", Temperature, 1.0, 273.15);
 alias degF = Units!("Fahrenheit", Temperature, 5.0/9.0, 459.67);
 
 alias sec = Units!("Second", Time);
-alias msec = Units!("Milli Second", Time, 1e-3);
-alias usec = Units!("Micro Second", Time, 1e-6);
-alias nsec = Units!("Nano Second", Time, 1e-9);
+alias msec = Units!("MilliSecond", Time, 1e-3);
+alias usec = Units!("MicroSecond", Time, 1e-6);
+alias nsec = Units!("NanoSecond", Time, 1e-9);
 alias min = Units!("Minute", Time, 60);
 alias hour = Units!("Hour", Time, 60*60);
 alias day = Units!("Day", Time, 60*60*24);
