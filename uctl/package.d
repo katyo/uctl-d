@@ -44,6 +44,7 @@ import uctl.filt;
 import uctl.trans;
 import uctl.regul;
 import uctl.simul;
+import uctl.modul;
 import uctl.util;
 
 alias uctl.filt.mk mk;

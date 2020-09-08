@@ -27,6 +27,8 @@ MODULES += \
   uctl.simul.htr \
   uctl.simul.dcm \
   uctl.simul.thr \
+  uctl.modul.package \
+  uctl.modul.swm \
   uctl.test
 
 PLOTS += \
@@ -35,7 +37,8 @@ PLOTS += \
   sim_htr \
   sim_pid_htr \
   sim_dcm \
-  thr_fit
+  thr_fit \
+  mod_swm
 
 #DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundDown
