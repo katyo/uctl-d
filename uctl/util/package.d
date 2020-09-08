@@ -8,3 +8,7 @@ public import uctl.util.dl;
 public import uctl.util.lt;
 public import uctl.util.sort;
 public import uctl.util.win;
+
+import uctl.util.osc;
+
+alias uctl.util.osc.mk mk;
