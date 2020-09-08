@@ -604,8 +604,14 @@ struct Units(string name_, alias Class_, real factor_ = 1, real offset_ = 0) if 
 }
 
 /// Checks if somethig is measurement units
-template isUnits(X...) if (X.length == 1) {
-  enum bool isUnits = isInstanceOf!(Units, X[0]);
+template isUnits(X...) if (X.length == 1 || X.length == 2) {
+  static if (X.length == 1) {
+    enum bool isUnits = isInstanceOf!(Units, X[0]);
+  } else static if (isUnits!(X[0]) && isUnitsClass!(X[1])) {
+    enum bool isUnits = is(X[0].Class == X[1]);
+  } else {
+    enum bool isUnits = false;
+  }
 }
 
 /// Defines new measurement units class
