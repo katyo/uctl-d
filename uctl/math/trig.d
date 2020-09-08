@@ -53,14 +53,84 @@ module uctl.math.trig;
 import std.math: PI, std_sin = sin, std_cos = cos;
 import std.traits: isCallable, Parameters, ReturnType;
 
-import uctl.num: isFloat, fix, asnum, isFixed;
-import uctl.unit: to, Angle, rad, hpi, hasUnits;
+import uctl.num: isFloat, fix, asnum, isFixed, isNumer;
+import uctl.unit: to, as, Angle, rad, hpi, hasUnits, isUnits;
 
 version(unittest) {
-  import uctl.unit: Val, as, deg;
+  import uctl.unit: Val, deg;
   import uctl.test: assert_eq, max_abs_error, mean_sqr_error, unittests;
 
   mixin unittests;
+}
+
+/// Get PI/2 constant in any angle units
+auto half_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
+  return asnum!(1.0.as!hpi.to!U.raw, T).as!U;
+}
+
+/// Get PI/2 constant in any angle units
+auto half_pi(A)() if (hasUnits!(A, Angle)) {
+  return half_pi!(A.raw_t, A.units);
+}
+
+/// Get PI/3 constant in any angle units
+auto third_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
+  return asnum!((2.0/3.0).as!hpi.to!U.raw, T).as!U;
+}
+
+/// Get PI/3 constant in any angle units
+auto third_pi(A)() if (hasUnits!(A, Angle)) {
+  return third_pi!(A.raw_t, A.units);
+}
+
+/// Get PI/4 constant in any angle units
+auto quarter_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
+  return asnum!((0.5).as!hpi.to!U.raw, T).as!U;
+}
+
+/// Get PI/4 constant in any angle units
+auto quarter_pi(A)() if (hasUnits!(A, Angle)) {
+  return quarter_pi!(A.raw_t, A.units);
+}
+
+/// Get PI/6 constant in any angle units
+auto sixth_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
+  return asnum!((1.0/3.0).as!hpi.to!U.raw, T).as!U;
+}
+
+/// Get PI/6 constant in any angle units
+auto sixth_pi(A)() if (hasUnits!(A, Angle)) {
+  return sixth_pi!(A.raw_t, A.units);
+}
+
+/// Get 2PI/3 constant in any angle units
+auto two_third_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
+  return asnum!((4.0/3.0).as!hpi.to!U.raw, T).as!U;
+}
+
+/// Get 2PI/3 constant in any angle units
+auto two_third_pi(A)() if (hasUnits!(A, Angle)) {
+  return two_third_pi!(A.raw_t, A.units);
+}
+
+/// Get PI constant in any angle units
+auto pi(T, U)() if (isFixed!T && isUnits!(U, Angle)) {
+  return asnum!(2.0.as!hpi.to!U.raw, T).as!U;
+}
+
+/// Get PI constant in any angle units
+auto pi(A)() if (hasUnits!(A, Angle)) {
+  return pi!(A.raw_t, A.units);
+}
+
+/// Get 2PI constant in any angle units
+auto two_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
+  return asnum!(4.0.as!hpi.to!U.raw, T).as!U;
+}
+
+/// Get 2PI constant in any angle units
+auto two_pi(A)() if (hasUnits!(A, Angle)) {
+  return two_pi!(A.raw_t, A.units);
 }
 
 /// Check that function is like a sine or cosine
