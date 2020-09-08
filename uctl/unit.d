@@ -161,8 +161,8 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
 
   /// Convert underlying raw value
   const pure nothrow @nogc @safe
-  X opCast(X)() if (hasUnits!X && is(X.units == U)) {
-    return cast(X) raw;
+  X opCast(X)() if (hasUnits!(X, U)) {
+    return (cast(X.raw_t) raw).as!U;
   }
 
   /// Negation
