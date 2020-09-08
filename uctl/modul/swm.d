@@ -31,7 +31,7 @@ auto swm(alias S, alias R, T)(const T phase) if (isSinOrCos!(S, T) && ((!is(R) &
     } else static if (N == 3) {
       res[0] = S(phase);
       res[1] = S(phase + two_third_pi!T);
-      res[2] = S(phase - two_third_pi!T);
+      res[2] = cast(O) -(res[0] + res[1]); //S(phase - two_third_pi!T);
     }
   }
 
@@ -79,7 +79,7 @@ nothrow @nogc unittest {
   auto abc2 = swm!(sine, [3])(phase2);
   assert_eq(abc2[0], 0.3088505386567556);
   assert_eq(abc2[1], 0.669092649734379541);
-  assert_eq(abc2[2], -0.978261450902767948);
+  assert_eq(abc2[2], -0.977943188391135143);
 }
 
 /// Test modulation (floating-point)
@@ -112,7 +112,7 @@ nothrow @nogc unittest {
   auto abc = swm!(sine, [3])(phase);
   assert_eq(abc[0], P(0.0));
   assert_eq(abc[1], P(0.8661972284));
-  assert_eq(abc[2], P(-0.866197288));
+  assert_eq(abc[2], P(-0.8661972284));
 
   /// Step 1
   auto phase2 = state.apply(param);
@@ -127,5 +127,5 @@ nothrow @nogc unittest {
   auto abc2 = swm!(sine, [3])(phase2);
   assert_eq(abc2[0], P(0.3088505268));
   assert_eq(abc2[1], P(0.6690926552));
-  assert_eq(abc2[2], P(-0.9782614708));
+  assert_eq(abc2[2], P(-0.977943182));
 }
