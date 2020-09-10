@@ -8,6 +8,7 @@ module uctl.modul.swm;
 import std.traits: isInstanceOf, isArray;
 import uctl.num: isNumer, isInt;
 import uctl.math.trig: isSinOrCos, half_pi, two_third_pi;
+import uctl.util.vec: isGenVec, genVecSize, GenVec, sliceof;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
@@ -16,23 +17,21 @@ version(unittest) {
 }
 
 /// Generate wave(s)
-auto swm(alias S, alias R, T)(const T phase) if (isSinOrCos!(S, T) && ((!is(R) && isArray!(typeof(R)) && R.length == 1 && isInt!(R[0]) && R[0] >= 1 && R[0] <= 3))) {
+auto swm(alias S, alias R, T)(const T phase) if (isSinOrCos!(S, T) && isGenVec!R && genVecSize!R >= 1 && genVecSize!R <= 3) {
   alias O = typeof(S(phase));
 
-  static if (!is(R) && isArray!(typeof(R))) {
-    enum uint N = R[0];
-    O[N] res;
+  enum uint N = genVecSize!R;
+  GenVec!(R, O) res;
 
-    static if (N == 1) {
-      res[0] = S(phase);
-    } else static if (N == 2) {
-      res[0] = S(phase);
-      res[1] = S(phase + half_pi!T);
-    } else static if (N == 3) {
-      res[0] = S(phase);
-      res[1] = S(phase + two_third_pi!T);
-      res[2] = cast(O) -(res[0] + res[1]); //S(phase - two_third_pi!T);
-    }
+  static if (N == 1) {
+    res.sliceof[0] = S(phase);
+  } else static if (N == 2) {
+    res.sliceof[0] = S(phase);
+    res.sliceof[1] = S(phase + half_pi!T);
+  } else static if (N == 3) {
+    res.sliceof[0] = S(phase);
+    res.sliceof[1] = S(phase + two_third_pi!T);
+    res.sliceof[2] = cast(O) -(res[0] + res[1]); //S(phase - two_third_pi!T);
   }
 
   return res;
