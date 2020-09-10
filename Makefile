@@ -12,6 +12,7 @@ MODULES += \
   uctl.util.sort \
   uctl.util.win \
   uctl.util.osc \
+  uctl.util.vec \
   uctl.filt.package \
   uctl.filt.avg \
   uctl.filt.ema \

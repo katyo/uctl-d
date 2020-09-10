@@ -8,6 +8,7 @@ public import uctl.util.dl;
 public import uctl.util.lt;
 public import uctl.util.sort;
 public import uctl.util.win;
+public import uctl.util.vec;
 
 import uctl.util.osc;
 
