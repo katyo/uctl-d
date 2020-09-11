@@ -130,7 +130,7 @@ module uctl.unit;
 
 import std.math: PI;
 import std.traits: Unqual, isInstanceOf;
-import uctl.num: isNum, fix, asfix, isFixed, isNumer;
+import uctl.num: isNum, fix, asnum, isFixed, isNumer;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
@@ -338,11 +338,7 @@ auto to(U, T)(const T val) if (hasUnits!T && isUnits!(T.units) && isUnits!U && i
     enum real factor = T.units.factor / U.factor;
     enum real offset = T.units.offset * factor - U.offset;
 
-    static if (isFixed!(T.raw_t)) {
-      return (val.raw * asfix!(factor) + asfix!(offset)).as!U;
-    } else {
-      return (val.raw * cast(T.raw_t) factor + cast(T.raw_t) offset).as!U;
-    }
+    return (val.raw * asnum!(factor, T.raw_t) + asnum!(offset, T.raw_t)).as!U;
   }
 }
 
