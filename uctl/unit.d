@@ -317,6 +317,27 @@ nothrow @nogc @safe unittest {
   assert(is(rawTypeOf!(X(1).as!mm) == X));
 }
 
+/// Create value literal of same class
+template asval(T, real raw) if (hasUnits!T) {
+  enum auto asval = asval!(raw, T);
+}
+
+/// Create value literal of same class
+template asval(real raw, T) if (hasUnits!T) {
+  enum auto asval = asnum!(raw, T.raw_t).as!(T.units);
+}
+
+/// Test `asval`
+nothrow @nogc unittest {
+  alias F = Val!(float, V);
+  assert(is(typeof(asval!(1.0, F)) == F));
+  assert(is(typeof(asval!(F, 0.0)) == F));
+
+  alias X = Val!(fix!(-1, 1), Ohm);
+  assert(is(typeof(asval!(1.0, X)) == Val!(fix!1, Ohm)));
+  assert(is(typeof(asval!(X, 0.0)) == Val!(fix!0, Ohm)));
+}
+
 /// Add measurement units to raw value
 pure nothrow @nogc @safe
 Val!(T, U) as(U, T)(T val) if (is(T) && isNumer!T && is(U) && isUnits!U) {
