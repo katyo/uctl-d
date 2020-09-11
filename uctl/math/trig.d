@@ -54,7 +54,7 @@ import std.math: PI, std_sin = sin, std_cos = cos;
 import std.traits: isCallable, Parameters, ReturnType;
 
 import uctl.num: isFloat, fix, asnum, isFixed, isNumer;
-import uctl.unit: to, as, Angle, rad, hpi, hasUnits, isUnits;
+import uctl.unit: to, as, asval, Angle, rad, hpi, hasUnits, isUnits;
 
 version(unittest) {
   import uctl.unit: Val, deg;
@@ -63,64 +63,36 @@ version(unittest) {
   mixin unittests;
 }
 
-/// Get PI/2 constant in any angle units
-auto half_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
-  return asnum!(1.0.as!hpi.to!U.raw, T).as!U;
-}
-
-/// Get PI/2 constant in any angle units
-auto half_pi(A)() if (hasUnits!(A, Angle)) {
-  return half_pi!(A.raw_t, A.units);
-}
-
-/// Get PI/3 constant in any angle units
-auto third_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
-  return asnum!((2.0/3.0).as!hpi.to!U.raw, T).as!U;
-}
-
-/// Get PI/3 constant in any angle units
-auto third_pi(A)() if (hasUnits!(A, Angle)) {
-  return third_pi!(A.raw_t, A.units);
-}
-
-/// Get PI/4 constant in any angle units
-auto quarter_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
-  return asnum!((0.5).as!hpi.to!U.raw, T).as!U;
-}
-
-/// Get PI/4 constant in any angle units
-auto quarter_pi(A)() if (hasUnits!(A, Angle)) {
-  return quarter_pi!(A.raw_t, A.units);
-}
-
-/// Get PI/6 constant in any angle units
-auto sixth_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
-  return asnum!((1.0/3.0).as!hpi.to!U.raw, T).as!U;
-}
-
-/// Get PI/6 constant in any angle units
-auto sixth_pi(A)() if (hasUnits!(A, Angle)) {
-  return sixth_pi!(A.raw_t, A.units);
-}
-
-/// Get 2PI/3 constant in any angle units
-auto two_third_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
-  return asnum!((4.0/3.0).as!hpi.to!U.raw, T).as!U;
-}
-
-/// Get 2PI/3 constant in any angle units
-auto two_third_pi(A)() if (hasUnits!(A, Angle)) {
-  return two_third_pi!(A.raw_t, A.units);
+/// Get PI constant in any angle units
+template pi(X...) if (X.length >= 1 && X.length <= 2) {
+  enum auto pi = pi!(1.0, X);
 }
 
 /// Get PI constant in any angle units
-auto pi(T, U)() if (isFixed!T && isUnits!(U, Angle)) {
-  return asnum!(2.0.as!hpi.to!U.raw, T).as!U;
+template pi(real mul, X...) if (X.length >= 1 && X.length <= 2) {
+  static if (X.length == 1 && hasUnits!(X[0], Angle)) {
+    alias A = X[0];
+  } else static if (X.length == 2) {
+    static if (isNumer!(X[0]) && isUnits!(X[1], Angle)) {
+      alias A = Val!(X[0], X[1]);
+    } else static if (isNumer!(X[1]) && isUnits!(X[0], Angle)) {
+      alias A = Val!(X[1], X[0]);
+    }
+  }
+  enum auto pi = asval!((2.0 * mul).as!hpi.to!(A.units).raw, A);
 }
 
-/// Get PI constant in any angle units
-auto pi(A)() if (hasUnits!(A, Angle)) {
-  return pi!(A.raw_t, A.units);
+/// Test `pi`
+nothrow @nogc unittest {
+  alias A = typeof(1.0.as!hpi);
+
+  assert_eq(pi!A, PI.as!rad.to!hpi);
+  assert_eq(pi!(1.0/3.0, A), (PI * 1.0/3.0).as!rad.to!hpi);
+
+  alias X = Val!(fix!(-10, 10), hpi);
+
+  assert_eq(pi!X, asnum!((PI).as!rad.to!hpi.raw, X.raw_t).as!(X.units));
+  assert_eq(pi!(1.0/3.0, X), asnum!((PI * 1.0/3.0).as!rad.to!hpi.raw, X.raw_t).as!(X.units));
 }
 
 /// Get 2PI constant in any angle units

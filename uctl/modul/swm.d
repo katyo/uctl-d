@@ -7,7 +7,7 @@ module uctl.modul.swm;
 
 import std.traits: isInstanceOf, isArray;
 import uctl.num: isNumer, isInt;
-import uctl.math.trig: isSinOrCos, half_pi, two_third_pi;
+import uctl.math.trig: isSinOrCos, pi;
 import uctl.util.vec: isGenVec, genVecSize, GenVec, sliceof;
 
 version(unittest) {
@@ -27,11 +27,11 @@ auto swm(alias S, alias R, T)(const T phase) if (isSinOrCos!(S, T) && isGenVec!R
     res.sliceof[0] = S(phase);
   } else static if (N == 2) {
     res.sliceof[0] = S(phase);
-    res.sliceof[1] = S(phase + half_pi!T);
+    res.sliceof[1] = S(phase + pi!(0.5, T));
   } else static if (N == 3) {
     res.sliceof[0] = S(phase);
-    res.sliceof[1] = S(phase + two_third_pi!T);
-    res.sliceof[2] = cast(O) -(res[0] + res[1]); //S(phase - two_third_pi!T);
+    res.sliceof[1] = S(phase + pi!(2.0/3.0, T));
+    res.sliceof[2] = cast(O) -(res[0] + res[1]); //S(phase - pi!(2.0/3.0, T));
   }
 
   return res;
