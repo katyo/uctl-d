@@ -445,6 +445,8 @@ alias nW = Units!("NanoWatt", Power, 1e-9);
 alias KW = Units!("KiloWatt", Power, 1e3);
 alias MW = Units!("MegaWatt", Power, 1e6);
 
+alias HP = Units!("Horse power", Power, 735.49875);
+
 alias J = Units!("Joule", Energy);
 alias mJ = Units!("MilliJoule", Energy, 1e-3);
 alias uJ = Units!("MicroJoule", Energy, 1e-6);
@@ -511,6 +513,9 @@ nothrow @nogc unittest {
   assert_eq(296.15.as!degK.to!degF, 73.4.as!degF, 1e-10);
   assert_eq(73.4.as!degF.to!degC, 23.0.as!degC, 1e-10);
   assert_eq(23.0.as!degC.to!degF, 73.4.as!degF);
+
+  assert_eq(1.0.as!HP.to!W, 735.49875.as!W);
+  assert_eq(1.0.as!W.to!HP, 0.001359621617303904.as!HP);
 
   alias X = fix!(-10, 10);
 
