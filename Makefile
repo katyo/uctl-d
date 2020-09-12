@@ -30,6 +30,7 @@ MODULES += \
   uctl.simul.thr \
   uctl.modul.package \
   uctl.modul.swm \
+  uctl.modul.svm \
   uctl.test
 
 PLOTS += \
@@ -39,7 +40,8 @@ PLOTS += \
   sim_pid_htr \
   sim_dcm \
   thr_fit \
-  mod_swm
+  mod_swm \
+  mod_svm
 
 #DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundDown
@@ -102,7 +104,7 @@ plot: plot.$(1)
 
 plot.$(1): doc/$(1).svg
 
-doc/$(1).svg: plot/$(1).m uctl
+doc/$(1).svg: plot/$(1).m #uctl
 	cd $$(dir $$<) && octave $$(notdir $$<)
 	mv plot/$(1).svg $$@
 endef

@@ -1241,7 +1241,7 @@ template asnum(real val, T) if (isNumer!T) {
   }
 }
 
-/// Test asnum
+/// Test `asnum`
 nothrow @nogc unittest {
   assert(is(typeof(asnum!(1.0, float)) == float));
   assert(is(typeof(asnum!(float, 0.0)) == float));

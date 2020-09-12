@@ -3,4 +3,5 @@
  */
 module uctl.modul;
 
-import uctl.modul.swm;
+public import uctl.modul.swm;
+public import uctl.modul.svm;
