@@ -22,22 +22,15 @@ rows = ceil(length(funcs) / cols);
 
 for i = 1:length(funcs)
   func = funcs{i};
-  data = str2num(eval_d('import uctl.util.win;',
-                        'enum uint N = ', size, ';',
-                        'static immutable w = ', func, '!(N, double);',
-                        'foreach (i; 0 .. N+1) {',
-                        '  auto x = cast(double)i / cast(double)N;',
-                        '  auto y = w[i];',
-                        '  printf("%g %g\n", x, y);',
-                        '}'));
+  data = str2num(eval_d(fileread('win_funcs.d'),
+                        'size', size,
+                        'func', func));
   x = data(:,1);
   y = data(:,2);
 
   subplot(rows, cols, i);
   plot(x, y);
   axis("labely");
-  ##set(gca, 'xticklabel', []);
-  ##set(gca, 'xtick', []);
   title(strrep(func, '_', '-'));
 endfor
 

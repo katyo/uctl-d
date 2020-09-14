@@ -9,17 +9,9 @@ place = [1 3 5 7
 
 for i = 1:length(orders)
   order = orders(i);
-  data = str2num(eval_d('import uctl.math.trig;',
-                        'import uctl.unit;',
-                        'import std.math: PI;',
-                        'enum uint N = ', size, ';',
-                        'enum double S = PI / (2 * N);',
-                        'foreach (i; 0 .. N+1) {',
-                        '  auto x = (cast(double)i * S).as!rad;',
-                        '  auto y = sin!', order, '(x);',
-                        '  auto yr = sin(x);',
-                        '  printf("%g %g %g\n", x.raw, y, yr);',
-                        '}'));
+  data = str2num(eval_d(fileread('trig_errs.d'),
+                        'size', size,
+                        'order', order));
   x = data(:,1);
   y = data(:,2);
   yr = data(:,3);

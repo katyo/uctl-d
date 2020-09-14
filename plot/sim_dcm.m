@@ -1,18 +1,9 @@
 dt = 10e-6;
 tend = 0.7;
 
-data = str2num(eval_d('import uctl.simul.dcm;', "\n",
-                      'enum auto dt = ', dt, ';', "\n",
-                      'enum auto tend = ', tend, ';', "\n",
-                      'immutable auto mot_param = mk!(Param, dt)(124e-3f, 42e-6f, 8.5e-3f, 8.71e-6f);', "\n",
-                      'auto mot_state = State!(mot_param, float, float)();', "\n",
-                      'foreach (i; 0 .. cast(int)(tend / dt)) {', "\n",
-                      '  float t = i * dt;', "\n",
-                      '  float Ur = t >= 0.15 && t < 0.35 ? 13.56 : t < 0.5 ? 12.0 : 0.0;', "\n",
-                      '  float Tl = t >= 0.1 && t < 0.3 ? 124e-3 : 13.6e-3;', "\n",
-                      '  mot_state.apply(mot_param, Ur, Tl);', "\n",
-                      '  printf("%f %f %f %f %f\n", t, Ur, Tl, mot_state.wr, mot_state.Ir);', "\n",
-                      '}', "\n"));
+data = str2num(eval_d(fileread('sim_dcm.d'),
+                      'dt', dt,
+                      'tend', tend));
 
 t = data(:,1);
 U = data(:,2);

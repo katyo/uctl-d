@@ -1,21 +1,29 @@
-function data = eval_d(varargin)
-  code = "nothrow @nogc extern(C) void main() { import core.stdc.stdio: printf; ";
+function data = eval_d(code, varargin)
+  code = [code "\n"];
   i = 1;
   while i <= length(varargin)
-    arg = varargin{i};
+    var = varargin{i};
     i++;
-    if isnumeric(arg)
-      arg = num2str(arg);
+    if !ischar(var)
+      error(["Variable name expected at position: " num2str(i)]);
     endif
-    code = [code arg];
+    val = varargin{i}; i++;
+    if ischar(val)
+      code = [code "alias "];
+    elseif isnumeric(val)
+      val = num2str(val);
+      code = [code "enum auto "];
+    endif
+    code = [code var " = " val ";\n"];
   endwhile
-  code = [code " }"];
+  code = [code "import core.stdc.stdio: printf;\n" "nothrow @nogc extern(C) void main() { entry(); }\n"];
 
   src_name = "tmp.d";
   src_file = fopen(src_name, "w");
   fputs(src_file, code);
   fclose(src_file);
 
+  obj_name = "tmp.o";
   bin_name = "tmp.x";
   cmd = ["ldc2 -I. -I.. -of=" bin_name " -d-debug -betterC -nogc -O5 -release " src_name];
   [status, ~] = system(cmd);
@@ -29,5 +37,6 @@ function data = eval_d(varargin)
   endif
 
   delete(src_name);
+  delete(obj_name);
   delete(bin_name);
 endfunction
