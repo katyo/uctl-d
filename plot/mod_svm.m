@@ -13,14 +13,20 @@ p = data(:,2);
 a1 = data(:,3);
 b1 = data(:,4);
 c1 = data(:,5);
-v1 = max(a1, max(b1, c1)) .- min(a1, min(b1, c1));
-w1 = v1 .^ 2;
+ab1 = b1 - a1;
+bc1 = c1 - b1;
+ca1 = a1 - c1;
+w1 = (ab1 .^ 2 + bc1 .^ 2 + ca1 .^ 2) / 3;
 
-subplot(3,1,1);
-plot(t, p, '-;phase;',
-     t, a1, '-;channel a;',
-     t, b1, '-;channel b;',
-     t, c1, '-;channel c;');
+subplot(2,1,1);
+plot(t, p, ':;phase;',
+     t, a1, '-;Va;',
+     t, b1, '-;Vb;',
+     t, c1, '-;Vc;',
+     t, ab1, '--;Vab;',
+     t, bc1, '--;Vbc;',
+     t, ca1, '--;Vca;',
+     t, w1, '-.;P, W;', 'linewidth', 1.5);
 xlabel("t, S");
 ylabel("U, V");
 title("Space-vector modulation");
@@ -28,24 +34,22 @@ title("Space-vector modulation");
 a2 = data(:,6);
 b2 = data(:,7);
 c2 = data(:,8);
-v2 = max(a2, max(b2, c2)) .- min(a2, min(b2, c2));
-w2 = v2 .^ 2;
+ab2 = b2 - a2;
+bc2 = c2 - b2;
+ca2 = a2 - c2;
+w2 = (ab2 .^ 2 + bc2 .^ 2 + ca2 .^ 2) / 3;
 
-subplot(3,1,2);
-plot(t, p, '-;phase;',
-     t, a2, '-;channel a;',
-     t, b2, '-;channel b;',
-     t, c2, '-;channel c;');
+subplot(2,1,2);
+plot(t, p, ':;phase;',
+     t, a2, '-;Va;',
+     t, b2, '-;Vb;',
+     t, c2, '-;Vc;',
+     t, ab2, '--;Vab;',
+     t, bc2, '--;Vbc;',
+     t, ca2, '--;Vca;',
+     t, w2, '-.;P, W;', 'linewidth', 1.5);
 xlabel("t, S");
 ylabel("U, V");
 title("Sine-wave modulation");
 
-subplot(3,1,3);
-plot(t, p, '-;phase;',
-     t, w1, '-;SVM;',
-     t, w2, '-;SINE;');
-xlabel("t, S");
-ylabel("P, W");
-title("Amount power of machine");
-
-print -dsvg -color '-S640,800' mod_svm.svg
+print -dsvg -color '-S640,600' mod_svm.svg
