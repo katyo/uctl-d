@@ -83,7 +83,11 @@ template isClass(X...) {
   static if (X.length == 1) {
     enum bool isClass = isInstanceOf!(Class, X[0]);
   } else static if (X.length == 2) {
-    enum bool isClass = isClass!(X[0]) && X[0].hasP == X[1].hasP && X[0].hasI == X[1].hasI && X[0].hasD == X[1].hasD;
+    static if (isClass!(X[0])) {
+      enum bool isClass = X[0].hasP == X[1].hasP && X[0].hasI == X[1].hasI && X[0].hasD == X[1].hasD;
+    } else {
+      enum bool isClass = false;
+    }
   }
 }
 
