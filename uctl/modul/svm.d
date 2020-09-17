@@ -105,7 +105,7 @@ nothrow @nogc unittest {
 }
 
 /// Generate wave(s)
-auto svm(alias S, alias R, T)(const T phase) if (isSinOrCos!(S, T) && isGenVec!R && genVecSize!R == 3) {
+auto svm(alias S, alias R = [3], T)(const T phase) if (isSinOrCos!(S, T) && isGenVec!R && genVecSize!R == 3) {
   alias O = typeof(S(phase));
 
   GenVec!(R, O) res;

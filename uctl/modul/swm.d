@@ -17,7 +17,7 @@ version(unittest) {
 }
 
 /// Generate wave(s)
-auto swm(alias S, alias R, T)(const T phase) if (isSinOrCos!(S, T) && isGenVec!R && genVecSize!R >= 1 && genVecSize!R <= 3) {
+auto swm(alias S, alias R = [3], T)(const T phase) if (isSinOrCos!(S, T) && isGenVec!R && genVecSize!R >= 1 && genVecSize!R <= 3) {
   alias O = typeof(S(phase));
 
   enum uint N = genVecSize!R;
