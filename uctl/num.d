@@ -697,7 +697,7 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
     alias R = fix!(Rrmin, Rrmax, Rbits);
 
-    return R.from_raw(-raw);
+    return R.from_raw(-raw.raw_to!(exp, R.exp, Rbits));
   }
 
   /// Addition of fixed-point value (binary +)
@@ -1072,6 +1072,11 @@ nothrow @nogc unittest {
 nothrow @nogc unittest {
   assert_eq(-fix!(-100, 200)(5), fix!(-200, 100)(-5));
   assert_eq(-fix!(-22, 11)(-0.5), fix!(-11, 22)(0.5));
+
+  assert_eq(-fix!(-2, 1)(-1.5), fix!(-1, 2)(1.5));
+  assert_eq(-fix!(-2, 1)(-2.0), fix!(-1, 2)(2.0));
+  assert_eq(-fix!(-1, 2)(1.5), fix!(-2, 1)(-1.5));
+  assert_eq(-fix!(-1, 2)(2.0), fix!(-2, 1)(-2.0));
 }
 
 /// Addition
