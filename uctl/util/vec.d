@@ -186,6 +186,7 @@ nothrow @nogc @safe unittest {
 }
 
 /// Interpret vector-like value as slice
+pure nothrow @nogc @trusted
 ref VecType!V[VecSize!V] sliceof(V)(ref V v) if (isVec!V) {
   return * cast(VecType!V[VecSize!V]*) &v;
 }
