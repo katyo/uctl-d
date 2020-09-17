@@ -131,6 +131,22 @@ nothrow @nogc @safe unittest {
   assert(!isNum!(float, double, int));
 }
 
+/// Check that literal or expression is number-like value (integer or floating-point)
+template likeNum(X...) if (X.length == 1) {
+  static if (!is(X[0])) {
+    enum bool likeNum = is(typeof(X[0]): real);
+  } else {
+    enum bool likeNum = false;
+  }
+}
+
+/// Test `likeNum`
+nothrow @nogc unittest {
+  assert(likeNum!1.0);
+  assert(likeNum!1.0f);
+  assert(likeNum!1);
+}
+
 /// Select appropriate integer type by width in bits
 template intType(uint bits, bool unsigned = false) {
   static if (unsigned) {
