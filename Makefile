@@ -7,7 +7,7 @@ MODULES += \
   uctl.math.log \
   uctl.math.util \
   uctl.util.package \
-  uctl.util.val \
+  uctl.util.adj \
   uctl.util.dl \
   uctl.util.lt \
   uctl.util.sort \
