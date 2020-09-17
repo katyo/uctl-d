@@ -3,7 +3,7 @@
  */
 module uctl.util.vec;
 
-import std.traits: isArray, Fields, isInstanceOf;
+import std.traits: isArray, Fields, isInstanceOf, TemplateOf;
 import std.range: ElementType;
 import uctl.num: isNumer, isInt;
 import uctl.unit: hasUnits;
@@ -356,4 +356,34 @@ nothrow @nogc unittest {
   assert(abc.a == 0.25);
   assert(abc.b == 0.25);
   assert(abc.c == 0.25);
+}
+
+/// Generic vector from type
+template genVecOf(X...) if (X.length == 1 && isVec!(X[0])) {
+  static if (is(X[0])) {
+    alias T = X[0];
+  } else {
+    alias T = typeof(X[0]);
+  }
+  static if (isArray!T) {
+    enum uint[1] genVecOf = [VecSize!T];
+  } else static if (is(T == struct)) {
+    alias genVecOf = TemplateOf!T;
+  }
+}
+
+/// Test `genVecOf`
+nothrow @nogc unittest {
+  alias A = genVecOf!(float[2]);
+  assert(isArray!(typeof(A)) && A.length == 1 && A[0] == 2);
+
+  int[3] ab;
+  alias B = genVecOf!(ab);
+  assert(isArray!(typeof(B)) && B.length == 1 && B[0] == 3);
+
+  struct X(T) {
+    T x;
+  }
+  alias C = genVecOf!(X!double);
+  assert(__traits(isSame, C, X));
 }
