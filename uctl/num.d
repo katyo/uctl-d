@@ -687,6 +687,21 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
     }
   }
 
+  /// Get absolute value
+  const pure nothrow @nogc @property @safe
+  auto absof() {
+    static if (isntneg) {
+      return this;
+    } else static if (isneg) {
+      return -this;
+    } else {
+      enum real_t Rrmin = 0.0;
+      enum real_t Rrmax = fmax(-rmin, rmax);
+      alias R = fix!(Rrmin, Rrmax, bits);
+      return this < (cast(self) 0.0) ? (cast(R) -this) : (cast(R) this);
+    }
+  }
+
   /// Negation (unary -)
   const pure nothrow @nogc @safe
   auto opUnary(string op)() if (op == "-") {
@@ -1066,6 +1081,15 @@ nothrow @nogc unittest {
   assert_eq(fix!(-10, 15)(-7.9).intof, fix!(-10, 15)(-7));
 
   assert_eq(fix!(-10, 15)(9.99).intof, fix!(-10, 15)(9));
+}
+
+/// Absolute value
+nothrow @nogc unittest {
+  alias X = fix!(-2, 1);
+  alias Y = fix!(0, 2);
+
+  assert_eq(X(-1.5).absof, Y(1.5));
+  assert_eq(X(0.5).absof, Y(0.5));
 }
 
 /// Negation
