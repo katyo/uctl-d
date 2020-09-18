@@ -66,7 +66,7 @@ nothrow @nogc unittest {
   assert_eq(abc[2], -0.86619724983652);
 
   /// Step 1
-  auto phase2 = state.apply(param);
+  auto phase2 = state(param);
 
   auto a2 = swm!(sine, [1])(phase2);
   assert_eq(a2[0], 0.3088505386567556);
@@ -114,7 +114,7 @@ nothrow @nogc unittest {
   assert_eq(abc[2], P(-0.8661972284));
 
   /// Step 1
-  auto phase2 = state.apply(param);
+  auto phase2 = state(param);
 
   auto a2 = swm!(sine, [1])(phase2);
   assert_eq(a2[0], P(0.3088505268));

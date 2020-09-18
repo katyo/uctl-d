@@ -132,12 +132,20 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.F, T
   }
 
   /// State value
-  R x = 0;
+  R x = 0.0;
   /// Covariance
-  C p = 0;
+  C p = 0.0;
 
+  /// Initialize using initial value
+  const pure nothrow @nogc @safe
+  this(const R initial, const C covariance = 0.0) {
+    x = initial;
+    p = covariance;
+  }
+
+  /// Evaluate filtering step
   pure nothrow @nogc @safe
-  auto apply(ref const P param, const T value) {
+  auto opCall(const ref P param, const T value) {
     enum auto one = asnum!(1, T);
 
     // Predict state: X0 = F * X
@@ -167,9 +175,9 @@ nothrow @nogc unittest {
   static immutable auto param = mk!Param(0.6, 0.5, 0.2, 0.4);
   static auto state = State!(param, double)();
 
-  assert_eq(state.apply(param, 0.123456), 0.0658432);
-  assert_eq(state.apply(param, 1.01246), 0.54008947, 1e-7);
-  assert_eq(state.apply(param, -5.198), -2.49042048, 1e-8);
+  assert_eq(state(param, 0.123456), 0.0658432);
+  assert_eq(state(param, 1.01246), 0.54008947, 1e-7);
+  assert_eq(state(param, -5.198), -2.49042048, 1e-8);
 }
 
 /// Test LQE filter (fixed-point)
@@ -179,7 +187,7 @@ nothrow @nogc unittest {
   static immutable auto param = mk!Param(asfix!0.6, asfix!0.5, asfix!0.2, asfix!0.4);
   static auto state = State!(param, X)();
 
-  assert_eq(state.apply(param, cast(X) 0.123456), cast(X) 0.0658432, cast(X) 1e-8);
-  assert_eq(state.apply(param, cast(X) 1.01246), cast(X) 0.54008947, cast(X) 1e-8);
-  assert_eq(state.apply(param, cast(X) -5.198), cast(X) -2.49042048, cast(X) 1e-8);
+  assert_eq(state(param, cast(X) 0.123456), cast(X) 0.0658432, cast(X) 1e-8);
+  assert_eq(state(param, cast(X) 1.01246), cast(X) 0.54008947, cast(X) 1e-8);
+  assert_eq(state(param, cast(X) -5.198), cast(X) -2.49042048, cast(X) 1e-8);
 }

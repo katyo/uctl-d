@@ -12,7 +12,7 @@ nothrow @nogc void entry() {
 
   foreach (i; 0 .. cast(int)(tend/dt)) {
     float t = i * dt;
-    auto phase = state.apply(param);
+    auto phase = state(param);
 
     auto a = swm!(sine, [1])(phase);
     auto ab = swm!(sine, [2])(phase);

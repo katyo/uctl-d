@@ -13,7 +13,7 @@ module uctl.filt.fir;
 import std.traits: Unqual, isInstanceOf;
 import std.math: PI, sin;
 
-import uctl.num: fix, asfix, isNumer, isFixed;
+import uctl.num: fix, asfix, isNumer, isFixed, typeOf;
 import uctl.util.win: Window;
 import uctl.util.dl: PFDL;
 
@@ -51,17 +51,7 @@ struct Param(uint N_, B_) if (isNumer!B_ && N_ > 0) {
 
   private B[L] weight;
 
-  /// Get weight value by index
-  const pure nothrow @nogc @safe
-  B opIndex(uint i) {
-    return weight[i];
-  }
-
-  /// Set weight value by index
-  pure nothrow @nogc @safe
-  void opIndexAssign(B v, uint i) {
-    weight[i] = v;
-  }
+  alias weight this;
 }
 
 /**
@@ -146,9 +136,8 @@ template param_from_weights(uint L, W) {
  *   N = filter order
  *   T = input values type
  */
-struct State(alias P_, T_) if (isInstanceOf!(Param, P_) && isNumer!(P_.B, T_)) {
-  alias P = P_;
-
+struct State(alias P_, T_) if (isInstanceOf!(Param, typeOf!P_) && isNumer!(P_.B, T_)) {
+  alias P = typeOf!P_;
   alias T = T_;
 
   private PFDL!(P.L, T) dl;
@@ -164,7 +153,7 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_) && isNumer!(P_.B, T_)) {
   /**
    * Apply filter or evaluate filtering step
    */
-  auto apply(ref const P param, const T value) {
+  auto opCall(ref const P param, const T value) {
     alias R = typeof(P.B() * T() * P.I());
 
     R res = param[0] * value;
@@ -184,18 +173,18 @@ nothrow @nogc unittest {
   static immutable auto param = param_from_weights([0.456, -0.137, 0.702, -1.421].staticArray!float);
   static State!(typeof(param), float) state = 0;
 
-  assert_eq(state.apply(param, 0.0), 0.0);
-  assert_eq(state.apply(param, 1.0), 0.456, 1e-8);
-  assert_eq(state.apply(param, 0.0), -0.137, 1e-8);
-  assert_eq(state.apply(param, 0.0), 0.702, 1e-7);
-  assert_eq(state.apply(param, 0.0), -1.421, 1e-8);
-  assert_eq(state.apply(param, 0.0), 0.0);
+  assert_eq(state(param, 0.0), 0.0);
+  assert_eq(state(param, 1.0), 0.456, 1e-8);
+  assert_eq(state(param, 0.0), -0.137, 1e-8);
+  assert_eq(state(param, 0.0), 0.702, 1e-7);
+  assert_eq(state(param, 0.0), -1.421, 1e-8);
+  assert_eq(state(param, 0.0), 0.0);
 
-  assert_eq(state.apply(param, 0.123), 0.056088, 1e-8);
-  assert_eq(state.apply(param, 11.234), 5.105853, 1e-7);
-  assert_eq(state.apply(param, 5.001), 0.827744, 1e-6);
-  assert_eq(state.apply(param, -3.120), 5.603628, 1e-6);
-  assert_eq(state.apply(param, -8.998), -16.128460, 1e-7);
+  assert_eq(state(param, 0.123), 0.056088, 1e-8);
+  assert_eq(state(param, 11.234), 5.105853, 1e-7);
+  assert_eq(state(param, 5.001), 0.827744, 1e-6);
+  assert_eq(state(param, -3.120), 5.603628, 1e-6);
+  assert_eq(state(param, -8.998), -16.128460, 1e-7);
 }
 
 /// Test FIR filter (fixed-point)
@@ -207,16 +196,16 @@ nothrow @nogc unittest {
   static immutable auto param = param_from_weights([0.456, -0.137, 0.702, -1.421].map!(w => cast(W) w).staticArray!4);
   static State!(typeof(param), X) state = cast(X) 0;
 
-  assert_eq(state.apply(param, cast(X) 0.0), cast(Y) 0.0);
-  assert_eq(state.apply(param, cast(X) 1.0), cast(Y) 0.456);
-  assert_eq(state.apply(param, cast(X) 0.0), cast(Y) -0.137);
-  assert_eq(state.apply(param, cast(X) 0.0), cast(Y) 0.702, cast(Y) 1e-7);
-  assert_eq(state.apply(param, cast(X) 0.0), cast(Y) -1.421);
-  assert_eq(state.apply(param, cast(X) 0.0), cast(Y) 0.0);
+  assert_eq(state(param, cast(X) 0.0), cast(Y) 0.0);
+  assert_eq(state(param, cast(X) 1.0), cast(Y) 0.456);
+  assert_eq(state(param, cast(X) 0.0), cast(Y) -0.137);
+  assert_eq(state(param, cast(X) 0.0), cast(Y) 0.702, cast(Y) 1e-7);
+  assert_eq(state(param, cast(X) 0.0), cast(Y) -1.421);
+  assert_eq(state(param, cast(X) 0.0), cast(Y) 0.0);
 
-  assert_eq(state.apply(param, cast(X) 0.123), cast(Y) 0.056088);
-  assert_eq(state.apply(param, cast(X) 11.234), cast(Y) 5.105853, cast(Y) 1e-7);
-  assert_eq(state.apply(param, cast(X) 5.001), cast(Y) 0.827744, cast(Y) 1e-7);
-  assert_eq(state.apply(param, cast(X) -3.120), cast(Y) 5.603628, cast(Y) 1e-7);
-  assert_eq(state.apply(param, cast(X) -8.998), cast(Y) -16.128460, cast(Y) 1e-7);
+  assert_eq(state(param, cast(X) 0.123), cast(Y) 0.056088);
+  assert_eq(state(param, cast(X) 11.234), cast(Y) 5.105853, cast(Y) 1e-7);
+  assert_eq(state(param, cast(X) 5.001), cast(Y) 0.827744, cast(Y) 1e-7);
+  assert_eq(state(param, cast(X) -3.120), cast(Y) 5.603628, cast(Y) 1e-7);
+  assert_eq(state(param, cast(X) -8.998), cast(Y) -16.128460, cast(Y) 1e-7);
 }

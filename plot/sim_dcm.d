@@ -9,7 +9,7 @@ nothrow @nogc void entry() {
     float Ur = t >= 0.15 && t < 0.35 ? 13.56 : t < 0.5 ? 12.0 : 0.0;
     float Tl = t >= 0.1 && t < 0.3 ? 124e-3 : 13.6e-3;
 
-    mot_state.apply(mot_param, Ur, Tl);
+    mot_state(mot_param, Ur, Tl);
     printf("%f %f %f %f %f\n", t, Ur, Tl, mot_state.wr, mot_state.Ir);
   }
 }

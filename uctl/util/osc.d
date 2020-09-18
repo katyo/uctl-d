@@ -146,7 +146,7 @@ struct State(alias P_, A_) if (isInstanceOf!(Param, typeOf!P_) && isNumer!(P_.A.
 
   /// Apply oscillator step
   pure nothrow @nogc @safe
-  A apply(ref const P param) {
+  A opCall(ref const P param) {
     phase = cast(A) (phase + param.delta)._unwind();
     return phase;
   }
@@ -171,8 +171,8 @@ nothrow @nogc unittest {
   state.set(5.0.as!qrev);
   assert_eq(state.phase, 0.25.as!rev);
 
-  assert_eq(state.apply(param), 0.3.as!rev);
-  assert_eq(state.apply(param), 0.35.as!rev);
+  assert_eq(state(param), 0.3.as!rev);
+  assert_eq(state(param), 0.35.as!rev);
 }
 
 /// Test oscillator (fixed-point)
@@ -191,6 +191,6 @@ nothrow @nogc unittest {
   state.set(A(5.0).as!qrev);
   assert_eq(state.phase, A(0.25).as!rev);
 
-  assert_eq(state.apply(param), A(0.3).as!rev);
-  assert_eq(state.apply(param), A(0.35).as!rev);
+  assert_eq(state(param), A(0.3).as!rev);
+  assert_eq(state(param), A(0.35).as!rev);
 }

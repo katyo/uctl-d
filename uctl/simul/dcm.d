@@ -249,7 +249,7 @@ struct State(alias P_, U_, W_) if (isParam!P_ && isNumer!(P_.R, U_, W_)) {
   /**
      Apply simulation step
   */
-  W apply(ref const P param, const U Us, const T Tl) {
+  W opCall(ref const P param, const U Us, const T Tl) {
     Ir += (Us - Eb - param.Rr * Ir) * param.dt_inv_Lr;
     Te = Ir * param.Fs;
     wr += (Te - Tl) * param.dt_inv_Jr; // [N m S Kg^-1 m^-2] => [Kg S^-2 m^2 S Kg^-1 m^-2] => [S^-1]
@@ -268,11 +268,11 @@ nothrow @nogc unittest {
   static immutable auto param = mk!(Param, dt)(124e-3f, 42e-6f, 8.5e-3f, 8.71e-6f);
   static auto state = State!(param, float, float)();
 
-  assert_eq(state.apply(param, 0.0, 124e-4), 0.0);
-  assert_eq(state.apply(param, 13.56, 124e-4), 3.008364737, 1e-6);
-  assert_eq(state.apply(param, 13.56, 124e-4), 8.231302261, 1e-6);
-  assert_eq(state.apply(param, 13.56, 13.6e-3), 14.99089372, 1e-5);
-  assert_eq(state.apply(param, 12.0, 13.6e-3), 22.46734637, 1e-5);
+  assert_eq(state(param, 0.0, 124e-4), 0.0);
+  assert_eq(state(param, 13.56, 124e-4), 3.008364737, 1e-6);
+  assert_eq(state(param, 13.56, 124e-4), 8.231302261, 1e-6);
+  assert_eq(state(param, 13.56, 13.6e-3), 14.99089372, 1e-5);
+  assert_eq(state(param, 12.0, 13.6e-3), 22.46734637, 1e-5);
 }
 
 /// Test motor state (fixed-point)
@@ -287,9 +287,9 @@ nothrow @nogc unittest {
 
   alias T = state.T;
 
-  assert_eq(state.apply(param, U(0.0), T(124e-3)), W(0.0));
-  assert_eq(state.apply(param, U(13.56), T(124e-4)), W(3.008364737));
-  assert_eq(state.apply(param, U(13.56), T(124e-4)), W(8.231302261));
-  assert_eq(state.apply(param, U(13.56), T(13.6e-3)), W(14.99089372));
-  assert_eq(state.apply(param, U(12.0), T(13.6e-3)), W(22.46734637));
+  assert_eq(state(param, U(0.0), T(124e-3)), W(0.0));
+  assert_eq(state(param, U(13.56), T(124e-4)), W(3.008364737));
+  assert_eq(state(param, U(13.56), T(124e-4)), W(8.231302261));
+  assert_eq(state(param, U(13.56), T(13.6e-3)), W(14.99089372));
+  assert_eq(state(param, U(12.0), T(13.6e-3)), W(22.46734637));
 }

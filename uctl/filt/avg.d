@@ -32,7 +32,7 @@ version(unittest) {
  *   data = array of elements
  * Returns: Filtered value
  */
-auto apply(uint N, T, alias P = ident_picker!T)(ref T[N] data) if (isPicker!(P, T) && isNumer!(ReturnType!P) && N > 0) {
+auto avg(uint N, T, alias P = ident_picker!T)(ref T[N] data) if (isPicker!(P, T) && isNumer!(ReturnType!P) && N > 0) {
   alias R = Unqual!(ReturnType!P);
 
   static if (isFixed!T) {
@@ -71,12 +71,12 @@ auto apply(uint N, T, alias P = ident_picker!T)(ref T[N] data) if (isPicker!(P, 
 /// Test average filter (floating-point)
 nothrow @nogc unittest {
   static immutable auto a = [0.0, 0.5, 3.15, -0.25].staticArray!float;
-  assert_eq(apply(a), 0.85, 1e-7);
-  assert_eq(apply(a[1..$-1]), 1.825, 1e-7);
+  assert_eq(a.avg, 0.85, 1e-7);
+  assert_eq(a[1..$-1].avg, 1.825, 1e-7);
 
   static immutable auto b = [0.0, 1.5, 2.25, -0.125, -1.0].staticArray!float;
-  assert_eq(apply(b), 0.525, 1e-7);
-  assert_eq(apply(a[2..$]), 1.45, 1e-7);
+  assert_eq(b.avg, 0.525, 1e-7);
+  assert_eq(a[2..$].avg, 1.45, 1e-7);
 }
 
 /// Test average filter (fixed-point)
@@ -84,10 +84,10 @@ nothrow @nogc unittest {
   alias X = fix!(-5, 5);
 
   static immutable auto c = [0.0, 0.5, 3.15, -0.25].map!(x => cast(X) x).staticArray!4;
-  assert_eq(apply(c), cast(X) 0.85, cast(X) 1e-8);
+  assert_eq(c.avg, cast(X) 0.85, cast(X) 1e-8);
 
   static immutable auto d = [0.0, 1.5, 2.25, -0.125, -1.0].map!(x => cast(X) x).staticArray!5;
-  assert_eq(apply(d), cast(X) 0.525);
+  assert_eq(d.avg, cast(X) 0.525);
 }
 
 /**
@@ -102,8 +102,8 @@ nothrow @nogc unittest {
  *   data = array of elements
  * Returns: Filtered value
  */
-auto apply(alias P, uint N, T)(ref T[N] data) if (isPicker!(P, T) && isNumer!(ReturnType!P) && N > 0) {
-  return apply!(N, T, P)(data);
+auto avg(alias P, uint N, T)(ref T[N] data) if (isPicker!(P, T) && isNumer!(ReturnType!P) && N > 0) {
+  return avg!(N, T, P)(data);
 }
 
 /// Test average filter (with accessor)
@@ -116,13 +116,13 @@ nothrow @nogc unittest {
 
   static immutable auto s = [A(true, 0.0, 1), A(true, 0.25, 5), A(false, -1.75, 2)].staticArray;
 
-  assert_eq(apply!(ref (ref immutable A a) => a.b)(s), -0.5);
+  assert_eq(s.avg!(ref (ref immutable A a) => a.b), -0.5);
 
   static const auto s1 = [A(true, 0.0, 1), A(true, 0.25, 5), A(false, -1.75, 2)].staticArray;
 
-  assert_eq(apply!(ref (ref immutable A a) => a.b)(s), -0.5);
+  assert_eq(s.avg!(ref (ref immutable A a) => a.b), -0.5);
 
   static auto s2 = [A(true, 0.0, 1), A(true, 0.25, 5), A(false, -1.75, 2)].staticArray;
 
-  assert_eq(apply!(ref (ref A a) => a.b)(s2), -0.5);
+  assert_eq(s2.avg!(ref (ref A a) => a.b), -0.5);
 }

@@ -27,12 +27,12 @@ nothrow @nogc void entry() {
     float t = i * dt;
 
     // constant power heating
-    float Thtr = htr_state.apply(htr_param, Pwr, Tenv);
+    float Thtr = htr_state(htr_param, Pwr, Tenv);
 
     // PID-control
-    float Pwr_pid = pid_state.apply(pid_param, Ttgt - Thtr_pid).clamp(0.0, Pmax);
+    float Pwr_pid = pid_state(pid_param, Ttgt - Thtr_pid).clamp!(0.0, Pmax);
     // PID-conttolled heating
-    Thtr_pid = htr_state_pid.apply(htr_param, Pwr_pid, Tenv);
+    Thtr_pid = htr_state_pid(htr_param, Pwr_pid, Tenv);
 
     printf("%f %f %f %f\n", t, Thtr, Thtr_pid, Pwr_pid);
   }

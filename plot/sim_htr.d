@@ -9,7 +9,7 @@ nothrow @nogc void entry() {
     float t = i * dt;
     float Pwr = t < 100 ? 18 : t < 200 ? 26 : t < 300 ? 40 : 0;
 
-    float Thtr = htr_state.apply(htr_param, Pwr, Tenv);
+    float Thtr = htr_state(htr_param, Pwr, Tenv);
 
     printf("%f %f %f %f\n", t, Pwr, Thtr, float(Tenv));
   }

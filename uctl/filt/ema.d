@@ -290,7 +290,7 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.A, T
    * Returns: filtered value
    */
   pure nothrow @nogc @safe
-  R apply(const ref P param, const T value) {
+  R opCall(const ref P param, const T value) {
     // X = alpha * X + (1 - alpha) * X0
     auto res = (param.alpha * value +
                 param.cmpl_alpha * last_out);
@@ -304,10 +304,10 @@ nothrow @nogc unittest {
   static immutable auto param = mk!Alpha(0.6);
   static auto state = State!(param, double)();
 
-  assert_eq(state.apply(param, 1.3), 0.78, 1e-6);
-  assert_eq(state.apply(param, 0.8), 0.792, 1e-6);
-  assert_eq(state.apply(param, -0.5), 0.0168, 1e-6);
-  assert_eq(state.apply(param, -0.3), -0.17328, 1e-6);
+  assert_eq(state(param, 1.3), 0.78, 1e-6);
+  assert_eq(state(param, 0.8), 0.792, 1e-6);
+  assert_eq(state(param, -0.5), 0.0168, 1e-6);
+  assert_eq(state(param, -0.3), -0.17328, 1e-6);
 }
 
 /// Params from samples
@@ -315,8 +315,8 @@ nothrow @nogc unittest {
   static immutable auto param = mk!Samples(2.0);
   static auto state = State!(param, double)();
 
-  assert_eq(state.apply(param, 1.0), 0.6666667, 1e-6);
-  assert_eq(state.apply(param, 1.0), 0.8888889, 1e-6);
+  assert_eq(state(param, 1.0), 0.6666667, 1e-6);
+  assert_eq(state(param, 1.0), 0.8888889, 1e-6);
 }
 
 /// Params from time
@@ -326,10 +326,10 @@ nothrow @nogc unittest {
   static immutable auto param = mk!(Time, 0.1)(4.0);
   static auto state = State!(param, double)();
 
-  assert_eq(state.apply(param, 1.3), 0.06341463327, 1e-8);
-  assert_eq(state.apply(param, 0.8), 0.09934562445, 1e-8);
-  assert_eq(state.apply(param, -0.5), 0.07010925002, 1e-8);
-  assert_eq(state.apply(param, -0.3), 0.05205513909, 1e-8);
+  assert_eq(state(param, 1.3), 0.06341463327, 1e-8);
+  assert_eq(state(param, 0.8), 0.09934562445, 1e-8);
+  assert_eq(state(param, -0.5), 0.07010925002, 1e-8);
+  assert_eq(state(param, -0.3), 0.05205513909, 1e-8);
 }
 
 /// Params from samples (fixed)
@@ -339,8 +339,8 @@ nothrow @nogc unittest {
   static immutable auto param = mk!Samples(asfix!2.0);
   static auto state = State!(param, X)();
 
-  assert_eq(state.apply(param, cast(X) 1.0), cast(X) 0.666666666);
-  assert_eq(state.apply(param, cast(X) 1.0), cast(X) 0.8888888881);
+  assert_eq(state(param, cast(X) 1.0), cast(X) 0.666666666);
+  assert_eq(state(param, cast(X) 1.0), cast(X) 0.8888888881);
 }
 
 /// Params from time (fixed)
@@ -351,8 +351,8 @@ nothrow @nogc unittest {
   static immutable auto param = mk!(Time, dt)(asfix!4.0);
   static auto state = State!(param, X)();
 
-  assert_eq(state.apply(param, cast(X) 1.3), cast(X) 0.06341463327);
-  assert_eq(state.apply(param, cast(X) 0.8), cast(X) 0.09934562445);
-  assert_eq(state.apply(param, cast(X) -0.5), cast(X) 0.07010925002);
-  assert_eq(state.apply(param, cast(X) -0.3), cast(X) 0.05205513909);
+  assert_eq(state(param, cast(X) 1.3), cast(X) 0.06341463327);
+  assert_eq(state(param, cast(X) 0.8), cast(X) 0.09934562445);
+  assert_eq(state(param, cast(X) -0.5), cast(X) 0.07010925002);
+  assert_eq(state(param, cast(X) -0.3), cast(X) 0.05205513909);
 }

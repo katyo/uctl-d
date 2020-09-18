@@ -725,6 +725,31 @@ struct State(alias P_, E_) if (isParam!P_ && isNumer!(P_.P, E_)) {
     P.E e_i = 0.0;
   }
 
+  static if (C.hasD && C.hasI) {
+    /// Initialize regulator
+    const pure nothrow @nogc @safe
+    this(E e_, P.E e_i_) {
+      e = e_;
+      e_i = e_i_;
+    }
+  } else static if (C.hasD) {
+    /// Initialize regulator
+    const pure nothrow @nogc @safe
+    this(E e_) {
+      e = e_;
+    }
+  } else static if (C.hasI) {
+    /// Initialize regulator
+    const pure nothrow @nogc @safe
+    this(P.E e_i_) {
+      e_i = e_i_;
+    }
+  } else {
+    /// Initialize regulator
+    const pure nothrow @nogc @safe
+    this(P.P x) {}
+  }
+
   /**
      Apply regulator
 
@@ -751,7 +776,7 @@ struct State(alias P_, E_) if (isParam!P_ && isNumer!(P_.P, E_)) {
      See_Also: [CoupleP], [LimitI].
    */
   pure nothrow @nogc @safe
-  auto apply(const ref P param, const E error) {
+  auto opCall(const ref P param, const E error) {
     static if (C.hasI) { // Has integral term
       // Update integral error
       e_i += error;
@@ -800,10 +825,13 @@ nothrow @nogc unittest {
   static immutable auto p = mk!PO(0.125);
   static auto s = State!(p, double)();
 
-  assert_eq(s.apply(p, 1.0), 0.125);
-  assert_eq(s.apply(p, 1.0), 0.125);
-  assert_eq(s.apply(p, 0.5), 0.0625);
-  assert_eq(s.apply(p, -0.5), -0.0625);
+  assert_eq(p.sizeof, double.sizeof);
+  assert_eq(s.sizeof, 1);
+
+  assert_eq(s(p, 1.0), 0.125);
+  assert_eq(s(p, 1.0), 0.125);
+  assert_eq(s(p, 0.5), 0.0625);
+  assert_eq(s(p, -0.5), -0.0625);
 }
 
 /// Test Proportional regulator (fixed-point)
@@ -815,10 +843,13 @@ nothrow @nogc unittest {
   static immutable auto p = mk!PO(P(0.125));
   static auto s = State!(p, T)();
 
-  assert_eq(s.apply(p, T(1.0)), R(0.125));
-  assert_eq(s.apply(p, T(1.0)), R(0.125));
-  assert_eq(s.apply(p, T(0.5)), R(0.0625));
-  assert_eq(s.apply(p, T(-0.5)), R(-0.0625));
+  assert_eq(p.sizeof, P.sizeof);
+  assert_eq(s.sizeof, 1);
+
+  assert_eq(s(p, T(1.0)), R(0.125));
+  assert_eq(s(p, T(1.0)), R(0.125));
+  assert_eq(s(p, T(0.5)), R(0.0625));
+  assert_eq(s(p, T(-0.5)), R(-0.0625));
 }
 
 /// Test Proportional Integral regulator
@@ -826,10 +857,13 @@ nothrow @nogc unittest {
   static immutable auto p = mk!(PI, double)(0.125, 0.03125);
   static auto s = State!(typeof(p), double)();
 
-  assert_eq(s.apply(p, 1.0), 0.15625);
-  assert_eq(s.apply(p, 1.0), 0.1875);
-  assert_eq(s.apply(p, 0.5), 0.140625);
-  assert_eq(s.apply(p, -0.5), 0.0);
+  assert_eq(p.sizeof, double.sizeof * 2);
+  assert_eq(s.sizeof, double.sizeof);
+
+  assert_eq(s(p, 1.0), 0.15625);
+  assert_eq(s(p, 1.0), 0.1875);
+  assert_eq(s(p, 0.5), 0.140625);
+  assert_eq(s(p, -0.5), 0.0);
 }
 
 /// Test Proportional Integral regulator (fixed-point)
@@ -843,10 +877,13 @@ nothrow @nogc unittest {
   static immutable auto p = mk!(PI, E)(P(0.125), I(0.03125));
   static auto s = State!(typeof(p), T)();
 
-  assert_eq(s.apply(p, T(1.0)), R(0.15625));
-  assert_eq(s.apply(p, T(1.0)), R(0.1875));
-  assert_eq(s.apply(p, T(0.5)), R(0.140625));
-  assert_eq(s.apply(p, T(-0.5)), R(0.0));
+  assert_eq(p.sizeof, P.sizeof + I.sizeof);
+  assert_eq(s.sizeof, E.sizeof);
+
+  assert_eq(s(p, T(1.0)), R(0.15625));
+  assert_eq(s(p, T(1.0)), R(0.1875));
+  assert_eq(s(p, T(0.5)), R(0.140625));
+  assert_eq(s(p, T(-0.5)), R(0.0));
 }
 
 /// Test Proportional Derivative regulator
@@ -854,10 +891,13 @@ nothrow @nogc unittest {
   static immutable auto p = mk!PD(0.125, 0.5);
   static auto s = State!(typeof(p), double)();
 
-  assert_eq(s.apply(p, 1.0), 0.625);
-  assert_eq(s.apply(p, 1.0), 0.125);
-  assert_eq(s.apply(p, 0.5), -0.1875);
-  assert_eq(s.apply(p, -0.5), -0.5625);
+  assert_eq(p.sizeof, double.sizeof * 2);
+  assert_eq(s.sizeof, double.sizeof);
+
+  assert_eq(s(p, 1.0), 0.625);
+  assert_eq(s(p, 1.0), 0.125);
+  assert_eq(s(p, 0.5), -0.1875);
+  assert_eq(s(p, -0.5), -0.5625);
 }
 
 /// Test Proportional Derivative regulator (fixed-point)
@@ -870,10 +910,13 @@ nothrow @nogc unittest {
   static immutable auto p = mk!PD(P(0.125), D(0.5));
   static auto s = State!(typeof(p), T)();
 
-  assert_eq(s.apply(p, T(1.0)), R(0.625));
-  assert_eq(s.apply(p, T(1.0)), R(0.125));
-  assert_eq(s.apply(p, T(0.5)), R(-0.1875));
-  assert_eq(s.apply(p, T(-0.5)), R(-0.5625));
+  assert_eq(p.sizeof, P.sizeof + D.sizeof);
+  assert_eq(s.sizeof, T.sizeof);
+
+  assert_eq(s(p, T(1.0)), R(0.625));
+  assert_eq(s(p, T(1.0)), R(0.125));
+  assert_eq(s(p, T(0.5)), R(-0.1875));
+  assert_eq(s(p, T(-0.5)), R(-0.5625));
 }
 
 /// Test Proportional Integral Derivative regulator
@@ -881,10 +924,13 @@ nothrow @nogc unittest {
   static immutable auto p = mk!(PID, double)(0.125, 0.5, 0.03125);
   static auto s = State!(typeof(p), double)();
 
-  assert_eq(s.apply(p, 1.0), 0.65625);
-  assert_eq(s.apply(p, 1.0), 1.125);
-  assert_eq(s.apply(p, 0.5), 1.296875);
-  assert_eq(s.apply(p, -0.5), 0.90625);
+  assert_eq(p.sizeof, double.sizeof * 3);
+  assert_eq(s.sizeof, double.sizeof * 2);
+
+  assert_eq(s(p, 1.0), 0.65625);
+  assert_eq(s(p, 1.0), 1.125);
+  assert_eq(s(p, 0.5), 1.296875);
+  assert_eq(s(p, -0.5), 0.90625);
 }
 
 /// Test Proportional Integral regulator (fixed-point)
@@ -899,8 +945,11 @@ nothrow @nogc unittest {
   static immutable auto p = mk!(PID, E)(P(0.125), D(0.5), I(0.03125));
   static auto s = State!(typeof(p), T)();
 
-  assert_eq(s.apply(p, T(1.0)), R(0.65625));
-  assert_eq(s.apply(p, T(1.0)), R(1.125));
-  assert_eq(s.apply(p, T(0.5)), R(1.296875));
-  assert_eq(s.apply(p, T(-0.5)), R(0.90625));
+  assert_eq(p.sizeof, P.sizeof + D.sizeof + I.sizeof);
+  assert_eq(s.sizeof, T.sizeof + E.sizeof);
+
+  assert_eq(s(p, T(1.0)), R(0.65625));
+  assert_eq(s(p, T(1.0)), R(1.125));
+  assert_eq(s(p, T(0.5)), R(1.296875));
+  assert_eq(s(p, T(-0.5)), R(0.90625));
 }

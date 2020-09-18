@@ -9,7 +9,7 @@
 module uctl.filt.med;
 
 import std.traits: ReturnType;
-import avg = uctl.filt.avg;
+import uctl.filt.avg: avg;
 import uctl.num: isNumer;
 import uctl.util: ident_picker, isPicker, isMutable, bubble_sort;
 
@@ -42,26 +42,26 @@ version(unittest) {
  *
  * Note: This function modifies `data`.
  *
- * See_Also: [uctl.filt.avg.apply]
+ * See_Also: [uctl.filt.avg.avg]
  */
-auto apply(uint M = 1, uint N, T, alias P = ident_picker!T, alias S = bubble_sort)(ref T[N] data) if (isPicker!(P, T) && isMutable!(ReturnType!P) && isNumer!(ReturnType!P) && M >= 1 && M <= N) {
+auto med(uint M = 1, uint N, T, alias P = ident_picker!T, alias S = bubble_sort)(ref T[N] data) if (isPicker!(P, T) && isMutable!(ReturnType!P) && isNumer!(ReturnType!P) && M >= 1 && M <= N) {
   S!P(data);
   enum uint S = (N - M) / 2;
   enum uint E = S + M;
 
-  return avg.apply!(P, M, T)(data[S .. E]);
+  return avg!(P, M, T)(data[S .. E]);
 }
 
 /// Test median filter (floating-point)
 nothrow @nogc unittest {
   static auto a = [0.5, 0.0, 0.0625, 3.15, -0.25].staticArray!float;
-  assert_eq(a.apply, 0.0625);
+  assert_eq(a.med, 0.0625);
 
   static auto a2 = [0.5, 0.0, 0.0625, 3.15, -0.25].staticArray!float;
-  assert_eq(a2.apply!3, 0.1875);
+  assert_eq(a2.med!3, 0.1875);
 
   static auto a3 = [0.5, 0.0, 0.0625, 3.15, -0.25].staticArray!float;
-  assert_eq(a3.apply!5, 0.6925, 1e-7);
+  assert_eq(a3.med!5, 0.6925, 1e-7);
 }
 
 /// Test median filter (fixed-point)
@@ -69,13 +69,13 @@ nothrow @nogc unittest {
   alias X = fix!(-5, 5);
 
   static auto a = [0.5, 0.0, 0.0625, 3.15, -0.25].map!(x => cast(X) x).staticArray!5;
-  assert_eq(a.apply, cast(X) 0.0625);
+  assert_eq(a.med, cast(X) 0.0625);
 
   static auto a2 = [0.5, 0.0, 0.0625, 3.15, -0.25].map!(x => cast(X) x).staticArray!5;
-  assert_eq(a2.apply!3, cast(X) 0.1875, cast(X) 1e-8);
+  assert_eq(a2.med!3, cast(X) 0.1875, cast(X) 1e-8);
 
   static auto a3 = [0.5, 0.0, 0.0625, 3.15, -0.25].map!(x => cast(X) x).staticArray!5;
-  assert_eq(a3.apply!5, cast(X) 0.6925, cast(X) 1e-8);
+  assert_eq(a3.med!5, cast(X) 0.6925, cast(X) 1e-8);
 }
 
 /**
@@ -98,10 +98,10 @@ nothrow @nogc unittest {
  *
  * Note: This function modifies `data`.
  *
- * See_Also: [uctl.filt.avg.apply]
+ * See_Also: [uctl.filt.avg.avg]
  */
-auto apply(alias P, alias S = bubble_sort, uint M = 1, uint N, T)(ref T[N] data) if (isPicker!(P, T) && isMutable!(ReturnType!P) && isNumer!(ReturnType!P) && M >= 1 && M <= N) {
-  return apply!(M, N, T, P, S)(data);
+auto med(alias P, alias S = bubble_sort, uint M = 1, uint N, T)(ref T[N] data) if (isPicker!(P, T) && isMutable!(ReturnType!P) && isNumer!(ReturnType!P) && M >= 1 && M <= N) {
+  return med!(M, N, T, P, S)(data);
 }
 
 /// Test median filter with picker
@@ -113,5 +113,5 @@ nothrow @nogc unittest {
 
   static auto a = [A(true, 0.5), A(true, 0.0), A(false, 0.0625), A(false, 3.15), A(true, -0.25)].staticArray;
 
-  assert_eq(a.apply!(ref (ref A a) => a.a), 0.0625);
+  assert_eq(a.med!(ref (ref A a) => a.a), 0.0625);
 }
