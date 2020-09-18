@@ -10,7 +10,7 @@
  */
 module uctl.util.win;
 
-import std.traits: Unqual, Parameters, ReturnType;
+import std.traits: Unqual, Parameters, ReturnType, isInstanceOf;
 import std.math: fabs, sin, cos, PI;
 import uctl.num: isNum, isNumer;
 
@@ -34,37 +34,78 @@ struct Window(uint N_, W_) if (isNumer!W_ && N_ > 0) {
   /// Number of weights
   enum uint L = N + 1;
 
-  private W[L] weight;
+  W[L] weight;
+
+  alias weight this;
 
   const pure nothrow @nogc @safe
-  W opIndex(uint i) {
-    return weight[i];
+  this(const W w) {
+    weight = () {
+      W[L] ws;
+      foreach(i; 0..L) {
+        ws[i] = w;
+      }
+      return ws;
+    } ();
   }
+}
 
-  /// Set weight value by index
-  pure nothrow @nogc @safe
-  void opIndexAssign(W v, uint i) {
-    weight[i] = v;
+/// Test `Window`
+nothrow @nogc unittest {
+  static immutable w = Window!(100, double)(0.0);
+
+  assert_eq(w[0], 0.0);
+  assert_eq(w[50], 0.0);
+  assert_eq(w[100], 0.0);
+}
+
+/// Check for window function
+template isWindow(alias W) {
+  static if (__traits(compiles, W!(5, float))) {
+    alias w = W!(5, float);
+    static if (!is(w)) {
+      enum bool isWindow = isInstanceOf!(Window, typeof(w));
+    } else {
+      enum bool isWindow = false;
+    }
+  } else {
+    enum bool isWindow = false;
   }
+}
+
+/// Test `isWindow`
+nothrow @nogc unittest {
+  assert(isWindow!rectangular);
+  assert(isWindow!dirichlet);
+  assert(isWindow!hamming);
+  assert(isWindow!hann);
+  assert(isWindow!lanczos);
 }
 
 /// Create window by generating weights
-Window!(N, W) window_generate(uint N, W, alias F)() if (isNumer!W && N > 0 && Parameters!F.length == 1 && isNum!(ReturnType!F)) {
-  Window!(N, W) window;
-  foreach (i; 0..window.L) {
-    window[i] = cast(W) F(i);
-  }
-  return window;
+template genWindow(alias F) if (Parameters!F.length == 1 && isNum!(ReturnType!F)) {
+  alias genWindow(uint N, W) = .genWindow!(F, N, W);
+}
+
+/// Create window by generating weights
+template genWindow(alias F, uint N, W) if (Parameters!F.length == 1 && isNum!(ReturnType!F) && isNumer!W && N > 0) {
+  immutable Window!(N, W) genWindow = () {
+    Window!(N, W) window;
+    foreach (i; 0..window.L) {
+      window[i] = cast(W) F(i);
+    }
+    return window;
+  } ();
 }
 
 /// Rectangular window function
-alias rectangular(uint N, W) = window_generate!(N, W, (uint n) => 1.0);
+alias rectangular = genWindow!((uint n) => 1.0);
 
-/// Boxcar window function (alias for [rectangular])
-alias boxcar(uint N, W) = rectangular!(N, W);
+/// Boxcar window function
+alias boxcar = rectangular;
 
-/// Dirichlet window function (alias for [rectangular])
-alias dirichlet(uint N, W) = rectangular!(N, W);
+/// Dirichlet window function
+alias dirichlet = rectangular;
 
 /// Test rectangular window function (float)
 nothrow @nogc unittest {
@@ -92,28 +133,22 @@ nothrow @nogc unittest {
   }
 }
 
-/// Triangular window function (2dn-order B-spline window)
-template triangular(uint N, uint L, W) {
-  enum real half_N = cast(real) N / cast(real) 2.0;
-  enum real inv_half_L = cast(real) 2.0 / cast(real) L;
-  alias func = (uint n) => 1.0 - fabs((cast(real) n - half_N) * inv_half_L);
-  alias triangular = window_generate!(N, W, func);
+/// Triangular window function (2nd-order B-spline window)
+template triangular(uint K) {
+  template triangular(uint N, W) {
+    enum uint L = N + K;
+    enum real half_N = cast(real) N / cast(real) 2.0;
+    enum real inv_half_L = cast(real) 2.0 / cast(real) L;
+    alias func = (uint n) => 1.0 - fabs((cast(real) n - half_N) * inv_half_L);
+    alias triangular = genWindow!(func, N, W);
+  }
 }
 
-/// Triangular window function with L = N
-alias triangular0(uint N, W) = triangular!(N, N, W);
+/// Bartlett window function
+alias bartlett = triangular!0;
 
-/// Bartlett window function (alias for [triangular0])
-alias bartlett(uint N, W) = triangular0!(N, W);
-
-/// Fejer window function (alias for [triangular0])
-alias fejer(uint N, W) = triangular0!(N, W);
-
-/// Triangular window function with L = N + 1
-alias triangular1(uint N, W) = triangular!(N, N + 1, W);
-
-/// Triangular window function with L = N + 2
-alias triangular2(uint N, W) = triangular!(N, N + 2, W);
+/// Fejer window function
+alias fejer = triangular!0;
 
 /// Test triangular window function (float)
 nothrow @nogc unittest {
@@ -151,7 +186,7 @@ template bartlett_hann(uint N, W) {
     const auto d = cast(real) n / cast(real) (N + 1);
     return a0 - a1 * fabs(d - cast(real) 0.5) - a2 * cos(PI2 * d);
   };
-  alias bartlett_hann = window_generate!(N, W, func);
+  alias bartlett_hann = genWindow!(func, N, W);
 }
 
 /// Parzen window function
@@ -168,7 +203,7 @@ template parzen(uint N, W) {
     (2.0 * one_sub_biased_n_div_half_L * one_sub_biased_n_div_half_L * one_sub_biased_n_div_half_L) :
     (1.0 - 6.0 * biased_n_div_half_L * biased_n_div_half_L * one_sub_biased_n_div_half_L);
   };
-  alias parzen = window_generate!(N, W, func);
+  alias parzen = genWindow!(func, N, W);
 }
 
 /// Welch window function
@@ -178,13 +213,13 @@ template welch(uint N, W) {
     const auto v = cast(real) n * inv_half_N - 1.0;
     return 1.0 - v * v;
   };
-  alias welch = window_generate!(N, W, func);
+  alias welch = genWindow!(func, N, W);
 }
 
 /// Sine window function
 template sine(uint N, W) {
   enum real f = cast(real) PI / cast(real) N;
-  alias sine = window_generate!(N, W, (uint n) => sin(f * cast(real) n));
+  alias sine = genWindow!((uint n) => sin(f * cast(real) n), N, W);
 }
 
 /// Hann window function
@@ -194,99 +229,50 @@ template hann(uint N, W) {
     const auto s = sin(f * n);
     return s * s;
   };
-  alias hann = window_generate!(N, W, func);
+  alias hann = genWindow!(func, N, W);
 }
 
 /// Generic cosine window
-template cosine(uint N, W, real a0 = 0, real a1 = 0, real a2 = 0, real a3 = 0, real a4 = 0) {
-  enum real p0 = cast(real) PI / cast(real) N;
-  enum real p1 = p0 * 2.0;
-  enum real p2 = p1 * 2.0;
-  enum real p3 = p2 * 2.0;
-  enum real p4 = p3 * 2.0;
-  alias func = (uint n) => a0 - a1 * cos(p1 * n) + a2 * cos(p2 * n) - a3 * cos(p3 * n) + a4 * cos(p4 * n);
-  alias cosine = window_generate!(N, W, func);
+template cosine(real a0 = 0, real a1 = 0, real a2 = 0, real a3 = 0, real a4 = 0) {
+  template cosine(uint N, W) {
+    enum real p0 = cast(real) PI / cast(real) N;
+    enum real p1 = p0 * 2.0;
+    enum real p2 = p1 * 2.0;
+    enum real p3 = p2 * 2.0;
+    enum real p4 = p3 * 2.0;
+    alias func = (uint n) => a0 - a1 * cos(p1 * n) + a2 * cos(p2 * n) - a3 * cos(p3 * n) + a4 * cos(p4 * n);
+    alias cosine = genWindow!(func, N, W);
+  }
 }
 
 /// Hamming window
-template hamming(uint N, W) {
-  enum real a0 = 25.0 / 46.0;
-  enum real a1 = 1.0 - a0;
-  alias hamming = cosine!(N, W, a0, a1);
-}
+alias hamming = cosine!(25.0 / 46.0, 1.0 - 25.0 / 46.0);
 
 /// Blackman window
-template blackman(uint N, W) {
-  enum real d = 18608.0;
-  enum real a0 = 7938.0 / d;
-  enum real a1 = 9240.0 / d;
-  enum real a2 = 1430.0 / d;
-  alias blackman = cosine!(N, W, a0, a1, a2);
-}
+alias blackman = cosine!(7938.0 / 18608.0, 9240.0 / 18608.0, 1430.0 / 18608.0);
 
 /// Nuttall window function
-template nuttall(uint N, W) {
-  enum real a0 = 0.355768;
-  enum real a1 = 0.487396;
-  enum real a2 = 0.144232;
-  enum real a3 = 0.012604;
-  alias nuttall = cosine!(N, W, a0, a1, a2, a3);
-}
+alias nuttall = cosine!(0.355768, 0.487396, 0.144232, 0.012604);
 
 /// Blackman-Nuttall window function
-template blackman_nuttall(uint N, W) {
-  enum real a0 = 0.3635819;
-  enum real a1 = 0.4891775;
-  enum real a2 = 0.1365995;
-  enum real a3 = 0.0106411;
-  alias blackman_nuttall = cosine!(N, W, a0, a1, a2, a3);
-}
+alias blackman_nuttall = cosine!(0.3635819, 0.4891775, 0.1365995,  0.0106411);
 
 /// Blackman-Harris window function
-template blackman_harris(uint N, W) {
-  enum real a0 = 0.35875;
-  enum real a1 = 0.48829;
-  enum real a2 = 0.14128;
-  enum real a3 = 0.01168;
-  alias blackman_harris = cosine!(N, W, a0, a1, a2, a3);
-}
+alias blackman_harris = cosine!(0.35875, 0.48829, 0.14128, 0.01168);
 
 /// Flat top window function
-template flat_top(uint N, W) {
-  enum real a0 = 0.21557895;
-  enum real a1 = 0.41663158;
-  enum real a2 = 0.277263158;
-  enum real a3 = 0.083578947;
-  enum real a4 = 0.006947368;
-  alias flat_top = cosine!(N, W, a0, a1, a2, a3, a4);
-}
+alias flat_top = cosine!(0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368);
 
 /// Flat top window function
-template flat_top2(uint N, W) {
-  enum real a0 = 1.0;
-  enum real a1 = 1.93;
-  enum real a2 = 1.29;
-  enum real a3 = 0.388;
-  enum real a4 = 0.028;
-  alias flat_top2 = cosine!(N, W, a0, a1, a2, a3, a4);
-}
+alias flat_top2 = cosine!(1.0, 1.93, 1.29, 0.388, 0.028);
 
 /// Rife-Vincent window function of Class I with K = 1
 ///
 /// Note: Functionally equivalent to the Hann window function.
-template rife_vincent1(uint N, W) {
-  enum real a0 = 1.0;
-  enum real a1 = 1.0;
-  alias rife_vincent1 = cosine!(N, W, a0, a1);
-}
+alias rife_vincent1 = cosine!(1.0, 1.0);
 
 /// Rife-Vincent window function of Class I with K = 2
-template rife_vincent2(uint N, W) {
-  enum real a0 = 1.0;
-  enum real a1 = 4.0 / 3.0;
-  enum real a2 = 1.0 / 3.0;
-  alias rife_vincent2 = cosine!(N, W, a0, a1, a2);
-}
+alias rife_vincent2 = cosine!(1.0, 4.0 / 3.0, 1.0 / 3.0);
 
 // TODO: Add some other pretty useful window functions:
 // Gaussian, normal, Tukey, Planck-taper, Slepian, Kaiser, Dolph-Chebyshev, Ultraspherical, Poisson
@@ -298,5 +284,5 @@ template lanczos(uint N, W) {
     const auto z = f * cast(real) n - PI;
     return sin(z) / z;
   };
-  alias lanczos = window_generate!(N, W, func);
+  alias lanczos = genWindow!(func, N, W);
 }
