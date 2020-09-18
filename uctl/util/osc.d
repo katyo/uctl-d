@@ -7,7 +7,7 @@ module uctl.util.osc;
 
 import std.traits: isInstanceOf, Unqual;
 import uctl.num: isNumer, asnum, typeOf;
-import uctl.unit: Val, hasUnits, isUnits, Frequency, Time, Angle, Hz, sec, to, as, rev, hpi;
+import uctl.unit: Val, hasUnits, isUnits, Frequency, Time, Angle, Hz, sec, to, as, rev, qrev;
 import uctl.math.trig: two_pi;
 
 version(unittest) {
@@ -74,9 +74,9 @@ nothrow @nogc unittest {
   enum dt = 0.001;
   alias F = fix!(0.0, 500.0);
   alias P = fix!(1e-3, 0.5);
-  auto param = mk!(Param, hpi, dt)(F(50.0).as!Hz);
+  auto param = mk!(Param, qrev, dt)(F(50.0).as!Hz);
 
-  assert_eq(param.delta, P(200e-3).as!hpi);
+  assert_eq(param.delta, P(200e-3).as!qrev);
 }
 
 /**
@@ -165,10 +165,10 @@ nothrow @nogc unittest {
 
   assert_eq(state.phase, 0.0.as!rev);
 
-  state.set(2.0.as!hpi);
+  state.set(2.0.as!qrev);
   assert_eq(state.phase, 0.5.as!rev);
 
-  state.set(5.0.as!hpi);
+  state.set(5.0.as!qrev);
   assert_eq(state.phase, 0.25.as!rev);
 
   assert_eq(state.apply(param), 0.3.as!rev);
@@ -185,10 +185,10 @@ nothrow @nogc unittest {
 
   assert_eq(state.phase, A(0.0).as!rev);
 
-  state.set(A(2.0).as!hpi);
+  state.set(A(2.0).as!qrev);
   assert_eq(state.phase, A(0.5).as!rev);
 
-  state.set(A(5.0).as!hpi);
+  state.set(A(5.0).as!qrev);
   assert_eq(state.phase, A(0.25).as!rev);
 
   assert_eq(state.apply(param), A(0.3).as!rev);

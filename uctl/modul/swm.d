@@ -42,12 +42,12 @@ nothrow @nogc unittest {
   import uctl: mk;
   import uctl.util.osc: Param, State;
   import uctl.math.trig: sin;
-  import uctl.unit: as, hpi, Hz;
+  import uctl.unit: as, qrev, Hz;
 
   alias sine = sin!5;
   enum auto dt = 0.001;
 
-  auto param = mk!(Param, hpi, dt)(50.0.as!Hz);
+  auto param = mk!(Param, qrev, dt)(50.0.as!Hz);
   auto state = State!(param, double)();
 
   // Step 0
@@ -86,7 +86,7 @@ nothrow @nogc unittest {
   import uctl: mk;
   import uctl.util.osc: Param, State;
   import uctl.math.trig: sin;
-  import uctl.unit: as, hpi, Hz;
+  import uctl.unit: as, qrev, Hz;
   import uctl.num: fix;
 
   alias sine = sin!5;
@@ -95,7 +95,7 @@ nothrow @nogc unittest {
   alias A = fix!(-5, 5);
   alias P = fix!(-1, 1);
 
-  auto param = mk!(Param, hpi, dt)(F(50.0).as!Hz);
+  auto param = mk!(Param, qrev, dt)(F(50.0).as!Hz);
   auto state = State!(param, A)();
 
   /// Step 0

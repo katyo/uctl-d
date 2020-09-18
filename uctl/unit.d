@@ -56,11 +56,11 @@
      - `rad`
      - Radian
    * - Angle
-     - `hpi`
-     - Half PI (½π)
-   * - Angle
      - `rev`
      - Revolution
+   * - Angle
+     - `qrev`
+     - Quarter revolution (½π)
    * - Voltage
      - `V`
      - Volt
@@ -438,7 +438,7 @@ alias nm3 = Units!("Cubic nanoMeter", Area, 1e-27);
 alias Km3 = Units!("Cubic kiloMeter", Area, 1e9);
 
 alias rev = Units!("Revolution", Angle);
-alias hpi = Units!("Half PI", Angle, 1.0/4.0);
+alias qrev = Units!("Quarter Revolution", Angle, 1.0/4.0);
 alias deg = Units!("Degree", Angle, 1.0/360.0);
 alias rad = Units!("Radian", Angle, 1.0/(PI*2));
 

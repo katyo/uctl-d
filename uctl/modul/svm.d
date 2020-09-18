@@ -16,7 +16,7 @@ import uctl.util.vec: isGenVec, genVecSize, GenVec, sliceof;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
-  import uctl.unit: hpi;
+  import uctl.unit: qrev;
 
   mixin unittests;
 }
@@ -46,7 +46,7 @@ private uint sectorize(A)(ref A phase) if (hasUnits!(A, Angle)) {
 
 nothrow @nogc unittest {
   // 0
-  auto phase = 0.0.as!hpi;
+  auto phase = 0.0.as!qrev;
 
   alias A = typeof(phase);
 
@@ -88,17 +88,17 @@ nothrow @nogc unittest {
   assert_eq(sectorize(phase), 5);
   assert_eq(phase.raw, 0.666666666666666741);
 
-  phase = 0.5.as!hpi;
+  phase = 0.5.as!qrev;
 
   assert_eq(sectorize(phase), 0);
   assert_eq(phase.raw, 0.5);
 
-  phase = 1.0.as!hpi;
+  phase = 1.0.as!qrev;
 
   assert_eq(sectorize(phase), 1);
   assert_eq(phase.raw, 0.33333333333333337);
 
-  phase = 3.0.as!hpi;
+  phase = 3.0.as!qrev;
 
   assert_eq(sectorize(phase), 4);
   assert_eq(phase.raw, 0.33333333333333337);
@@ -154,12 +154,12 @@ nothrow @nogc unittest {
   import uctl: mk;
   import uctl.util.osc: Param, State;
   import uctl.math.trig: sin;
-  import uctl.unit: as, hpi, Hz;
+  import uctl.unit: as, qrev, Hz;
 
   alias sine = sin!5;
   enum auto dt = 0.001;
 
-  auto param = mk!(Param, hpi, dt)(50.0.as!Hz);
+  auto param = mk!(Param, qrev, dt)(50.0.as!Hz);
   auto state = State!(param, double)();
 
   // Step 0
@@ -184,7 +184,7 @@ nothrow @nogc unittest {
   import uctl: mk;
   import uctl.util.osc: Param, State;
   import uctl.math.trig: sin;
-  import uctl.unit: as, hpi, Hz;
+  import uctl.unit: as, qrev, Hz;
   import uctl.num: fix;
 
   alias sine = sin!5;
@@ -193,7 +193,7 @@ nothrow @nogc unittest {
   alias A = fix!(-5, 5);
   alias P = fix!(-1, 1);
 
-  auto param = mk!(Param, hpi, dt)(F(50.0).as!Hz);
+  auto param = mk!(Param, qrev, dt)(F(50.0).as!Hz);
   auto state = State!(param, A)();
 
   /// Step 0

@@ -54,7 +54,7 @@ import std.math: PI, std_sin = sin, std_cos = cos;
 import std.traits: isCallable, Parameters, ReturnType;
 
 import uctl.num: isFloat, fix, asnum, isFixed, isNumer;
-import uctl.unit: to, as, asval, Angle, rad, hpi, hasUnits, isUnits;
+import uctl.unit: to, as, asval, Angle, rad, qrev, hasUnits, isUnits;
 
 version(unittest) {
   import uctl.unit: Val, deg;
@@ -79,25 +79,25 @@ template pi(real mul, X...) if (X.length >= 1 && X.length <= 2) {
       alias A = Val!(X[1], X[0]);
     }
   }
-  enum auto pi = asval!((2.0 * mul).as!hpi.to!(A.units).raw, A);
+  enum auto pi = asval!((2.0 * mul).as!qrev.to!(A.units).raw, A);
 }
 
 /// Test `pi`
 nothrow @nogc unittest {
-  alias A = typeof(1.0.as!hpi);
+  alias A = typeof(1.0.as!qrev);
 
-  assert_eq(pi!A, PI.as!rad.to!hpi);
-  assert_eq(pi!(1.0/3.0, A), (PI * 1.0/3.0).as!rad.to!hpi);
+  assert_eq(pi!A, PI.as!rad.to!qrev);
+  assert_eq(pi!(1.0/3.0, A), (PI * 1.0/3.0).as!rad.to!qrev);
 
-  alias X = Val!(fix!(-10, 10), hpi);
+  alias X = Val!(fix!(-10, 10), qrev);
 
-  assert_eq(pi!X, asnum!((PI).as!rad.to!hpi.raw, X.raw_t).as!(X.units));
-  assert_eq(pi!(1.0/3.0, X), asnum!((PI * 1.0/3.0).as!rad.to!hpi.raw, X.raw_t).as!(X.units));
+  assert_eq(pi!X, asnum!((PI).as!rad.to!qrev.raw, X.raw_t).as!(X.units));
+  assert_eq(pi!(1.0/3.0, X), asnum!((PI * 1.0/3.0).as!rad.to!qrev.raw, X.raw_t).as!(X.units));
 }
 
 /// Get 2PI constant in any angle units
 auto two_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
-  return asnum!(4.0.as!hpi.to!U.raw, T).as!U;
+  return asnum!(4.0.as!qrev.to!U.raw, T).as!U;
 }
 
 /// Get 2PI constant in any angle units
@@ -203,7 +203,7 @@ template isTrigPolyOrder(uint N) {
    N = Polynomial order (can be 2, 3, 4 or 5)
    A = Angle type (should have angle units)
 
-   Preferred angle units is `hpi` other angle units will be implicitly casted to `hpi`.
+   Preferred angle units is `qrev` other angle units will be implicitly casted to `qrev`.
 
    See_Also: [cos]
 */
@@ -222,7 +222,7 @@ template sin(uint N) if (isTrigPolyOrder!N) {
     }
     alias C(real v) = asnum!(v, Z);
 
-    auto x = angle.to!hpi.raw;
+    auto x = angle.to!qrev.raw;
 
     static if (N == 4) {
       auto x_ = C!1 - x; // sin -> cos
@@ -396,13 +396,13 @@ nothrow @nogc unittest {
    N = Polynomial order (can be 2, 3, 4 or 5)
    A = Angle type (should have angle units)
 
-   Preferred angle units is `hpi` other angle units will be implicitly casted to `hpi`.
+   Preferred angle units is `qrev` other angle units will be implicitly casted to `qrev`.
 
    See_Also: [sin]
 */
 template cos(uint N) if (isTrigPolyOrder!N) {
   auto cos(A)(const A angle) if (hasUnits!(A, Angle) && (isFloat!(A.raw_t) || isFixed!(A.raw_t))) {
-    return sin!N(asnum!(1, A.raw_t).as!hpi - angle.to!hpi);
+    return sin!N(asnum!(1, A.raw_t).as!qrev - angle.to!qrev);
   }
 }
 

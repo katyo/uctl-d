@@ -10,7 +10,7 @@ module uctl.trans.clarke;
 import std.traits: isInstanceOf;
 import std.math: sqrt;
 import uctl.num: isNumer, asnum;
-import uctl.unit: hasUnits, Angle, as, to, hpi;
+import uctl.unit: hasUnits, Angle, as, to, qrev;
 import uctl.math.trig: isSinOrCos;
 import uctl.trans.park: DQ;
 
@@ -107,7 +107,7 @@ struct AlphaBeta(T) if (isNumer!T) {
   const pure nothrow @nogc @safe
   auto to(alias R, alias S, A)(const A theta) if (__traits(isSame, DQ, R) && hasUnits!(A, Angle) && isSinOrCos!(S, A) && isNumer!(T, A.raw_t)) {
     auto sin_theta = S(theta);
-    auto cos_theta = S(asnum!(1, T).as!hpi.to!(A.units) - theta); // cos(a) == sin(pi/2-a)
+    auto cos_theta = S(asnum!(1, T).as!qrev.to!(A.units) - theta); // cos(a) == sin(pi/2-a)
 
     auto d = alpha * cos_theta + beta * sin_theta;
     auto q = beta * cos_theta - alpha * sin_theta;
