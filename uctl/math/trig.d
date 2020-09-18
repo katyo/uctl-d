@@ -95,16 +95,6 @@ nothrow @nogc unittest {
   assert_eq(pi!(1.0/3.0, X), asnum!((PI * 1.0/3.0).as!rad.to!qrev.raw, X.raw_t).as!(X.units));
 }
 
-/// Get 2PI constant in any angle units
-auto two_pi(T, U)() if (isNumer!T && isUnits!(U, Angle)) {
-  return asnum!(4.0.as!qrev.to!U.raw, T).as!U;
-}
-
-/// Get 2PI constant in any angle units
-auto two_pi(A)() if (hasUnits!(A, Angle)) {
-  return two_pi!(A.raw_t, A.units);
-}
-
 /// Check that function is like a sine or cosine
 template isSinOrCos(alias S, A) {
   static if (hasUnits!(A, Angle) && __traits(compiles, (A a) => S(a))) {

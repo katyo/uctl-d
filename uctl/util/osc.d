@@ -8,7 +8,7 @@ module uctl.util.osc;
 import std.traits: isInstanceOf, Unqual;
 import uctl.num: isNumer, asnum, typeOf;
 import uctl.unit: Val, hasUnits, isUnits, Frequency, Time, Angle, Hz, sec, to, as, rev, qrev;
-import uctl.math.trig: two_pi;
+import uctl.math: pi;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
@@ -153,7 +153,7 @@ struct State(alias P_, A_) if (isInstanceOf!(Param, typeOf!P_) && isNumer!(P_.A.
 }
 
 private auto _unwind(A)(const A phase) if (hasUnits!(A, Angle)) {
-  return (phase.raw % two_pi!A.raw).as!(A.units);
+  return (phase.raw % pi!(2, A).raw).as!(A.units);
 }
 
 /// Test oscillator (floating-point)
