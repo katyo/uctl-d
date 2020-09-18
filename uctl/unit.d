@@ -1,5 +1,5 @@
 /**
-   ### Measurement units
+   ## Measurement units
 
    Units grouped by classes. Units can be added to any numeric values using function [as]. The `.raw` field of [Val] can be used to get numeric value back. Units can be converted to another units of same class using function [to].
 
@@ -57,10 +57,13 @@
      - Radian
    * - Angle
      - `rev`
-     - Revolution
+     - Revolution (2π, 360°)
+   * - Angle
+     - `hrev`
+     - Half revolution (π, 180°)
    * - Angle
      - `qrev`
-     - Quarter revolution (½π)
+     - Quarter revolution (½π, 90°)
    * - Voltage
      - `V`
      - Volt
@@ -438,9 +441,10 @@ alias nm3 = Units!("Cubic nanoMeter", Area, 1e-27);
 alias Km3 = Units!("Cubic kiloMeter", Area, 1e9);
 
 alias rev = Units!("Revolution", Angle);
+alias hrev = Units!("Half Revolution", Angle, 1.0/2.0);
 alias qrev = Units!("Quarter Revolution", Angle, 1.0/4.0);
 alias deg = Units!("Degree", Angle, 1.0/360.0);
-alias rad = Units!("Radian", Angle, 1.0/(PI*2));
+alias rad = Units!("Radian", Angle, 1.0/(2.0*PI));
 
 alias V = Units!("Volt", Voltage);
 alias mV = Units!("MilliVolt", Voltage, 1e-3);
