@@ -23,7 +23,7 @@ rows = ceil(length(funcs) / cols);
 for i = 1:length(funcs)
   func = funcs{i};
   data = str2num(eval_d(fileread('win_funcs.d'),
-                        'size', size,
+                        'uint size', size,
                         'func', func));
   x = data(:,1);
   y = data(:,2);

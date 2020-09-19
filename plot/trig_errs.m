@@ -10,8 +10,8 @@ place = [1 3 5 7
 for i = 1:length(orders)
   order = orders(i);
   data = str2num(eval_d(fileread('trig_errs.d'),
-                        'size', size,
-                        'order', order));
+                        'uint size', size,
+                        'uint order', order));
   x = data(:,1);
   y = data(:,2);
   yr = data(:,3);
