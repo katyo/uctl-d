@@ -16,6 +16,8 @@
  *   * As an 1st-order transmission behavior
  * )
  *
+ * ![EMA filtering](filt_ema.svg)
+ *
  * See_Also: [Exponential moving average](https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average).
  */
 module uctl.filt.ema;

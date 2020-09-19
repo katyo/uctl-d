@@ -37,6 +37,7 @@ MODULES += \
 PLOTS += \
   trig_errs \
   win_funcs \
+  filt_ema \
   sim_htr \
   sim_pid_htr \
   sim_dcm \
