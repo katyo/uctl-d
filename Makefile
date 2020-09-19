@@ -32,6 +32,7 @@ MODULES += \
   uctl.modul.package \
   uctl.modul.swm \
   uctl.modul.svm \
+  uctl.modul.psc \
   uctl.test
 
 PLOTS += \
@@ -43,7 +44,8 @@ PLOTS += \
   sim_dcm \
   thr_fit \
   mod_swm \
-  mod_svm
+  mod_svm \
+  mod_svm_psc
 
 #DFLAGS += -d-version=fixDouble
 #DFLAGS += -d-version=fixRoundDown

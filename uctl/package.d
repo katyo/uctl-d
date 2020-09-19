@@ -51,4 +51,5 @@ alias uctl.filt.mk mk;
 alias uctl.trans.mk mk;
 alias uctl.regul.mk mk;
 alias uctl.simul.mk mk;
+alias uctl.modul.mk mk;
 alias uctl.util.mk mk;
