@@ -12,4 +12,5 @@ import uctl.filt.lqe;
 import uctl.filt.med;
 
 alias uctl.filt.ema.mk mk;
+alias uctl.filt.fir.mk mk;
 alias uctl.filt.lqe.mk mk;

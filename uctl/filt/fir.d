@@ -11,16 +11,19 @@
 module uctl.filt.fir;
 
 import std.traits: Unqual, isInstanceOf;
-import std.math: PI, sin;
-
 import uctl.num: fix, asfix, isNumer, isFixed, typeOf;
-import uctl.util.win: Window;
+import uctl.math: isSinOrCos, sin, pi;
+import uctl.unit: Val, rawTypeOf, hasUnits, Angle, hrev, qrev, rad, Frequency, Hz, as, to;
+import uctl.util.vec: isVec, VecSize, VecType, sliceof;
+import uctl.util.win: isWindow;
 import uctl.util.dl: PFDL;
 
 version(unittest) {
   import std.array: staticArray;
   import std.algorithm: map;
   import uctl.test: assert_eq, unittests;
+  import uctl.util.win: dirichlet, bartlett;
+  import uctl.unit: rev;
 
   mixin unittests;
 }
@@ -43,7 +46,7 @@ struct Param(uint N_, B_) if (isNumer!B_ && N_ > 0) {
 
   static if (isFixed!B) {
     alias I = fix!L;
-    alias S = typeof(fix!(-1, 1)() / (fix!PI() * I()));
+    alias S = typeof(B() / (pi!(rad, B).raw * I()));
   } else {
     alias I = B;
     alias S = B;
@@ -61,14 +64,82 @@ struct Param(uint N_, B_) if (isNumer!B_ && N_ > 0) {
  *   [uctl.util.win]
  *   [Window function](https://en.wikipedia.org/wiki/Window_function) wikipedia article.
  */
-template param_from_window(uint L, W = float, SIN = sin) if (isNumer!W && L > 1) {
+template mk(alias P, alias F, alias S = sin) if (__traits(isSame, Param, P) && isWindow!F) {
+  template mk(uint L, W) if (isNumer!W && L > 1) {
+    alias mk = mk!(P, F, S, L, W);
+  }
+}
+
+/**
+   Create impulse response using window function
+
+   Sampling calculates like so:
+
+   $(MATH s = \frac{F_p + F_c}{2} \frac{1}{F_s} 2 \pi),
+
+   where
+   $(LIST
+   * $(MATH F_p) - pass frequency, $(I Hz)
+   * $(MATH F_c) - cutoff frequency, $(I Hz)
+   * $(MATH F_s) - sampling rate, $(I Hz)
+   )
+
+   Or:
+
+   $(MATH s = \frac{F_p + F_c}{2} dt 2 \pi),
+
+   where
+   $(LIST
+   * $(MATH F_p) - pass frequency, $(I Hz)
+   * $(MATH F_c) - cutoff frequency, $(I Hz)
+   * $(MATH dt) - sampling pariod, $(I sec)
+   )
+
+   See_Also:
+   [uctl.util.win]
+   [Window function](https://en.wikipedia.org/wiki/Window_function) wikipedia article.
+ */
+pure nothrow @nogc @safe
+auto mk(alias P, alias F, alias S, uint L, W, real dt, PF, CF)(const PF pass_freq, const CF cutoff_freq) if (__traits(isSame, Param, P) && isWindow!F && isSinOrCos!(S, Val!(W, qrev)) && isNumer!W && L > 1 && hasUnits!(PF, Frequency) && hasUnits!(CF, Frequency) && isNumer!(W, rawTypeOf!PF, rawTypeOf!CF)) {
+  auto sampling = (pass_freq + cutoff_freq).raw * dt;
+  return mk!(P, F, S, L, W)(sampling.as!hrev);
+}
+
+/// Test params using window function
+nothrow @nogc unittest {
+  enum dt = 0.001;
+
+  immutable p1 = mk!(Param, dirichlet, sin!5, 5, float, dt)(100.0.as!Hz, 200.0.as!Hz);
+
+  assert_eq(p1[0], 0.704693198);
+  assert_eq(p1[1], 0.192574844);
+  assert_eq(p1[2], 0.113196723);
+  assert_eq(p1[3], 0.024502262);
+  assert_eq(p1[4], -0.034966972);
+
+  immutable p2 = mk!(Param, bartlett, sin!5, 5, float, dt)(100.0.as!Hz, 200.0.as!Hz);
+
+  assert_eq(p2[0], 0.0);
+  assert_eq(p2[1], 0.444739610);
+  assert_eq(p2[2], 0.522841573);
+  assert_eq(p2[3], 0.113172896);
+  assert_eq(p2[4], -0.080754042);
+}
+
+/**
+ * Create impulse response using window function
+ *
+ * See_Also:
+ *   [uctl.util.win]
+ *   [Window function](https://en.wikipedia.org/wiki/Window_function) wikipedia article.
+ */
+pure nothrow @nogc @safe
+auto mk(alias P, alias F, alias S, uint L, W, T)(const T sampling) if (__traits(isSame, Param, P) && isWindow!F && isSinOrCos!(S, Val!(W, qrev)) && isNumer!W && L > 1 && hasUnits!(T, Angle) && isNumer!(W, rawTypeOf!T)) {
   enum uint N = L - 1;
 
   static if (isFixed!W) {
-    enum auto pi = asfix!PI;
     alias B = fix!(-1, 1);
   } else {
-    enum auto pi = PI;
     alias B = W;
   }
 
@@ -77,56 +148,69 @@ template param_from_window(uint L, W = float, SIN = sin) if (isNumer!W && L > 1)
   alias P = typeof(W() * R.S());
   alias A = typeof(P() * R.I());
 
-  alias param_from_window = (ref const Window!(N, W) window, R.S sampling) {
-    P[N + 1] pulse_behavior = [ 0: sampling * window[0] ];
-    A accum_weight = pulse_behavior[0];
+  immutable window = F!(L, W);
+  P[N + 1] pulse_behavior;
 
-    foreach (uint i; 1..L) {
-      R.I index = i;
-      R.S ideal_pulse_behavior = SIN(sampling * index) / (pi * index);
-      pulse_behavior[i] = ideal_pulse_behavior * window[i];
-      accum_weight += pulse_behavior[i];
-    }
+  pulse_behavior[0] = sampling.to!rad.raw * window[0];
 
-    R param;
+  A accum_weight = pulse_behavior[0];
+  auto qrev_sampling = sampling.to!qrev;
 
-    foreach (uint i; 0..L) {
-      param[i] = pulse_behavior[i] / accum_weight;
-    }
+  foreach (uint i; 1..L) {
+    R.I index = i;
+    R.S ideal_pulse_behavior = S(qrev_sampling * index) / (pi!(rad, B).raw * index);
+    pulse_behavior[i] = ideal_pulse_behavior * window[i];
+    accum_weight += pulse_behavior[i];
+  }
 
-    return param;
-  };
+  R param;
+
+  foreach (uint i; 0..L) {
+    param[i] = pulse_behavior[i] / accum_weight;
+  }
+
+  return param;
 }
 
-/**
-   Calculate sampling for [param_from_window].
- */
-auto calculate_sampling(F, P, C)(F sample_rate, P pass_freq, C cutoff_freq) if (isNumer!(F, P, C)) {
-  static if (isFixed!F) {
-    enum auto pi = asfix!PI;
-  } else {
-    enum auto pi = PI;
-  }
-  return (pass_freq + cutoff_freq) * pi / sample_rate;
+/// Test params using window function
+nothrow @nogc unittest {
+  enum s = 0.15.as!rev;
+
+  immutable p1 = mk!(Param, dirichlet, sin!5, 5, float)(s);
+
+  assert_eq(p1[0], 0.704693198);
+  assert_eq(p1[1], 0.192574844);
+  assert_eq(p1[2], 0.113196723);
+  assert_eq(p1[3], 0.024502262);
+  assert_eq(p1[4], -0.034966972);
+
+  immutable p2 = mk!(Param, bartlett, sin!5, 5, float)(s);
+
+  assert_eq(p2[0], 0.0);
+  assert_eq(p2[1], 0.444739610);
+  assert_eq(p2[2], 0.522841573);
+  assert_eq(p2[3], 0.113172896);
+  assert_eq(p2[4], -0.080754042);
 }
 
 /**
  * Create impulse response using predefined weights
  */
-template param_from_weights(uint L, W) {
-  enum uint N = L - 1;
+pure nothrow @nogc @safe
+auto mk(alias P, V)(const V weights) if (__traits(isSame, Param, P) && isVec!V && isNumer!(VecType!V) && VecSize!V > 1) {
+  enum auto L = VecSize!V;
+  enum auto N = L - 1;
+  alias W = VecType!V;
 
   alias R = Param!(N, W);
 
-  R param_from_weights(const W[L] weights) {
-    R param;
+  R param;
 
-    foreach (uint i; 0..L) {
-      param[i] = weights[i];
-    }
-
-    return param;
+  foreach (uint i; 0..L) {
+    param[i] = weights.sliceof[i];
   }
+
+  return param;
 }
 
 /**
@@ -170,7 +254,7 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, typeOf!P_) && isNumer!(P_.B,
 
 /// Test FIR filter (floating-point)
 nothrow @nogc unittest {
-  static immutable auto param = param_from_weights([0.456, -0.137, 0.702, -1.421].staticArray!float);
+  static immutable auto param = mk!Param([0.456, -0.137, 0.702, -1.421].staticArray!float);
   static State!(typeof(param), float) state = 0;
 
   assert_eq(state(param, 0.0), 0.0);
@@ -193,7 +277,7 @@ nothrow @nogc unittest {
   alias X = fix!(-10, 15);
   alias Y = fix!(-80, 120);
 
-  static immutable auto param = param_from_weights([0.456, -0.137, 0.702, -1.421].map!(w => cast(W) w).staticArray!4);
+  static immutable auto param = mk!Param([0.456, -0.137, 0.702, -1.421].map!(w => cast(W) w).staticArray!4);
   static State!(typeof(param), X) state = cast(X) 0;
 
   assert_eq(state(param, cast(X) 0.0), cast(Y) 0.0);
