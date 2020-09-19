@@ -1,8 +1,9 @@
-import uctl.simul.dcm;
+import uctl.simul: DCM;
+import uctl: mk;
 
 nothrow @nogc void entry() {
-  immutable auto mot_param = mk!(Param, dt)(124e-3f, 42e-6f, 8.5e-3f, 8.71e-6f);
-  auto mot_state = State!(mot_param, float, float)();
+  immutable auto mot_param = mk!(DCM.Param, dt)(124e-3f, 42e-6f, 8.5e-3f, 8.71e-6f);
+  auto mot_state = DCM.State!(mot_param, float, float)();
 
   foreach (i; 0 .. cast(int)(tend / dt)) {
     float t = i * dt;

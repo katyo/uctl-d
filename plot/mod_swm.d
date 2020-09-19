@@ -1,4 +1,4 @@
-import uctl.util.osc: Param, State;
+import uctl.util: OSC;
 import uctl.modul: swm;
 import uctl.math.trig: sin;
 import uctl.unit: as, Hz, rev;
@@ -7,8 +7,8 @@ import uctl: mk;
 nothrow @nogc void entry() {
   alias sine = sin!5;
 
-  auto param = mk!(Param, rev, dt)(float(freq).as!Hz);
-  auto state = State!(param, float)();
+  auto param = mk!(OSC.Param, rev, dt)(float(freq).as!Hz);
+  auto state = OSC.State!(param, float)();
 
   foreach (i; 0 .. cast(int)(tend/dt)) {
     float t = i * dt;

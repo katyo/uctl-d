@@ -40,12 +40,15 @@ In my experience currently $(I D) is a best choice to achieve the goals pursued 
 */
 module uctl;
 
-import uctl.filt;
-import uctl.trans;
-import uctl.regul;
-import uctl.simul;
-import uctl.modul;
-import uctl.util;
+public import uctl.math;
+public import uctl.unit;
+public import uctl.util;
+
+public import Filt = uctl.filt;
+public import Trans = uctl.trans;
+public import Regul = uctl.regul;
+public import Simul = uctl.simul;
+public import Modul = uctl.modul;
 
 alias uctl.filt.mk mk;
 alias uctl.trans.mk mk;

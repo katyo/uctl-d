@@ -1,4 +1,4 @@
-import uctl.math.trig;
+import uctl.math;
 import uctl.unit;
 import std.math: PI;
 

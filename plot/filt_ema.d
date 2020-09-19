@@ -3,41 +3,41 @@ import uctl.filt;
 
 nothrow @nogc
 void entry() {
-  immutable auto p1 = mk!EmaAlpha(0.9);
-  auto s1 = EmaState!(p1, float)();
+  immutable auto p1 = mk!(EMA.Alpha)(0.9);
+  auto s1 = EMA.State!(p1, float)();
 
-  immutable auto p2 = mk!EmaAlpha(0.6);
-  auto s2 = EmaState!(p2, float)();
+  immutable auto p2 = mk!(EMA.Alpha)(0.6);
+  auto s2 = EMA.State!(p2, float)();
 
-  immutable auto p3 = mk!EmaAlpha(0.3);
-  auto s3 = EmaState!(p3, float)();
+  immutable auto p3 = mk!(EMA.Alpha)(0.3);
+  auto s3 = EMA.State!(p3, float)();
 
-  immutable auto p4 = mk!EmaSamples(1.0);
-  auto s4 = EmaState!(p4, float)();
+  immutable auto p4 = mk!(EMA.Samples)(1.0);
+  auto s4 = EMA.State!(p4, float)();
 
-  immutable auto p5 = mk!EmaSamples(3.0);
-  auto s5 = EmaState!(p5, float)();
+  immutable auto p5 = mk!(EMA.Samples)(3.0);
+  auto s5 = EMA.State!(p5, float)();
 
-  immutable auto p6 = mk!EmaSamples(7.0);
-  auto s6 = EmaState!(p6, float)();
+  immutable auto p6 = mk!(EMA.Samples)(7.0);
+  auto s6 = EMA.State!(p6, float)();
 
-  immutable auto p7 = mk!(EmaTime, dt)(0.02);
-  auto s7 = EmaState!(p7, float)();
+  immutable auto p7 = mk!(EMA.Time, dt)(0.02);
+  auto s7 = EMA.State!(p7, float)();
 
-  immutable auto p8 = mk!(EmaTime, dt)(0.05);
-  auto s8 = EmaState!(p8, float)();
+  immutable auto p8 = mk!(EMA.Time, dt)(0.05);
+  auto s8 = EMA.State!(p8, float)();
 
-  immutable auto p9 = mk!(EmaTime, dt)(0.1);
-  auto s9 = EmaState!(p9, float)();
+  immutable auto p9 = mk!(EMA.Time, dt)(0.1);
+  auto s9 = EMA.State!(p9, float)();
 
-  immutable auto p10 = mk!(EmaPT1, dt)(0.01);
-  auto s10 = EmaState!(p10, float)();
+  immutable auto p10 = mk!(EMA.PT1, dt)(0.01);
+  auto s10 = EMA.State!(p10, float)();
 
-  immutable auto p11 = mk!(EmaPT1, dt)(0.03);
-  auto s11 = EmaState!(p11, float)();
+  immutable auto p11 = mk!(EMA.PT1, dt)(0.03);
+  auto s11 = EMA.State!(p11, float)();
 
-  immutable auto p12 = mk!(EmaPT1, dt)(0.06);
-  auto s12 = EmaState!(p12, float)();
+  immutable auto p12 = mk!(EMA.PT1, dt)(0.06);
+  auto s12 = EMA.State!(p12, float)();
 
   foreach (i; 0 .. data.length) {
     auto t = dt * i;

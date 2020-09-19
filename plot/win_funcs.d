@@ -1,4 +1,4 @@
-import uctl.util.win;
+import uctl.util;
 
 nothrow @nogc void entry() {
   static immutable win = func!(size, double);

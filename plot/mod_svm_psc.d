@@ -1,6 +1,5 @@
-import OSC = uctl.util.osc;
-import uctl.modul: svm;
-import PSC = uctl.modul.psc;
+import uctl.util: OSC;
+import uctl.modul: svm, PSC;
 import uctl.math: sin;
 import uctl.unit: as, sec, Hz, qrev;
 import uctl.util: scale;

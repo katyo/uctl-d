@@ -10,6 +10,6 @@ public import uctl.util.sort;
 public import uctl.util.win;
 public import uctl.util.vec;
 
-import uctl.util.osc;
+public import OSC = uctl.util.osc;
 
 alias uctl.util.osc.mk mk;

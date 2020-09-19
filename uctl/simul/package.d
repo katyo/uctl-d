@@ -3,9 +3,9 @@
  */
 module uctl.simul;
 
-import uctl.simul.dcm;
-import uctl.simul.htr;
-import uctl.simul.thr;
+public import DCM = uctl.simul.dcm;
+public import HTR = uctl.simul.htr;
+public import THR = uctl.simul.thr;
 
 alias uctl.simul.dcm.mk mk;
 alias uctl.simul.htr.mk mk;
