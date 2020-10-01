@@ -28,6 +28,7 @@ jobs:
         uses: dgellow/action-dscanner@v1.0.1
         with:
           level: warning
+          reporter: github-check
 
   build:
     strategy:
@@ -38,7 +39,8 @@ jobs:
         target:
           - i686-linux-gnu
           - x86_64-linux-gnu
-          - armv7l-linux-gnueabi
+          - armv6-linux-gnueabi
+          - armv7-linux-gnueabi
           - aarch64-linux-gnu
         dc:
           - ldc-latest
@@ -46,17 +48,29 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - run: sudo apt-get update
-      - if: contains(matrix.os, 'ubuntu') && contains(matrix.target, '-linux-') && !startsWith(matrix.target, 'x86_64')
+      - name: Setup cross linux toolchain
+        if: contains(matrix.os, 'ubuntu') && contains(matrix.target, '-linux-') && !startsWith(matrix.target, 'x86_64')
         run: sudo apt-get install -y gcc-$(printf ${{ matrix.target }} | sed 's/arm[^-]*/arm/g')
-      - if: contains(matrix.os, 'ubuntu') && contains(matrix.target, '-none-') && startsWith(matrix.target, 'arm')
+      - name: Setup arm embedded toolchain
+        if: contains(matrix.os, 'ubuntu') && contains(matrix.target, '-none-') && startsWith(matrix.target, 'arm')
         run: sudo apt-get install -y gcc-arm-none-eabi
+      - name: Setup qemu user
+        if: contains(matrix.os, 'ubuntu') && contains(matrix.target, '-linux-') && !startsWith(matrix.target, 'i686') && !startsWith(matrix.target, 'x86_64')
+        run: sudo apt-get install -y qemu-user
+      - name: Setup qemu system
+        if: contains(matrix.os, 'ubuntu') && contains(matrix.target, '-none-') && !startsWith(matrix.target, 'i686') && !startsWith(matrix.target, 'x86_64')
+        run: sudo apt-get install -y qemu-system-arm
       - name: Setup D compiler and tools
         uses: dlang-community/setup-dlang@v1
         with:
           compiler: ${{ matrix.dc }}
       - name: Checkout sources
         uses: actions/checkout@v2
-      - name: Run tests
+      - name: Build tests
         run: make build TARGET=${{ matrix.target }}
-      - if: ${{ startsWith(matrix.target, 'i686') || startsWith(matrix.target, 'x86_64') }}
+      - name: Run tests native linux
+        if: contains(matrix.os, 'ubuntu') && contains(matrix.target, '-linux-') && (startsWith(matrix.target, 'i686') || startsWith(matrix.target, 'x86_64'))
         run: make test TARGET=${{ matrix.target }}
+      - name: Run tests cross linux arm
+        if: contains(matrix.os, 'ubuntu') && contains(matrix.target, '-linux-') && (startsWith(matrix.target, 'arm') || startsWith(matrix.target, 'aarch64'))
+        run: make test TARGET=${{ matrix.target }} RUNNER='qemu'
