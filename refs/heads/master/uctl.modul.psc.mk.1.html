@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>mk (uctl.modul.psc.mk)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>mk</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.modul.html">modul</a> <a class="breadcrumb" href="uctl.modul.psc.html">psc</a> </div><div><div class="documentation-comment synopsis"><div><p>Configure corrector using critical time and PWM period</p></div></div></div><div class="annotated-prototype"><ol class="overloads"><li class="active-overload-option"><span class="overload-signature"><span class="lang-feature">auto</span>  <span class="name">mk</span>(T crit_time, D period)</span><div class="function-prototype"><div class="attributes"></div><div class="return-type"><a class="lang-feature" href="http://dpldocs.info/auto-function-return-prototype">auto</a> </div><div class="function-name">mk</div><div class="template-parameters" data-count="3">(<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="P">P</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="T">T</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="D">D</span></span></div></div>)</div><div class="runtime-parameters" data-count="2"><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="storage-class">const</span> <span class="name" data-ident="T">T</span></span></span> <span class="parameter-name name" data-ident="crit_time"><a href="#param-crit_time">crit_time</a></span></div><span class="comma">,</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="storage-class">const</span> <span class="name" data-ident="D">D</span></span></span> <span class="parameter-name name" data-ident="period"><a href="#param-period">period</a></span></div><span class="paren">)</span></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><div class="andand-left"><div class="andand-left">__traits(<span class="name" data-ident="isSame">isSame</span>, <a class="name" data-ident="Param" href="uctl.modul.psc.Param.html" title="uctl.modul.psc.Param">Param</a>, <span class="name" data-ident="P">P</span>) &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="hasUnits" href="uctl.unit.hasUnits.html" title="uctl.unit.hasUnits">hasUnits</a>!(<span class="name" data-ident="T">T</span>, <a class="name" data-ident="Time" href="uctl.unit.Time.html" title="uctl.unit.Time">Time</a>)</div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="hasUnits" href="uctl.unit.hasUnits.html" title="uctl.unit.hasUnits">hasUnits</a>!(<span class="name" data-ident="D">D</span>, <a class="name" data-ident="Time" href="uctl.unit.Time.html" title="uctl.unit.Time">Time</a>)</div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isNumer" href="uctl.num.isNumer.html" title="uctl.num.isNumer">isNumer</a>!(<span class="name" data-ident="T">T.raw_t</span>, <span class="name" data-ident="D">D.raw_t</span>)</div></div>)</div><div class="function-contracts"></div></div></li><li class="overload-option"><a href="uctl.modul.psc.mk.2.html"><span class="overload-signature"><span class="lang-feature">auto</span>  <span class="name">mk</span>(T crit_time, F frequency)</span></a></li></ol></div><div><h2 id="parameters"><a class="header-anchor" href="#parameters">Parameters</a></h2><dl class="parameter-descriptions"><dt id="param-crit_time"><a class="parameter-name" data-ident="crit_time" href="#param-crit_time">crit_time</a> <span class="parameter-type"><span class="name" data-ident="T">T</span></span></dt><dd><div class="documentation-comment"><div><p>Critical time to adjust to (Usually the minimum required time to measure current)</p></div></div></dd><dt id="param-period"><a class="parameter-name" data-ident="period" href="#param-period">period</a> <span class="parameter-type"><span class="name" data-ident="D">D</span></span></dt><dd><div class="documentation-comment"><div><p>Pulse-width modulation period</p></div></div></dd></dl><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test phase-shift corrector config</p></div><pre class="d_code highlighted"><span class="kwrd">immutable</span> <span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!<span class="hid">Param</span>(<span class="num">16.0</span>.<span class="hid">as</span>!<span class="hid">usec</span>, <span class="num">10.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delay</span>, <span class="num">0.00159999999999999986</span>);</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.modul.html">modul</a> <a class="parent" href="uctl.modul.psc.html">psc</a> 
+		<span class="type-separator">functions</span><ul><li><a class="function current" href="uctl.modul.psc.mk.1.html">mk</a></li></ul><span class="type-separator">structs</span><ul><li><a class="struct" href="uctl.modul.psc.Param.html">Param</a></li><li><a class="struct" href="uctl.modul.psc.State.html">State</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

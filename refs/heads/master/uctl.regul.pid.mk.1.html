@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>mk (uctl.regul.pid.mk)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>mk</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.regul.html">regul</a> <a class="breadcrumb" href="uctl.regul.pid.html">pid</a> </div><div><div class="documentation-comment synopsis"><div><p>Create Proportional regulator parameters</p></div></div></div><div class="annotated-prototype"><ol class="overloads"><li class="active-overload-option"><span class="overload-signature"><tt class="highlighted"><span class="hid">Param</span>!(<span class="hid">PO</span>, <span class="hid">P</span>)</tt> <span class="name">mk</span>(P p)</span><div class="function-prototype"><div class="attributes"></div><div class="return-type"><a class="name" data-ident="Param" href="uctl.regul.pid.Param.1.html" title="uctl.regul.pid.Param">Param</a>!(<a class="name" data-ident="PO" href="uctl.regul.pid.PO.html" title="uctl.regul.pid.PO">PO</a>, <span class="name" data-ident="P">P</span>)</div><div class="function-name">mk</div><div class="template-parameters" data-count="2">(<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="C">C</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="P">P</span></span></div></div>)</div><div class="runtime-parameters" data-count="1"><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="storage-class">const</span> <span class="name" data-ident="P">P</span></span></span> <span class="parameter-name name" data-ident="p"><a href="#param-p">p</a></span><span class="parameter-default-value">&#160;=&#160;0.0</span></div><span class="paren">)</span></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><a class="name" data-ident="isClass" href="uctl.regul.pid.isClass.html" title="uctl.regul.pid.isClass">isClass</a>!(<span class="name" data-ident="C">C</span>, <a class="name" data-ident="PO" href="uctl.regul.pid.PO.html" title="uctl.regul.pid.PO">PO</a>) &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isNumer" href="uctl.num.isNumer.html" title="uctl.num.isNumer">isNumer</a>!<span class="name" data-ident="P">P</span></div></div>)</div><div class="function-contracts"></div></div></li><li class="overload-option"><a href="uctl.regul.pid.mk.2.html"><span class="overload-signature"><tt class="highlighted"><span class="hid">Param</span>!(<span class="hid">PI</span>, <span class="hid">P</span>, <span class="hid">I</span>, <span class="hid">E</span>)</tt> <span class="name">mk</span>(P p, I i)</span></a></li><li class="overload-option"><a href="uctl.regul.pid.mk.3.html"><span class="overload-signature"><tt class="highlighted"><span class="hid">Param</span>!(<span class="hid">PI</span>, <span class="hid">P</span>, <span class="hid">I</span>, <span class="hid">E</span>)</tt> <span class="name">mk</span>(P p, I i, E e)</span></a></li><li class="overload-option"><a href="uctl.regul.pid.mk.4.html"><span class="overload-signature"><tt class="highlighted"><span class="hid">Param</span>!(<span class="hid">PD</span>, <span class="hid">P</span>, <span class="hid">D</span>)</tt> <span class="name">mk</span>(P p, D d)</span></a></li><li class="overload-option"><a href="uctl.regul.pid.mk.5.html"><span class="overload-signature"><tt class="highlighted"><span class="hid">Param</span>!(<span class="hid">PID</span>, <span class="hid">P</span>, <span class="hid">I</span>, <span class="hid">D</span>, <span class="hid">E</span>)</tt> <span class="name">mk</span>(P p, I i, D d)</span></a></li><li class="overload-option"><a href="uctl.regul.pid.mk.6.html"><span class="overload-signature"><tt class="highlighted"><span class="hid">Param</span>!(<span class="hid">PID</span>, <span class="hid">P</span>, <span class="hid">I</span>, <span class="hid">D</span>, <span class="hid">E</span>)</tt> <span class="name">mk</span>(P p, I i, D d, E e)</span></a></li></ol></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Proportional regulator parameters</p></div><pre class="d_code highlighted"><span class="kwrd">static</span> <span class="kwrd">immutable</span> <span class="kwrd">auto</span> <span class="hid">po</span> = <span class="hid">mk</span>!<span class="hid">PO</span>(<span class="num">0.36f</span>);
+<span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="kwrd">typeof</span>(<span class="hid">po</span>) == <span class="kwrd">immutable</span> <span class="hid">Param</span>!(<span class="hid">PO</span>, <span class="type">float</span>)));
+<span class="hid">assert_eq</span>(<span class="hid">po</span>.<span class="hid">p</span>, <span class="num">0.36f</span>);
+
+<span class="kwrd">enum</span> <span class="kwrd">auto</span> <span class="hid">dt</span> = <span class="num">0.1</span>;
+
+<span class="kwrd">static</span> <span class="kwrd">immutable</span> <span class="kwrd">auto</span> <span class="hid">pi</span> = <span class="hid">po</span>.<span class="hid">with_I</span>!(<span class="hid">dt</span>, <span class="type">float</span>)(<span class="num">12.0f</span>);
+<span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="kwrd">typeof</span>(<span class="hid">pi</span>) == <span class="kwrd">immutable</span> <span class="hid">Param</span>!(<span class="hid">PI</span>, <span class="type">float</span>, <span class="type">float</span>, <span class="type">float</span>)));
+<span class="hid">assert_eq</span>(<span class="hid">pi</span>.<span class="hid">p</span>, <span class="num">0.36f</span>);
+<span class="hid">assert_eq</span>(<span class="hid">pi</span>.<span class="hid">i</span>, <span class="num">1.2f</span>);</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.regul.html">regul</a> <a class="parent" href="uctl.regul.pid.html">pid</a> 
+		<span class="type-separator">aliases</span><ul><li><a class="alias" href="uctl.regul.pid.PD.html">PD</a></li><li><a class="alias" href="uctl.regul.pid.PI.html">PI</a></li><li><a class="alias" href="uctl.regul.pid.PID.html">PID</a></li><li><a class="alias" href="uctl.regul.pid.PO.html">PO</a></li></ul><span class="type-separator">functions</span><ul><li><a class="function current" href="uctl.regul.pid.mk.1.html">mk</a></li></ul><span class="type-separator">structs</span><ul><li><a class="struct" href="uctl.regul.pid.Class.html">Class</a></li><li><a class="struct" href="uctl.regul.pid.Param.1.html">Param</a></li><li><a class="struct" href="uctl.regul.pid.State.html">State</a></li></ul><span class="type-separator">templates</span><ul><li><a class="template" href="uctl.regul.pid.CoupleP.html">CoupleP</a></li><li><a class="template" href="uctl.regul.pid.LimitI.html">LimitI</a></li><li><a class="template" href="uctl.regul.pid.isClass.html">isClass</a></li><li><a class="template" href="uctl.regul.pid.isParam.html">isParam</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

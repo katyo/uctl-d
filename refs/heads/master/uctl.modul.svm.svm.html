@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>svm (uctl.modul.svm.svm)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>svm</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.modul.html">modul</a> <a class="breadcrumb" href="uctl.modul.svm.html">svm</a> </div><div><div class="documentation-comment synopsis"><div><p>Generate wave(s)</p></div></div></div><div class="annotated-prototype"><div class="function-prototype"><div class="attributes"></div><div class="return-type"><a class="lang-feature" href="http://dpldocs.info/auto-function-return-prototype">auto</a> </div><div class="function-name">svm</div><div class="template-parameters" data-count="3">(<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="S">S</span></span></div><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="R">R</span> = [3]</span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="T">T</span></span></div></div>)</div><div class="runtime-parameters" data-count="1"><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="storage-class">const</span> <span class="name" data-ident="T">T</span></span></span> <span class="parameter-name name" data-ident="phase"><a href="#param-phase">phase</a></span></div><span class="paren">)</span></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><div class="andand-left"><a class="name" data-ident="isSinOrCos" href="uctl.math.trig.isSinOrCos.html" title="uctl.math.trig.isSinOrCos">isSinOrCos</a>!(<span class="name" data-ident="S">S</span>, <span class="name" data-ident="T">T</span>) &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isGenVec" href="uctl.util.vec.isGenVec.1.html" title="uctl.util.vec.isGenVec">isGenVec</a>!<span class="name" data-ident="R">R</span></div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="genVecSize" href="uctl.util.vec.genVecSize.html" title="uctl.util.vec.genVecSize">genVecSize</a>!<span class="name" data-ident="R">R</span> == 3</div></div>)</div><div class="function-contracts"></div></div></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test modulation (floating-point)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">uctl</span>: <span class="hid">mk</span>;
+<span class="br">2 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">util</span>.<span class="hid">osc</span>: <span class="hid">Param</span>, <span class="hid">State</span>;
+<span class="br">3 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">math</span>.<span class="hid">trig</span>: <span class="hid">sin</span>;
+<span class="br">4 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">unit</span>: <span class="hid">as</span>, <span class="hid">qrev</span>, <span class="hid">Hz</span>;
+<span class="br">5 </span>
+<span class="br">6 </span><span class="kwrd">alias</span> <span class="hid">sine</span> = <span class="hid">sin</span>!<span class="num">5</span>;
+<span class="br">7 </span><span class="kwrd">enum</span> <span class="kwrd">auto</span> <span class="hid">dt</span> = <span class="num">0.001</span>;
+<span class="br">8 </span>
+<span class="br">9 </span><span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">qrev</span>, <span class="hid">dt</span>)(<span class="num">50.0</span>.<span class="hid">as</span>!<span class="hid">Hz</span>);
+<span class="br">10 </span><span class="kwrd">auto</span> <span class="hid">state</span> = <span class="hid">State</span>!(<span class="hid">param</span>, <span class="type">double</span>)();
+<span class="br">11 </span>
+<span class="br">12 </span><span class="com">// Step 0</span>
+<span class="br">13 </span><span class="kwrd">auto</span> <span class="hid">phase</span> = <span class="hid">state</span>.<span class="hid">phase</span>;
+<span class="br">14 </span>
+<span class="br">15 </span><span class="kwrd">auto</span> <span class="hid">abc</span> = <span class="hid">svm</span>!(<span class="hid">sine</span>, [<span class="num">3</span>])(<span class="hid">phase</span>);
+<span class="br">16 </span><span class="hid">assert_eq</span>(<span class="hid">abc</span>[<span class="num">0</span>], -<span class="num">0.866197249836520133</span>);
+<span class="br">17 </span><span class="hid">assert_eq</span>(<span class="hid">abc</span>[<span class="num">1</span>], <span class="num">0.86619724983652</span>);
+<span class="br">18 </span><span class="hid">assert_eq</span>(<span class="hid">abc</span>[<span class="num">2</span>], <span class="num">0.866197249836520133</span>);
+<span class="br">19 </span>
+<span class="br">20 </span><span class="com">/// Step 1</span>
+<span class="br">21 </span><span class="kwrd">auto</span> <span class="hid">phase2</span> = <span class="hid">state</span>(<span class="hid">param</span>);
+<span class="br">22 </span>
+<span class="br">23 </span><span class="kwrd">auto</span> <span class="hid">abc2</span> = <span class="hid">svm</span>!(<span class="hid">sine</span>, [<span class="num">3</span>])(<span class="hid">phase2</span>);
+<span class="br">24 </span><span class="hid">assert_eq</span>(<span class="hid">abc2</span>[<span class="num">0</span>], -<span class="num">0.977943188391134921</span>);
+<span class="br">25 </span><span class="hid">assert_eq</span>(<span class="hid">abc2</span>[<span class="num">1</span>], <span class="num">0.360242111077623717</span>);
+<span class="br">26 </span><span class="hid">assert_eq</span>(<span class="hid">abc2</span>[<span class="num">2</span>], <span class="num">0.977943188391134921</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test modulation (fixed-point)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">uctl</span>: <span class="hid">mk</span>;
+<span class="br">2 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">util</span>.<span class="hid">osc</span>: <span class="hid">Param</span>, <span class="hid">State</span>;
+<span class="br">3 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">math</span>.<span class="hid">trig</span>: <span class="hid">sin</span>;
+<span class="br">4 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">unit</span>: <span class="hid">as</span>, <span class="hid">qrev</span>, <span class="hid">Hz</span>;
+<span class="br">5 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">num</span>: <span class="hid">fix</span>;
+<span class="br">6 </span>
+<span class="br">7 </span><span class="kwrd">alias</span> <span class="hid">sine</span> = <span class="hid">sin</span>!<span class="num">5</span>;
+<span class="br">8 </span><span class="kwrd">enum</span> <span class="kwrd">auto</span> <span class="hid">dt</span> = <span class="num">0.001</span>;
+<span class="br">9 </span><span class="kwrd">alias</span> <span class="hid">F</span> = <span class="hid">fix</span>!(<span class="num">0</span>, <span class="num">200</span>);
+<span class="br">10 </span><span class="kwrd">alias</span> <span class="hid">A</span> = <span class="hid">fix</span>!(-<span class="num">5</span>, <span class="num">5</span>);
+<span class="br">11 </span><span class="kwrd">alias</span> <span class="hid">P</span> = <span class="hid">fix</span>!(-<span class="num">1</span>, <span class="num">1</span>);
+<span class="br">12 </span>
+<span class="br">13 </span><span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">qrev</span>, <span class="hid">dt</span>)(<span class="hid">F</span>(<span class="num">50.0</span>).<span class="hid">as</span>!<span class="hid">Hz</span>);
+<span class="br">14 </span><span class="kwrd">auto</span> <span class="hid">state</span> = <span class="hid">State</span>!(<span class="hid">param</span>, <span class="hid">A</span>)();
+<span class="br">15 </span>
+<span class="br">16 </span><span class="com">/// Step 0</span>
+<span class="br">17 </span><span class="kwrd">auto</span> <span class="hid">phase</span> = <span class="hid">state</span>.<span class="hid">phase</span>;
+<span class="br">18 </span>
+<span class="br">19 </span><span class="kwrd">auto</span> <span class="hid">abc</span> = <span class="hid">svm</span>!(<span class="hid">sine</span>, [<span class="num">3</span>])(<span class="hid">phase</span>);
+<span class="br">20 </span><span class="hid">assert_eq</span>(<span class="hid">abc</span>[<span class="num">0</span>], <span class="hid">P</span>(-<span class="num">0.8661972284</span>));
+<span class="br">21 </span><span class="hid">assert_eq</span>(<span class="hid">abc</span>[<span class="num">1</span>], <span class="hid">P</span>(<span class="num">0.8661972284</span>));
+<span class="br">22 </span><span class="hid">assert_eq</span>(<span class="hid">abc</span>[<span class="num">2</span>], <span class="hid">P</span>(<span class="num">0.8661972284</span>));
+<span class="br">23 </span>
+<span class="br">24 </span><span class="com">/// Step 1</span>
+<span class="br">25 </span><span class="kwrd">auto</span> <span class="hid">phase2</span> = <span class="hid">state</span>(<span class="hid">param</span>);
+<span class="br">26 </span>
+<span class="br">27 </span><span class="kwrd">auto</span> <span class="hid">abc2</span> = <span class="hid">svm</span>!(<span class="hid">sine</span>, [<span class="num">3</span>])(<span class="hid">phase2</span>);
+<span class="br">28 </span><span class="hid">assert_eq</span>(<span class="hid">abc2</span>[<span class="num">0</span>], <span class="hid">P</span>(-<span class="num">0.9779431224</span>));
+<span class="br">29 </span><span class="hid">assert_eq</span>(<span class="hid">abc2</span>[<span class="num">1</span>], <span class="hid">P</span>(<span class="num">0.3602420688</span>));
+<span class="br">30 </span><span class="hid">assert_eq</span>(<span class="hid">abc2</span>[<span class="num">2</span>], <span class="hid">P</span>(<span class="num">0.9779431224</span>));</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.modul.html">modul</a> <a class="parent" href="uctl.modul.svm.html">svm</a> 
+		<span class="type-separator">functions</span><ul><li><a class="function current" href="uctl.modul.svm.svm.html">svm</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>log2 (uctl.math.log.log2)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>log2</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.math.html">math</a> <a class="breadcrumb" href="uctl.math.log.html">log</a> </div><div><div class="documentation-comment synopsis"><div><p>Logarithm of base 2</p></div></div></div><div class="annotated-prototype"><div class="function-prototype"><div class="attributes"></div><div class="return-type"><a class="lang-feature" href="http://dpldocs.info/auto-function-return-prototype">auto</a> </div><div class="function-name">log2</div><div class="template-parameters" data-count="1">(<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="T">T</span></span></div></div>)</div><div class="runtime-parameters" data-count="1"><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="storage-class">const</span> <span class="name" data-ident="T">T</span></span></span> <span class="parameter-name name" data-ident="x"><a href="#param-x">x</a></span></div><span class="paren">)</span></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><a class="name" data-ident="isNumer" href="uctl.num.isNumer.html" title="uctl.num.isNumer">isNumer</a>!<span class="name" data-ident="T">T</span></div>)</div><div class="function-contracts"></div></div></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test <tt class="inline-code">log2</tt> for x &lt; 1 (floating-point)</p></div><pre class="d_code highlighted"><span class="kwrd">foreach</span> (<span class="hid">i</span>; <span class="num">1</span>..<span class="num">10</span>) {
+  <span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="num">2.0f</span>.<span class="hid">pow</span>(-<span class="hid">i</span>)), <span class="kwrd">cast</span>(<span class="type">float</span>) -<span class="hid">i</span>);
+}
+
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="num">1e-3f</span>), -<span class="num">9.965784284662087f</span>);
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="num">1e-2f</span>), -<span class="num">6.643856189774724f</span>);
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="num">1e-1f</span>), -<span class="num">3.321928094887362f</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test <tt class="inline-code">log2</tt> for x &gt; 1 (floating-point)</p></div><pre class="d_code highlighted"><span class="kwrd">foreach</span> (<span class="hid">i</span>; <span class="num">1</span>..<span class="num">10</span>) {
+  <span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="num">2.0f</span>.<span class="hid">pow</span>(<span class="hid">i</span>)), <span class="kwrd">cast</span>(<span class="type">float</span>) <span class="hid">i</span>);
+}
+
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="num">1e1f</span>), <span class="num">3.321928094887362f</span>);
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="num">1e2f</span>), <span class="num">6.643856189774724f</span>);
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="num">1e3f</span>), <span class="num">9.965784284662087f</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test <tt class="inline-code">log2</tt> for x &lt; 1 (fixed-point)</p></div><pre class="d_code highlighted"><span class="kwrd">alias</span> <span class="hid">X</span> = <span class="hid">fix</span>!(<span class="num">1e-3</span>, <span class="num">1</span>);
+<span class="kwrd">alias</span> <span class="hid">Y</span> = <span class="hid">fix</span>!(-<span class="num">10</span>, <span class="num">0</span>);
+
+<span class="kwrd">foreach</span> (<span class="hid">i</span>; <span class="num">1</span>..<span class="num">10</span>) {
+  <span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="num">2.0</span>.<span class="hid">pow</span>(-<span class="hid">i</span>)), <span class="kwrd">cast</span>(<span class="hid">Y</span>) -<span class="hid">i</span>);
+}
+
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="num">1e-3</span>), <span class="kwrd">cast</span>(<span class="hid">Y</span>) -<span class="num">9.965784284662087</span>, <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="num">1e-2</span>), <span class="kwrd">cast</span>(<span class="hid">Y</span>) -<span class="num">6.643856189774724</span>, <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="num">1e-1</span>), <span class="kwrd">cast</span>(<span class="hid">Y</span>) -<span class="num">3.321928094887362</span>, <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">1e-6</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test <tt class="inline-code">log2</tt> for x &gt; 1 (fixed-point)</p></div><pre class="d_code highlighted"><span class="kwrd">alias</span> <span class="hid">X</span> = <span class="hid">fix</span>!(<span class="num">1</span>, <span class="num">1e3</span>);
+<span class="kwrd">alias</span> <span class="hid">Y</span> = <span class="hid">fix</span>!(<span class="num">0</span>, <span class="num">10</span>);
+
+<span class="kwrd">foreach</span> (<span class="hid">i</span>; <span class="num">1</span>..<span class="num">10</span>) {
+  <span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="num">2.0</span>.<span class="hid">pow</span>(<span class="hid">i</span>)), <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="hid">i</span>);
+}
+
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="num">1e1</span>), <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">3.321928094887362</span>, <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="num">1e2</span>), <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">6.643856189774724</span>, <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">log2</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="num">1e3</span>), <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">9.965784284662087</span>, <span class="kwrd">cast</span>(<span class="hid">Y</span>) <span class="num">1e-6</span>);</pre></div><h2 id="see-also"><a class="header-anchor" href="#see-also">See Also</a></h2><div class="documentation-comment see-also-section"><div><p><a class="xref" href="uctl.math.log.log.html">log</a>, <a class="xref" href="uctl.math.log.log10.html">log10</a>.</p></div></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.math.html">math</a> <a class="parent" href="uctl.math.log.html">log</a> 
+		<span class="type-separator">functions</span><ul><li><a class="function" href="uctl.math.log.log.html">log</a></li><li><a class="function" href="uctl.math.log.log10.html">log10</a></li><li><a class="function current" href="uctl.math.log.log2.html">log2</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

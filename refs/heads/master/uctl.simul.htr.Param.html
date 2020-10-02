@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Param (uctl.simul.htr.Param)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>Param</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.simul.html">simul</a> <a class="breadcrumb" href="uctl.simul.htr.html">htr</a> </div><div><div class="documentation-comment synopsis"><div><p>Heater parameters</p></div></div></div><div class="annotated-prototype"><div class="aggregate-prototype"><div class="attributes"></div><span class="builtin-type">struct</span> Param (<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">real</span> <span class="name" data-ident="dt_">dt_</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="C_">C_</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="M_">M_</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="R_">R_</span></span></div></div>) <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><span class="name" data-ident="isNumer">isNumer</span>!(<span class="name" data-ident="C_">C_</span>, <span class="name" data-ident="M_">M_</span>, <span class="name" data-ident="R_">R_</span>)</div>) {<div class="aggregate-member"><a href="uctl.simul.htr.Param.rdt.html"><div class="attributes"></div><span class="builtin-type">enum</span> <span class="name">rdt</span>;</a></div><div class="aggregate-member"><a href="uctl.simul.htr.Param.dt.html"><div class="attributes"></div><span class="builtin-type">enum</span> <span class="name">dt</span>;</a></div><div class="aggregate-member"><a href="uctl.simul.htr.Param.a.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">PA</span></tt> <span class="name">a</span>;</a></div><div class="aggregate-member"><a href="uctl.simul.htr.Param.b.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">PB</span></tt> <span class="name">b</span>;</a></div><div class="aggregate-member"><a href="uctl.simul.htr.Param.c.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">PC</span></tt> <span class="name">c</span>;</a></div><div class="aggregate-member"><a href="uctl.simul.htr.Param.this.html"><span class="lang-feature name">this</span>(C C_, M m_, R R_);</a></div>}</div></div><h2 id="constructors"><a class="header-anchor" href="#constructors">Constructors</a></h2><dl class="member-list constructors"><dt><a href="uctl.simul.htr.Param.this.html">this</a><div class="simplified-prototype" style="max-width: 24ch;"><span class="lang-feature name">this</span>(C C_, M m_, R R_)</div></dt><dd><div><p>Initialize heater parameters</p></div></dd></dl><h2 id="members"><a class="header-anchor" href="#members">Members</a></h2><h3 class="member-list-header hide-from-toc" id="manifest constant"><a class="header-anchor" href="#manifest constant">Manifest constants</a></h3><dl class="member-list native"><dt><a href="uctl.simul.htr.Param.dt.html">dt</a><div class="simplified-prototype" style="max-width: 8ch;"><span class="builtin-type">enum</span> <span class="name">dt</span>;</div></dt><dd><div><p>Sampling time</p></div></dd><dt><a href="uctl.simul.htr.Param.rdt.html">rdt</a><div class="simplified-prototype" style="max-width: 9ch;"><span class="builtin-type">enum</span> <span class="name">rdt</span>;</div></dt><dd><div><p>Sampling time</p></div></dd></dl><h3 class="member-list-header hide-from-toc" id="variable"><a class="header-anchor" href="#variable">Variables</a></h3><dl class="member-list native"><dt><a href="uctl.simul.htr.Param.a.html">a</a><div class="simplified-prototype" style="max-width: 5ch;"><tt class="highlighted"><span class="hid">PA</span></tt> <span class="name">a</span>;</div></dt><dd><div><p>Term <tt class="inline-code">a</tt> value</p></div></dd><dt><a href="uctl.simul.htr.Param.b.html">b</a><div class="simplified-prototype" style="max-width: 5ch;"><tt class="highlighted"><span class="hid">PB</span></tt> <span class="name">b</span>;</div></dt><dd><div><p>Term <tt class="inline-code">b</tt> value</p></div></dd><dt><a href="uctl.simul.htr.Param.c.html">c</a><div class="simplified-prototype" style="max-width: 5ch;"><tt class="highlighted"><span class="hid">PC</span></tt> <span class="name">c</span>;</div></dt><dd><div><p>Term <tt class="inline-code">c</tt> value</p></div></dd></dl><div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.simul.html">simul</a> <a class="parent" href="uctl.simul.htr.html">htr</a> 
+		<span class="type-separator">functions</span><ul><li><a class="function" href="uctl.simul.htr.mk.html">mk</a></li></ul><span class="type-separator">structs</span><ul><li><a class="struct current" href="uctl.simul.htr.Param.html">Param</a></li><li><a class="struct" href="uctl.simul.htr.State.html">State</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

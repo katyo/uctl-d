@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>cos (uctl.math.trig.cos)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>cos</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.math.html">math</a> <a class="breadcrumb" href="uctl.math.trig.html">trig</a> </div><div><div class="documentation-comment synopsis"><div><p>Generic cosine function using polynomial interpolation</p><p>Usage:</p><pre class="d_code highlighted"><span class="kwrd">auto</span> <span class="hid">angle</span> = <span class="num">1.23</span>.<span class="hid">as</span>!<span class="hid">rad</span>;
+<span class="com">// directly</span>
+<span class="kwrd">auto</span> <span class="hid">result</span> = <span class="hid">cos</span>!<span class="hid">N</span>(<span class="hid">angle</span>);
+<span class="com">// by alias</span>
+<span class="kwrd">alias</span> <span class="hid">mycos</span> = <span class="hid">cos</span>!<span class="hid">N</span>;
+<span class="kwrd">auto</span> <span class="hid">result</span> = <span class="hid">mycos</span>(<span class="hid">angle</span>);</pre></div></div></div><div class="annotated-prototype"><div class="function-prototype"><div class="parent-prototype"><span class="builtin-type">template</span> <span class="name">cos</span><span class="template-params">(uint N)</span></div><div><div class="attributes"></div><div class="return-type"><a class="lang-feature" href="http://dpldocs.info/auto-function-return-prototype">auto</a> </div><div class="function-name">cos</div><div class="template-parameters" data-count="1">(<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="A">A</span></span></div></div>)</div><div class="runtime-parameters" data-count="1"><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="storage-class">const</span> <span class="name" data-ident="A">A</span></span></span> <span class="parameter-name name" data-ident="angle"><a href="#param-angle">angle</a></span></div><span class="paren">)</span></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><a class="name" data-ident="hasUnits" href="uctl.unit.hasUnits.html" title="uctl.unit.hasUnits">hasUnits</a>!(<span class="name" data-ident="A">A</span>, <a class="name" data-ident="Angle" href="uctl.unit.Angle.html" title="uctl.unit.Angle">Angle</a>) &amp;&amp; </div><div class="andand-right"><span class="parenthetical-expression">(<span class="parenthetical-expression-contents"><div class="oror-left"><a class="name" data-ident="isFloat" href="uctl.num.isFloat.html" title="uctl.num.isFloat">isFloat</a>!(<span class="name" data-ident="A">A.raw_t</span>) || </div><div class="oror-right"><a class="name" data-ident="isFixed" href="uctl.num.isFixed.html" title="uctl.num.isFixed">isFixed</a>!(<span class="name" data-ident="A">A.raw_t</span>)</div></span>)</span></div></div>)</div><div class="function-contracts"></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><a class="name" data-ident="isTrigPolyOrder" href="uctl.math.trig.isTrigPolyOrder.html" title="uctl.math.trig.isTrigPolyOrder">isTrigPolyOrder</a>!<span class="name" data-ident="N">N</span></div>)</div></div></div><div><h2 id="parameters"><a class="header-anchor" href="#parameters">Parameters</a></h2><dl class="parameter-descriptions"><dt id="param-N"><a class="parameter-name" data-ident="N" href="#param-N">N</a></dt><dd><div class="documentation-comment"><div><p>Polynomial order (can be 2, 3, 4 or 5)</p></div></div></dd><dt id="param-A"><a class="parameter-name" data-ident="A" href="#param-A">A</a></dt><dd><div class="documentation-comment"><div><p>Angle type (should have angle units)</p><p>Preferred angle units is <tt class="inline-code">qrev</tt> other angle units will be implicitly casted to <tt class="inline-code">qrev</tt>.</p></div></div></dd></dl><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test cosine for floating-point</p></div><pre class="d_code highlighted"><span class="kwrd">template</span> <span class="hid">max_err</span>(<span class="type">uint</span> <span class="hid">N</span>) {
+  <span class="kwrd">const</span> <span class="kwrd">auto</span> <span class="hid">max_err</span> =
+    <span class="hid">max_abs_error</span>!((<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="hid">cos</span>!<span class="hid">N</span>(<span class="hid">x</span>.<span class="hid">as</span>!<span class="hid">rad</span>),
+                   (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="hid">cos</span>(<span class="hid">x</span>.<span class="hid">as</span>!<span class="hid">rad</span>))
+    (-<span class="num">10</span>*<span class="hid">PI</span>, <span class="num">10</span>*<span class="hid">PI</span>, <span class="num">1000</span>);
+}
+
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>!<span class="num">2</span>, <span class="num">0.056009</span>, <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>!<span class="num">3</span>, <span class="num">0.020017</span>, <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>!<span class="num">4</span>, <span class="num">0.002787</span>, <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>!<span class="num">5</span>, <span class="num">0.000193</span>, <span class="num">1e-6</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test cosine for fixed-point</p></div><pre class="d_code highlighted"><span class="kwrd">template</span> <span class="hid">max_err</span>(<span class="type">uint</span> <span class="hid">N</span>) {
+  <span class="kwrd">alias</span> <span class="hid">X</span> = <span class="hid">fix</span>!(-<span class="num">10</span>*<span class="hid">PI</span>, <span class="num">10</span>*<span class="hid">PI</span>);
+  <span class="kwrd">const</span> <span class="kwrd">auto</span> <span class="hid">max_err</span> =
+    <span class="hid">max_abs_error</span>!((<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="kwrd">cast</span>(<span class="type">double</span>) <span class="hid">cos</span>!<span class="hid">N</span>(<span class="hid">X</span>(<span class="hid">x</span>).<span class="hid">as</span>!<span class="hid">rad</span>),
+                   (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="hid">cos</span>(<span class="hid">x</span>.<span class="hid">as</span>!<span class="hid">rad</span>))
+    (-<span class="num">10</span>*<span class="hid">PI</span>, <span class="num">10</span>*<span class="hid">PI</span>, <span class="num">1000</span>);
+}
+
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>!<span class="num">2</span>, <span class="num">0.056009</span>, <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>!<span class="num">3</span>, <span class="num">0.020017</span>, <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>!<span class="num">4</span>, <span class="num">0.002787</span>, <span class="num">1e-6</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>!<span class="num">5</span>, <span class="num">0.000193</span>, <span class="num">1e-6</span>);</pre></div><h2 id="see-also"><a class="header-anchor" href="#see-also">See Also</a></h2><div class="documentation-comment see-also-section"><div><p><a class="xref" href="uctl.math.trig.sin.2.html">sin</a></p></div></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.math.html">math</a> <a class="parent" href="uctl.math.trig.html">trig</a> 
+		<span class="type-separator">functions</span><ul><li><a class="function current" href="uctl.math.trig.cos.1.html">cos</a></li><li><a class="function" href="uctl.math.trig.sin.1.html">sin</a></li></ul><span class="type-separator">templates</span><ul><li><a class="template" href="uctl.math.trig.isSinOrCos.html">isSinOrCos</a></li><li><a class="template" href="uctl.math.trig.isTrigPolyOrder.html">isTrigPolyOrder</a></li><li><a class="template" href="uctl.math.trig.pi.1.html">pi</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

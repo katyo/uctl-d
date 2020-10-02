@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>hasUnits (uctl.unit.hasUnits)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>hasUnits</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.unit.html">unit</a> </div><div><div class="documentation-comment synopsis"><div><p>Check that some value or type has measurement units</p></div></div></div><div class="annotated-prototype"><div class="aggregate-prototype"><div class="attributes"></div><span class="builtin-type">template</span> hasUnits (<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="X">X</span>...</span></div></div>) {<div class="aggregate-member"><div class="attributes"></div><tt class="highlighted"><span class="kwrd">enum</span></tt> <tt class="highlighted"><span class="type">bool</span></tt> <span class="name">hasUnits</span>;</div><div class="aggregate-member"><div class="attributes"></div><tt class="highlighted"><span class="kwrd">enum</span></tt> <tt class="highlighted"><span class="type">bool</span></tt> <span class="name">hasUnits</span>;</div><div class="aggregate-member"><div class="attributes"></div><tt class="highlighted"><span class="kwrd">enum</span></tt> <tt class="highlighted"><span class="type">bool</span></tt> <span class="name">hasUnits</span>;</div><div class="aggregate-member"><div class="attributes"></div><tt class="highlighted"><span class="kwrd">enum</span></tt> <tt class="highlighted"><span class="type">bool</span></tt> <span class="name">hasUnits</span>;</div><div class="aggregate-member"><div class="attributes"></div><tt class="highlighted"><span class="kwrd">enum</span></tt> <tt class="highlighted"><span class="type">bool</span></tt> <span class="name">hasUnits</span>;</div>}</div></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test <tt class="inline-code">hasUnits</tt></p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">struct</span> <span class="hid">NoVal</span>(<span class="hid">T</span>) { <span class="hid">T</span> <span class="hid">val</span>; }
+<span class="br">2 </span>
+<span class="br">3 </span><span class="kwrd">assert</span>(<span class="hid">hasUnits</span>!(<span class="hid">Val</span>!(<span class="type">float</span>, <span class="hid">rad</span>)));
+<span class="br">4 </span><span class="kwrd">assert</span>(!<span class="hid">hasUnits</span>!(<span class="hid">NoVal</span>!(<span class="type">float</span>)));
+<span class="br">5 </span>
+<span class="br">6 </span><span class="kwrd">assert</span>(<span class="hid">hasUnits</span>!(<span class="hid">Val</span>!(<span class="type">float</span>, <span class="hid">rad</span>), <span class="hid">rad</span>));
+<span class="br">7 </span><span class="kwrd">assert</span>(!<span class="hid">hasUnits</span>!(<span class="hid">Val</span>!(<span class="type">float</span>, <span class="hid">rad</span>), <span class="hid">deg</span>));
+<span class="br">8 </span>
+<span class="br">9 </span><span class="kwrd">assert</span>(<span class="hid">hasUnits</span>!(<span class="hid">Val</span>!(<span class="type">float</span>, <span class="hid">rad</span>), <span class="hid">Angle</span>));
+<span class="br">10 </span><span class="kwrd">assert</span>(!<span class="hid">hasUnits</span>!(<span class="hid">Val</span>!(<span class="type">float</span>, <span class="hid">rad</span>), <span class="hid">Length</span>));
+<span class="br">11 </span>
+<span class="br">12 </span><span class="kwrd">assert</span>(<span class="hid">hasUnits</span>!(<span class="num">12</span>.<span class="hid">as</span>!<span class="hid">rad</span>));
+<span class="br">13 </span>
+<span class="br">14 </span><span class="kwrd">assert</span>(<span class="hid">hasUnits</span>!(<span class="num">12</span>.<span class="hid">as</span>!<span class="hid">rad</span>, <span class="hid">rad</span>));
+<span class="br">15 </span><span class="kwrd">assert</span>(!<span class="hid">hasUnits</span>!(<span class="num">12</span>.<span class="hid">as</span>!<span class="hid">rad</span>, <span class="hid">deg</span>));
+<span class="br">16 </span>
+<span class="br">17 </span><span class="kwrd">assert</span>(<span class="hid">hasUnits</span>!(<span class="num">12</span>.<span class="hid">as</span>!<span class="hid">rad</span>.<span class="hid">to</span>!<span class="hid">deg</span>, <span class="hid">deg</span>));
+<span class="br">18 </span><span class="kwrd">assert</span>(!<span class="hid">hasUnits</span>!(<span class="num">12</span>.<span class="hid">as</span>!<span class="hid">rad</span>.<span class="hid">to</span>!<span class="hid">deg</span>, <span class="hid">rad</span>));
+<span class="br">19 </span>
+<span class="br">20 </span><span class="kwrd">assert</span>(<span class="hid">hasUnits</span>!(<span class="num">12</span>.<span class="hid">as</span>!<span class="hid">rad</span>, <span class="hid">Angle</span>));
+<span class="br">21 </span><span class="kwrd">assert</span>(!<span class="hid">hasUnits</span>!(<span class="num">12</span>.<span class="hid">as</span>!<span class="hid">rad</span>, <span class="hid">Length</span>));</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.unit.html">unit</a> 
+		<span class="type-separator">aliases</span><ul><li><a class="alias" href="uctl.unit.Angle.html">Angle</a></li><li><a class="alias" href="uctl.unit.AngularAccel.html">AngularAccel</a></li><li><a class="alias" href="uctl.unit.AngularJerk.html">AngularJerk</a></li><li><a class="alias" href="uctl.unit.AngularVel.html">AngularVel</a></li><li><a class="alias" href="uctl.unit.Area.html">Area</a></li><li><a class="alias" href="uctl.unit.Capacitance.html">Capacitance</a></li><li><a class="alias" href="uctl.unit.Current.html">Current</a></li><li><a class="alias" href="uctl.unit.Energy.html">Energy</a></li><li><a class="alias" href="uctl.unit.Frequency.html">Frequency</a></li><li><a class="alias" href="uctl.unit.Inductance.html">Inductance</a></li><li><a class="alias" href="uctl.unit.Length.html">Length</a></li><li><a class="alias" href="uctl.unit.LinearAccel.html">LinearAccel</a></li><li><a class="alias" href="uctl.unit.LinearJerk.html">LinearJerk</a></li><li><a class="alias" href="uctl.unit.LinearVel.html">LinearVel</a></li><li><a class="alias" href="uctl.unit.Power.html">Power</a></li><li><a class="alias" href="uctl.unit.Resistance.html">Resistance</a></li><li><a class="alias" href="uctl.unit.Temperature.html">Temperature</a></li><li><a class="alias" href="uctl.unit.Time.html">Time</a></li><li><a class="alias" href="uctl.unit.Voltage.html">Voltage</a></li><li><a class="alias" href="uctl.unit.Volume.html">Volume</a></li></ul><span class="type-separator">functions</span><ul><li><a class="function" href="uctl.unit.as.html">as</a></li><li><a class="function" href="uctl.unit.to.html">to</a></li></ul><span class="type-separator">structs</span><ul><li><a class="struct" href="uctl.unit.Units.html">Units</a></li><li><a class="struct" href="uctl.unit.UnitsClass.html">UnitsClass</a></li><li><a class="struct" href="uctl.unit.Val.html">Val</a></li></ul><span class="type-separator">templates</span><ul><li><a class="template" href="uctl.unit.asval.1.html">asval</a></li><li><a class="template current" href="uctl.unit.hasUnits.html">hasUnits</a></li><li><a class="template" href="uctl.unit.isUnits.html">isUnits</a></li><li><a class="template" href="uctl.unit.isUnitsClass.html">isUnitsClass</a></li><li><a class="template" href="uctl.unit.rawTypeOf.html">rawTypeOf</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

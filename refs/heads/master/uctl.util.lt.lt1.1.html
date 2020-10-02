@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>lt1 (uctl.util.lt.lt1)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>lt1</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.util.html">util</a> <a class="breadcrumb" href="uctl.util.lt.html">lt</a> </div><div><div class="documentation-comment synopsis"><div><p>Floating-point compile-time generated lookup table</p><p>Regular lookup table for one argument with linear interpolation which can be used by calling it as a function.</p><pre class="d_code highlighted"><span class="kwrd">alias</span> <span class="hid">sqr</span> = <span class="hid">lt1</span>!(<span class="num">10</span>, <span class="type">float</span>, <span class="type">float</span>, <span class="num">0.0</span>, <span class="num">1.0</span>, (<span class="hid">x</span>) =&gt; <span class="hid">x</span> * <span class="hid">x</span>);
+
+<span class="kwrd">assert</span>(<span class="hid">sqr</span>(<span class="num">0</span>) == <span class="num">0</span>);</pre></div></div></div><div class="annotated-prototype"><ol class="overloads"><li class="active-overload-option"><span class="overload-signature"><tt class="highlighted"><span class="hid">R</span></tt> <span class="name">lt1</span>(A arg)</span><div class="function-prototype"><div class="attributes">pure nothrow @<span class="name" data-ident="nogc">nogc</span> @<span class="name" data-ident="safe">safe</span> </div><div class="return-type"><span class="name" data-ident="R">R</span></div><div class="function-name">lt1</div><div class="template-parameters" data-count="6">(<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">uint</span> <span class="name" data-ident="len">len</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="R">R</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="A">A</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">real</span> <span class="name" data-ident="start">start</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">real</span> <span class="name" data-ident="end">end</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">real</span> <span class="lang-feature">function</span><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="builtin-type">real</span></span></span></div><span class="paren">)</span></div> pure nothrow @<span class="name" data-ident="nogc">nogc</span> @<span class="name" data-ident="safe">safe</span> <span class="name" data-ident="gen">gen</span></span></div></div>)</div><div class="runtime-parameters" data-count="1"><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="name" data-ident="A">A</span></span></span> <span class="parameter-name name" data-ident="arg"><a href="#param-arg">arg</a></span></div><span class="paren">)</span></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><a class="name" data-ident="isFloat" href="uctl.num.isFloat.html" title="uctl.num.isFloat">isFloat</a>!<span class="name" data-ident="R">R</span> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isFloat" href="uctl.num.isFloat.html" title="uctl.num.isFloat">isFloat</a>!<span class="name" data-ident="A">A</span></div></div>)</div><div class="function-contracts"></div></div></li><li class="overload-option"><a href="uctl.util.lt.lt1.2.html"><span class="overload-signature"><tt class="highlighted"><span class="hid">R</span></tt> <span class="name">lt1</span>(A arg)</span></a></li></ol></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test floating-point lookup tables (x^2)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">alias</span> <span class="hid">sqr</span> = <span class="hid">lt1</span>!(<span class="num">10</span>, <span class="type">float</span>, <span class="type">float</span>, <span class="num">0.0</span>, <span class="num">1.0</span>, (<span class="hid">x</span>) =&gt; <span class="hid">x</span> * <span class="hid">x</span>);
+<span class="br">2 </span>
+<span class="br">3 </span><span class="hid">assert_eq</span>(<span class="hid">sqr</span>(<span class="num">0.0</span>), <span class="num">0.0</span>);
+<span class="br">4 </span><span class="hid">assert_eq</span>(<span class="hid">sqr</span>(<span class="num">0.1</span>), <span class="num">0.01</span>, <span class="num">0.002</span>);
+<span class="br">5 </span><span class="hid">assert_eq</span>(<span class="hid">sqr</span>(<span class="num">0.5</span>), <span class="num">0.25</span>, <span class="num">0.004</span>);
+<span class="br">6 </span><span class="hid">assert_eq</span>(<span class="hid">sqr</span>(<span class="num">1.0</span>), <span class="num">1.0</span>);
+<span class="br">7 </span>
+<span class="br">8 </span><span class="type">void</span> <span class="hid">test_as_func</span>(<span class="type">float</span> <span class="kwrd">delegate</span>(<span class="type">float</span>) <span class="kwrd">pure</span> <span class="kwrd">nothrow</span> @<span class="hid">safe</span> @<span class="hid">nogc</span> <span class="hid">f</span>) {
+<span class="br">9 </span>  <span class="hid">assert_eq</span>(<span class="hid">f</span>(<span class="num">0.0</span>), <span class="num">0.0</span>);
+<span class="br">10 </span>  <span class="hid">assert_eq</span>(<span class="hid">f</span>(<span class="num">0.1</span>), <span class="num">0.01</span>, <span class="num">0.002</span>);
+<span class="br">11 </span>  <span class="hid">assert_eq</span>(<span class="hid">f</span>(<span class="num">0.5</span>), <span class="num">0.25</span>, <span class="num">0.004</span>);
+<span class="br">12 </span>  <span class="hid">assert_eq</span>(<span class="hid">f</span>(<span class="num">1.0</span>), <span class="num">1.0</span>);
+<span class="br">13 </span>}
+<span class="br">14 </span>
+<span class="br">15 </span><span class="hid">test_as_func</span>(&amp;<span class="hid">sqr</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test floating-point lookup tables (sin)</p></div><pre class="d_code highlighted"><span class="kwrd">alias</span> <span class="hid">fsin</span> = <span class="hid">lt1</span>!(<span class="num">32</span>, <span class="type">float</span>, <span class="type">float</span>, <span class="num">0.0</span>, <span class="hid">PI</span>/<span class="num">2.0</span>, (<span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>));
+
+<span class="hid">assert_eq</span>(<span class="hid">fsin</span>(<span class="num">0.0</span>), <span class="num">0.0</span>, <span class="hid">eps</span>);
+<span class="hid">assert_eq</span>(<span class="hid">fsin</span>(<span class="hid">PI</span>/<span class="num">6.0</span>), <span class="num">0.499856</span>, <span class="hid">eps</span>);
+<span class="hid">assert_eq</span>(<span class="hid">fsin</span>(<span class="hid">PI</span>/<span class="num">2.0</span>), <span class="num">1.0</span>, <span class="hid">eps</span>);</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.util.html">util</a> <a class="parent" href="uctl.util.lt.html">lt</a> 
+		<span class="type-separator">functions</span><ul><li><a class="function current" href="uctl.util.lt.lt1.1.html">lt1</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

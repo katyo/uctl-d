@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>mk (uctl.filt.fir.mk)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>mk</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.filt.html">filt</a> <a class="breadcrumb" href="uctl.filt.fir.html">fir</a> </div><div><div class="documentation-comment synopsis"><div><p>Create impulse response using window function</p></div></div></div><div class="annotated-prototype"><ol class="overloads"><li class="overload-option"><a href="uctl.filt.fir.mk.1.html"><span class="overload-signature"><span class="builtin-type">template</span> <span class="name">mk</span><span class="template-params">(alias P, alias F, alias S = sin)</span></span></a></li><li class="overload-option"><a href="uctl.filt.fir.mk.2.html"><span class="overload-signature"><span class="lang-feature">auto</span>  <span class="name">mk</span>(PF pass_freq, CF cutoff_freq)</span></a></li><li class="active-overload-option"><span class="overload-signature"><span class="lang-feature">auto</span>  <span class="name">mk</span>(T sampling)</span><div class="function-prototype"><div class="attributes">pure nothrow @<span class="name" data-ident="nogc">nogc</span> @<span class="name" data-ident="safe">safe</span> </div><div class="return-type"><a class="lang-feature" href="http://dpldocs.info/auto-function-return-prototype">auto</a> </div><div class="function-name">mk</div><div class="template-parameters" data-count="6">(<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="P">P</span></span></div><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="F">F</span></span></div><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="S">S</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">uint</span> <span class="name" data-ident="L">L</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="W">W</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="T">T</span></span></div></div>)</div><div class="runtime-parameters" data-count="1"><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="storage-class">const</span> <span class="name" data-ident="T">T</span></span></span> <span class="parameter-name name" data-ident="sampling"><a href="#param-sampling">sampling</a></span></div><span class="paren">)</span></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><div class="andand-left"><div class="andand-left"><div class="andand-left"><div class="andand-left"><div class="andand-left">__traits(<span class="name" data-ident="isSame">isSame</span>, <a class="name" data-ident="Param" href="uctl.filt.fir.Param.html" title="uctl.filt.fir.Param">Param</a>, <span class="name" data-ident="P">P</span>) &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isWindow" href="uctl.util.win.isWindow.html" title="uctl.util.win.isWindow">isWindow</a>!<span class="name" data-ident="F">F</span></div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isSinOrCos" href="uctl.math.trig.isSinOrCos.html" title="uctl.math.trig.isSinOrCos">isSinOrCos</a>!(<span class="name" data-ident="S">S</span>, <a class="name" data-ident="Val" href="uctl.unit.Val.html" title="uctl.unit.Val">Val</a>!(<span class="name" data-ident="W">W</span>, <span class="name" data-ident="qrev">qrev</span>))</div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isNumer" href="uctl.num.isNumer.html" title="uctl.num.isNumer">isNumer</a>!<span class="name" data-ident="W">W</span></div> &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="L">L</span> &gt; 1</div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="hasUnits" href="uctl.unit.hasUnits.html" title="uctl.unit.hasUnits">hasUnits</a>!(<span class="name" data-ident="T">T</span>, <a class="name" data-ident="Angle" href="uctl.unit.Angle.html" title="uctl.unit.Angle">Angle</a>)</div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isNumer" href="uctl.num.isNumer.html" title="uctl.num.isNumer">isNumer</a>!(<span class="name" data-ident="W">W</span>, <a class="name" data-ident="rawTypeOf" href="uctl.unit.rawTypeOf.html" title="uctl.unit.rawTypeOf">rawTypeOf</a>!<span class="name" data-ident="T">T</span>)</div></div>)</div><div class="function-contracts"></div></div></li><li class="overload-option"><a href="uctl.filt.fir.mk.4.html"><span class="overload-signature"><span class="lang-feature">auto</span>  <span class="name">mk</span>(V weights)</span></a></li></ol></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test params using window function</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">enum</span> <span class="hid">s</span> = <span class="num">0.15</span>.<span class="hid">as</span>!<span class="hid">rev</span>;
+<span class="br">2 </span>
+<span class="br">3 </span><span class="kwrd">immutable</span> <span class="hid">p1</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">dirichlet</span>, <span class="hid">sin</span>!<span class="num">5</span>, <span class="num">5</span>, <span class="type">float</span>)(<span class="hid">s</span>);
+<span class="br">4 </span>
+<span class="br">5 </span><span class="hid">assert_eq</span>(<span class="hid">p1</span>[<span class="num">0</span>], <span class="num">0.704693198</span>);
+<span class="br">6 </span><span class="hid">assert_eq</span>(<span class="hid">p1</span>[<span class="num">1</span>], <span class="num">0.192574844</span>);
+<span class="br">7 </span><span class="hid">assert_eq</span>(<span class="hid">p1</span>[<span class="num">2</span>], <span class="num">0.113196723</span>);
+<span class="br">8 </span><span class="hid">assert_eq</span>(<span class="hid">p1</span>[<span class="num">3</span>], <span class="num">0.024502262</span>);
+<span class="br">9 </span><span class="hid">assert_eq</span>(<span class="hid">p1</span>[<span class="num">4</span>], -<span class="num">0.034966972</span>);
+<span class="br">10 </span>
+<span class="br">11 </span><span class="kwrd">immutable</span> <span class="hid">p2</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">bartlett</span>, <span class="hid">sin</span>!<span class="num">5</span>, <span class="num">5</span>, <span class="type">float</span>)(<span class="hid">s</span>);
+<span class="br">12 </span>
+<span class="br">13 </span><span class="hid">assert_eq</span>(<span class="hid">p2</span>[<span class="num">0</span>], <span class="num">0.0</span>);
+<span class="br">14 </span><span class="hid">assert_eq</span>(<span class="hid">p2</span>[<span class="num">1</span>], <span class="num">0.444739610</span>);
+<span class="br">15 </span><span class="hid">assert_eq</span>(<span class="hid">p2</span>[<span class="num">2</span>], <span class="num">0.522841573</span>);
+<span class="br">16 </span><span class="hid">assert_eq</span>(<span class="hid">p2</span>[<span class="num">3</span>], <span class="num">0.113172896</span>);
+<span class="br">17 </span><span class="hid">assert_eq</span>(<span class="hid">p2</span>[<span class="num">4</span>], -<span class="num">0.080754042</span>);</pre></div><h2 id="see-also"><a class="header-anchor" href="#see-also">See Also</a></h2><div class="documentation-comment see-also-section"><div><p><a class="xref" href="uctl.util.win.html">uctl.util.win</a></p><p><a href="https://en.wikipedia.org/wiki/Window_function">Window function</a> wikipedia article.</p></div></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.filt.html">filt</a> <a class="parent" href="uctl.filt.fir.html">fir</a> 
+		<span class="type-separator">structs</span><ul><li><a class="struct" href="uctl.filt.fir.Param.html">Param</a></li><li><a class="struct" href="uctl.filt.fir.State.html">State</a></li></ul><span class="type-separator">templates</span><ul><li><a class="template current" href="uctl.filt.fir.mk.1.html">mk</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

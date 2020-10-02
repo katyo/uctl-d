@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Param (uctl.filt.lqe.Param)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>Param</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.filt.html">filt</a> <a class="breadcrumb" href="uctl.filt.lqe.html">lqe</a> </div><div><div class="documentation-comment synopsis"><div><p>LQE filter parameters</p></div></div></div><div class="annotated-prototype"><div class="aggregate-prototype"><div class="attributes"></div><span class="builtin-type">struct</span> Param (<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="F_">F_</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="H_">H_</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="Q_">Q_</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="R_">R_</span></span></div></div>) <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><span class="name" data-ident="isNumer">isNumer</span>!(<span class="name" data-ident="F_">F_</span>, <span class="name" data-ident="H_">H_</span>, <span class="name" data-ident="Q_">Q_</span>, <span class="name" data-ident="R_">R_</span>)</div>) {<div class="aggregate-member"><a href="uctl.filt.lqe.Param.f.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">F</span></tt> <span class="name">f</span>;</a></div><div class="aggregate-member"><a href="uctl.filt.lqe.Param.h.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">H</span></tt> <span class="name">h</span>;</a></div><div class="aggregate-member"><a href="uctl.filt.lqe.Param.q.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">Q</span></tt> <span class="name">q</span>;</a></div><div class="aggregate-member"><a href="uctl.filt.lqe.Param.r.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">R</span></tt> <span class="name">r</span>;</a></div><div class="aggregate-member"><a href="uctl.filt.lqe.Param.f2.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">F2</span></tt> <span class="name">f2</span>;</a></div><div class="aggregate-member"><a href="uctl.filt.lqe.Param.h2.html"><div class="attributes"></div><tt class="highlighted"><span class="hid">H2</span></tt> <span class="name">h2</span>;</a></div><div class="aggregate-member"><a href="uctl.filt.lqe.Param.this.html"><span class="lang-feature name">this</span>(F f_, H h_, Q q_, R r_);</a></div>}</div></div><h2 id="constructors"><a class="header-anchor" href="#constructors">Constructors</a></h2><dl class="member-list constructors"><dt><a href="uctl.filt.lqe.Param.this.html">this</a><div class="simplified-prototype" style="max-width: 30ch;"><span class="lang-feature name">this</span>(F f_, H h_, Q q_, R r_)</div></dt><dd><div><p>Init LQE parameters</p></div></dd></dl><h2 id="members"><a class="header-anchor" href="#members">Members</a></h2><h3 class="member-list-header hide-from-toc" id="variable"><a class="header-anchor" href="#variable">Variables</a></h3><dl class="member-list native"><dt><a href="uctl.filt.lqe.Param.f.html">f</a><div class="simplified-prototype" style="max-width: 4ch;"><tt class="highlighted"><span class="hid">F</span></tt> <span class="name">f</span>;</div></dt><dd><div><p>Factor of actual value to previous actual value</p></div></dd><dt><a href="uctl.filt.lqe.Param.f2.html">f2</a><div class="simplified-prototype" style="max-width: 6ch;"><tt class="highlighted"><span class="hid">F2</span></tt> <span class="name">f2</span>;</div></dt><dd><div><p>Square f</p></div></dd><dt><a href="uctl.filt.lqe.Param.h.html">h</a><div class="simplified-prototype" style="max-width: 4ch;"><tt class="highlighted"><span class="hid">H</span></tt> <span class="name">h</span>;</div></dt><dd><div><p>Factor of measured value to actual value</p></div></dd><dt><a href="uctl.filt.lqe.Param.h2.html">h2</a><div class="simplified-prototype" style="max-width: 6ch;"><tt class="highlighted"><span class="hid">H2</span></tt> <span class="name">h2</span>;</div></dt><dd><div><p>Square h</p></div></dd><dt><a href="uctl.filt.lqe.Param.q.html">q</a><div class="simplified-prototype" style="max-width: 4ch;"><tt class="highlighted"><span class="hid">Q</span></tt> <span class="name">q</span>;</div></dt><dd><div><p>Measurement noise</p></div></dd><dt><a href="uctl.filt.lqe.Param.r.html">r</a><div class="simplified-prototype" style="max-width: 4ch;"><tt class="highlighted"><span class="hid">R</span></tt> <span class="name">r</span>;</div></dt><dd><div><p>Environment noise</p></div></dd></dl><div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.filt.html">filt</a> <a class="parent" href="uctl.filt.lqe.html">lqe</a> 
+		<span class="type-separator">functions</span><ul><li><a class="function" href="uctl.filt.lqe.mk.html">mk</a></li></ul><span class="type-separator">structs</span><ul><li><a class="struct current" href="uctl.filt.lqe.Param.html">Param</a></li><li><a class="struct" href="uctl.filt.lqe.State.html">State</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>intType (uctl.num.intType)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>intType</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.num.html">num</a> </div><div><div class="documentation-comment synopsis"><div><p>Select appropriate integer type by width in bits</p></div></div></div><div class="annotated-prototype"><div class="aggregate-prototype"><div class="attributes"></div><span class="builtin-type">template</span> intType (<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">uint</span> <span class="name" data-ident="bits">bits</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">bool</span> <span class="name" data-ident="unsigned">unsigned</span> = false</span></div></div>) {}</div></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test <tt class="inline-code">intType</tt></p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">0</span>) == <span class="type">byte</span>));
+<span class="br">2 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">1</span>) == <span class="type">byte</span>));
+<span class="br">3 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">7</span>) == <span class="type">byte</span>));
+<span class="br">4 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">8</span>) == <span class="type">byte</span>));
+<span class="br">5 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">9</span>) == <span class="type">short</span>));
+<span class="br">6 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">15</span>) == <span class="type">short</span>));
+<span class="br">7 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">16</span>) == <span class="type">short</span>));
+<span class="br">8 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">17</span>) == <span class="type">int</span>));
+<span class="br">9 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">31</span>) == <span class="type">int</span>));
+<span class="br">10 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">32</span>) == <span class="type">int</span>));
+<span class="br">11 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">33</span>) == <span class="type">long</span>));
+<span class="br">12 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">63</span>) == <span class="type">long</span>));
+<span class="br">13 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">64</span>) == <span class="type">long</span>));
+<span class="br">14 </span>
+<span class="br">15 </span><span class="kwrd">static</span> <span class="kwrd">if</span> (<span class="kwrd">is</span>(<span class="type">cent</span>)) {
+<span class="br">16 </span>  <span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">64</span>) == <span class="type">cent</span>));
+<span class="br">17 </span>  <span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">127</span>) == <span class="type">cent</span>));
+<span class="br">18 </span>  <span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">128</span>) == <span class="type">cent</span>));
+<span class="br">19 </span>}
+<span class="br">20 </span>
+<span class="br">21 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">8</span>, <span class="kwrd">true</span>) == <span class="type">ubyte</span>));
+<span class="br">22 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">16</span>, <span class="kwrd">true</span>) == <span class="type">ushort</span>));
+<span class="br">23 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">32</span>, <span class="kwrd">true</span>) == <span class="type">uint</span>));
+<span class="br">24 </span><span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">64</span>, <span class="kwrd">true</span>) == <span class="type">ulong</span>));
+<span class="br">25 </span>
+<span class="br">26 </span><span class="kwrd">static</span> <span class="kwrd">if</span> (<span class="kwrd">is</span>(<span class="type">ucent</span>)) {
+<span class="br">27 </span>  <span class="kwrd">assert</span>(<span class="kwrd">is</span>(<span class="hid">intType</span>!(<span class="num">128</span>) == <span class="type">ucent</span>));
+<span class="br">28 </span>}</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.num.html">num</a> 
+		<span class="type-separator">structs</span><ul><li><a class="struct" href="uctl.num.fix.html">fix</a></li></ul><span class="type-separator">templates</span><ul><li><a class="template" href="uctl.num.asfix.html">asfix</a></li><li><a class="template" href="uctl.num.asnum.1.html">asnum</a></li><li><a class="template" href="uctl.num.bitsOf.html">bitsOf</a></li><li><a class="template" href="uctl.num.filledBit.html">filledBit</a></li><li><a class="template" href="uctl.num.filledBits.html">filledBits</a></li><li><a class="template" href="uctl.num.fmtOf.html">fmtOf</a></li><li><a class="template current" href="uctl.num.intType.html">intType</a></li><li><a class="template" href="uctl.num.isAnyNum.html">isAnyNum</a></li><li><a class="template" href="uctl.num.isAnyNumer.html">isAnyNumer</a></li><li><a class="template" href="uctl.num.isFixed.html">isFixed</a></li><li><a class="template" href="uctl.num.isFixedConst.html">isFixedConst</a></li><li><a class="template" href="uctl.num.isFixedEqualsTo.html">isFixedEqualsTo</a></li><li><a class="template" href="uctl.num.isFloat.html">isFloat</a></li><li><a class="template" href="uctl.num.isInt.html">isInt</a></li><li><a class="template" href="uctl.num.isNum.html">isNum</a></li><li><a class="template" href="uctl.num.isNumer.html">isNumer</a></li><li><a class="template" href="uctl.num.isSameFixed.html">isSameFixed</a></li><li><a class="template" href="uctl.num.likeNum.html">likeNum</a></li><li><a class="template" href="uctl.num.signedOf.html">signedOf</a></li><li><a class="template" href="uctl.num.typeOf.html">typeOf</a></li><li><a class="template" href="uctl.num.unsignedOf.html">unsignedOf</a></li></ul><span class="type-separator">variables</span><ul><li><a class="variable" href="uctl.num.PHI.html">PHI</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>
