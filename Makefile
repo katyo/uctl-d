@@ -132,19 +132,19 @@ $(foreach module,$(MODULES),$(eval $(call module_rules,$(module))))
 define plot_rules
 plot: plot.$(1)
 
-plot.$(1): doc/$(1).svg
+plot.$(1): plot/$(1).svg
 
-doc/$(1).svg: plot/$(1).m #uctl
-	cd $$(dir $$<) && octave $$(notdir $$<)
-	mv plot/$(1).svg $$@
+plot/$(1).svg: plot/$(1).m #uctl
+	@echo PLOT $(1)
+	@cd $$(dir $$<) && octave $$(notdir $$<)
 endef
 
 $(foreach plot,$(PLOTS),$(eval $(call plot_rules,$(plot))))
 
-doc_gen: uctl
-	adrdox -i --tex-math=katex -o doc $<
-
-doc: doc_gen plot
+doc: uctl
+	@echo DOC
+	@adrdox -i --tex-math=katex -o doc $<
+	@cp plot/*.svg doc
 
 clean:
 	@echo CLEAN ALL

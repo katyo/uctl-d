@@ -28,6 +28,33 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ github.token }}
         run: 'dscanner --styleCheck | reviewdog -efm="%f(%l:%c)[%tarn]: %m" -efm="%f(%l:%c)[%trror]: %m" -name="Coding style" -reporter="${{ matrix.reporter }}" -level="${{ matrix.level }}"'
 
+  build-doc:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            adrdox: 2.4.1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup adrdox
+        run: |
+          curl -L https://github.com/katyo/adrdox/releases/download/v${{ matrix.adrdox }}/adrdox_linux-x86_64.zip > ${{ runner.temp }}/adrdox.zip
+          sudo unzip ${{ runner.temp }}/adrdox.zip -d /usr/share/adrdox -x adrdox
+          sudo unzip ${{ runner.temp }}/adrdox.zip -d /usr/bin adrdox
+          sudo chmod +x /usr/bin/adrdox
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Build docs
+        run: make doc
+      - name: Publish docs
+        if: github.event_name == 'push'
+        uses: JamesIves/github-pages-deploy-action@3.6.2
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          BRANCH: gh-pages
+          FOLDER: doc
+          TARGET_FOLDER: ${{ github.ref }}
+
   build:
     needs:
       - check
