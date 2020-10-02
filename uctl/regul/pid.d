@@ -36,7 +36,9 @@ version(unittest) {
    coupledP_ = class has decoupled proportional term
    limitedI_ = class has integral error limiting
 */
-struct Class(string name_, bool hasP_ = true, bool hasI_ = false, bool hasD_ = false, bool coupledP_ = false, bool limitedI_ = false) {
+struct Class(string name_,
+             bool hasP_ = true, bool hasI_ = false, bool hasD_ = false,
+             bool coupledP_ = false, bool limitedI_ = false) {
   /// Class name
   enum string name = name_;
 
@@ -182,8 +184,8 @@ struct Param(C, P_) if (isClass!(C, PO) && isNumer!P_) {
      I = Integral factor type
      i = Integral factor
   */
-  const pure nothrow @nogc @safe
-  Param!(PI, P, I, E) with_I(E, I)(const I i) if (isNumer!(P, E, I)) {
+  pure nothrow @nogc @safe
+  Param!(PI, P, I, E) with_I(E, I)(const I i) const if (isNumer!(P, E, I)) {
     return Param!(PI, P, I, E)(p, i);
   }
 
@@ -196,8 +198,8 @@ struct Param(C, P_) if (isClass!(C, PO) && isNumer!P_) {
      I = Integral time type
      i = Integral time
   */
-  const pure nothrow @nogc @safe
-  Param!(PI, P, typeof(I() * asnum!(dt, I)), E) with_I(real dt, E, I)(const I i) if (isNumer!(P, I, E)) {
+  pure nothrow @nogc @safe
+  Param!(PI, P, typeof(I() * asnum!(dt, I)), E) with_I(real dt, E, I)(const I i) const if (isNumer!(P, I, E)) {
     return with_I!E(i * asnum!(dt, I));
   }
 
@@ -208,8 +210,8 @@ struct Param(C, P_) if (isClass!(C, PO) && isNumer!P_) {
      D = Derivative factor type
      d = Derivative factor
   */
-  const pure nothrow @nogc @safe
-  Param!(PD, P, D) with_D(D)(const D d) if (isNumer!(P, D)) {
+  pure nothrow @nogc @safe
+  Param!(PD, P, D) with_D(D)(const D d) const if (isNumer!(P, D)) {
     return Param!(PD, P, D)(p, d);
   }
 
@@ -221,8 +223,8 @@ struct Param(C, P_) if (isClass!(C, PO) && isNumer!P_) {
      D = Derivative time type
      d = Derivative time
   */
-  const pure nothrow @nogc @safe
-  Param!(PI, P, typeof(D() * asnum!(1.0 / dt, D))) with_D(real dt, D)(const D d) if (isNumer!(P, D)) {
+  pure nothrow @nogc @safe
+  Param!(PI, P, typeof(D() * asnum!(1.0 / dt, D))) with_D(real dt, D)(const D d) const if (isNumer!(P, D)) {
     return with_D(d * asnum!(1.0 / dt, D));
   }
 }
@@ -335,8 +337,8 @@ struct Param(C, P_, I_, E_) if (isClass!(C, PI) && isNumer!(P_, I_, E_)) {
     }
 
     /// Add abolute integral error limit
-    const pure nothrow @nogc @safe
-    Param!(LimitI!(PI), P, I, E) with_I_limit(const E e) {
+    pure nothrow @nogc @safe
+    Param!(LimitI!(PI), P, I, E) with_I_limit(const E e) const {
       return Param!(LimitI!(PI), P, I, E)(p, i, e);
     }
   }
@@ -360,8 +362,8 @@ struct Param(C, P_, I_, E_) if (isClass!(C, PI) && isNumer!(P_, I_, E_)) {
      D = Derivative factor type
      d = Derivative factor
   */
-  const pure nothrow @nogc @safe
-  Param!(PID, P, I, D, E) with_D(D)(const D d) if (isNumer!(P, I, D, E)) {
+  pure nothrow @nogc @safe
+  Param!(PID, P, I, D, E) with_D(D)(const D d) const if (isNumer!(P, I, D, E)) {
     return Param!(PID, P, I, D, E)(p, i, d);
   }
 
@@ -373,8 +375,9 @@ struct Param(C, P_, I_, E_) if (isClass!(C, PI) && isNumer!(P_, I_, E_)) {
      D = Derivative time type
      d = Derivative time
   */
-  const pure nothrow @nogc @safe
-  Param!(PID, P, I, typeof(D() * asnum!(1.0 / dt, D)), E) with_D(real dt, D)(const D d) if (isNumer!(P, I, D, E)) {
+  pure nothrow @nogc @safe
+  Param!(PID, P, I, typeof(D() * asnum!(1.0 / dt, D)), E)
+  with_D(real dt, D)(const D d) const if (isNumer!(P, I, D, E)) {
     return with_D(d * asnum!(1.0 / dt, D));
   }
 }
@@ -432,12 +435,14 @@ nothrow @nogc unittest {
 }
 
 /// Create Proportional Integral regulator parameters
-Param!(PI, P, I, E) mk(alias C, E, P, I)(const P p = 0.0, const I i = 0.0) if (isClass!(C, PI) && isNumer!(P, I, E) && !C.limitedI) {
+Param!(PI, P, I, E) mk(alias C, E, P, I)(const P p = 0.0, const I i = 0.0)
+if (isClass!(C, PI) && isNumer!(P, I, E) && !C.limitedI) {
   return Param!(PI, P, I, E)(p, i);
 }
 
 /// Create Proportional Integral regulator parameters with error limit
-Param!(PI, P, I, E) mk(alias C, E, P, I)(const P p = 0.0, const I i = 0.0, const E e = 0.0) if (isClass!(C, PI) && isNumer!(P, I, E) && C.limitedI) {
+Param!(PI, P, I, E) mk(alias C, E, P, I)(const P p = 0.0, const I i = 0.0, const E e = 0.0)
+if (isClass!(C, PI) && isNumer!(P, I, E) && C.limitedI) {
   return Param!(PI, P, I, E)(p, i, e);
 }
 
@@ -499,8 +504,8 @@ struct Param(C, P_, D_) if (isClass!(C, PD) && isNumer!(P_, D_)) {
      I = Integral factor type
      i = Integral factor
   */
-  const pure nothrow @nogc @safe
-  Param!(PID, P, I, D, E) with_I(E, I)(const I i) if (isNumer!(P, I, D, E)) {
+  pure nothrow @nogc @safe
+  Param!(PID, P, I, D, E) with_I(E, I)(const I i) const if (isNumer!(P, I, D, E)) {
     return Param!(PID, P, I, D, E)(p, i, d);
   }
 
@@ -513,8 +518,8 @@ struct Param(C, P_, D_) if (isClass!(C, PD) && isNumer!(P_, D_)) {
      I = Integral factor type
      i = Integral time
   */
-  const pure nothrow @nogc @safe
-  Param!(PID, P, typeof(I() * asnum!(dt, I)), D, E) with_I(real dt, E, I)(const I i) if (isNumer!(P, I, D, E)) {
+  pure nothrow @nogc @safe
+  Param!(PID, P, typeof(I() * asnum!(dt, I)), D, E) with_I(real dt, E, I)(const I i) const if (isNumer!(P, I, D, E)) {
     return with_I!E(i * asnum!(dt, I));
   }
 }
@@ -632,8 +637,8 @@ struct Param(C, P_, I_, D_, E_) if (isClass!(C, PID) && isNumer!(P_, I_, D_, E_)
     }
 
     /// Add abolute integral error limit
-    const pure nothrow @nogc @safe
-    Param!(LimitI!(PID), P, I, D, E) with_I_limit(const E e) {
+    pure nothrow @nogc @safe
+    Param!(LimitI!(PID), P, I, D, E) with_I_limit(const E e) const {
       return Param!(LimitI!(PID), P, I, D, E)(p, i, d, e);
     }
   }
@@ -681,12 +686,14 @@ nothrow @nogc unittest {
 }
 
 /// Create Proportional Integral Derivative regulator parameters
-Param!(PID, P, I, D, E) mk(alias C, E, P, I, D)(const P p = 0.0, const I i = 0.0, const D d = 0.0) if (isClass!(C, PID) && isNumer!(P, I, D, E) && !C.limitedI) {
+Param!(PID, P, I, D, E) mk(alias C, E, P, I, D)(const P p = 0.0, const I i = 0.0, const D d = 0.0)
+if (isClass!(C, PID) && isNumer!(P, I, D, E) && !C.limitedI) {
   return Param!(PID, I, P, D, E)(p, i, d);
 }
 
 /// Create Proportional Integral Derivative regulator parameters with Integral error limit
-Param!(PID, P, I, D, E) mk(alias C, E, P, I, D)(const P p = 0.0, const I i = 0.0, const D d = 0.0, const E e = 0.0) if (isClass!(C, PID) && isNumer!(P, I, D, E) && C.limitedI) {
+Param!(PID, P, I, D, E) mk(alias C, E, P, I, D)(const P p = 0.0, const I i = 0.0, const D d = 0.0, const E e = 0.0)
+if (isClass!(C, PID) && isNumer!(P, I, D, E) && C.limitedI) {
   return Param!(PID, I, P, D, E)(p, i, d, e);
 }
 
@@ -790,7 +797,7 @@ struct State(alias P_, E_) if (isParam!P_ && isNumer!(P_.P, E_)) {
 
     static if (C.hasD) { // Has derivative term
       // Calculate derivative error
-      auto e_d = error - e;
+      immutable e_d = error - e;
 
       // Update error value
       e = error;

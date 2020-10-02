@@ -172,6 +172,7 @@ nothrow @nogc unittest {
   assert_eq(cos(60.0.as!deg), 0.5);
 }
 
+/// Check that number can be used as polynomial order for trigonometry approximation
 template isTrigPolyOrder(uint N) {
   enum bool isTrigPolyOrder = N >= 2 && N <= 5;
 }
@@ -212,12 +213,12 @@ template sin(uint N) if (isTrigPolyOrder!N) {
     }
     alias C(real v) = asnum!(v, Z);
 
-    auto x = angle.to!qrev.raw;
+    const auto x = angle.to!qrev.raw;
 
     static if (N == 4) {
-      auto x_ = C!1 - x; // sin -> cos
+      const auto x_ = C!1 - x; // sin -> cos
     } else {
-      auto x_ = x;
+      const auto x_ = x;
     }
 
     auto z = cast(Z) (x_ % C!4); // x %= 2π
@@ -289,9 +290,9 @@ template sin(uint N) if (isTrigPolyOrder!N) {
         z = cast(Z) (C!2 - z); // x = π - x
       }
 
-      auto z2 = z * z;
+      const auto z2 = z * z;
 
-      auto y = cast(R) (C!a - (C!b - C!c * z2) * z2);
+      const auto y = cast(R) (C!a - (C!b - C!c * z2) * z2);
 
       return cast(R) (n ? -y : y);
     }
@@ -341,7 +342,7 @@ nothrow @nogc unittest {
   test_sign!5(0.000193);
 
   template max_err(uint N) {
-    auto max_err =
+    const auto max_err =
       max_abs_error!((double x) => sin!N(x.as!rad),
                      (double x) => sin(x.as!rad))
       (-10*PI, 10*PI, 1000);
@@ -357,7 +358,7 @@ nothrow @nogc unittest {
 nothrow @nogc unittest {
   template max_err(uint N) {
     alias X = fix!(-10*PI, 10*PI);
-    auto max_err =
+    const auto max_err =
       max_abs_error!((double x) => cast(double) sin!N(X(x).as!rad),
                      (double x) => sin(x.as!rad))
       (-10*PI, 10*PI, 1000);
@@ -399,7 +400,7 @@ template cos(uint N) if (isTrigPolyOrder!N) {
 /// Test cosine for floating-point
 nothrow @nogc unittest {
   template max_err(uint N) {
-    auto max_err =
+    const auto max_err =
       max_abs_error!((double x) => cos!N(x.as!rad),
                      (double x) => cos(x.as!rad))
       (-10*PI, 10*PI, 1000);
@@ -415,7 +416,7 @@ nothrow @nogc unittest {
 nothrow @nogc unittest {
   template max_err(uint N) {
     alias X = fix!(-10*PI, 10*PI);
-    auto max_err =
+    const auto max_err =
       max_abs_error!((double x) => cast(double) cos!N(X(x).as!rad),
                      (double x) => cos(x.as!rad))
       (-10*PI, 10*PI, 1000);

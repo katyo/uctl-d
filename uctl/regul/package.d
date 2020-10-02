@@ -7,4 +7,4 @@ module uctl.regul;
 
 public import PID = uctl.regul.pid;
 
-alias uctl.regul.pid.mk mk;
+alias mk = uctl.regul.pid.mk;

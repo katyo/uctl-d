@@ -107,6 +107,7 @@ struct Model(string name_, bool calcT_ = false, bool calcR_ = false) {
   enum bool calcR = calcR_;
 }
 
+/// Check that type is thermistor model
 template isModel(X...) if (X.length == 1 || X.length == 2) {
   static if (X.length == 1) {
     static if (is(X[0])) {
@@ -139,11 +140,16 @@ alias Beta = Model!("Simplified beta model");
 
 /// Thermistor parameters for Steinhart-Hart model
 struct Param(alias M, A, B, C) if (isModel!(M, SteinhartHart) && isNumer!(A, B, C)) {
-  static assert(!M.calcR, "Calculation of resistance from temperature using Steinhart-Hart model is too computationally expensive and not supported. You can use simplified beta model.");
+  static assert(!M.calcR,
+                "Calculation of resistance from temperature using Steinhart-Hart model is " ~
+                "too computationally expensive and not supported. You can use simplified beta model.");
 
   static if (M.calcT) {
+    /// The first coefficient of model
     A a;
+    /// The second coefficient of model
     B b;
+    /// The third coefficient of model
     C c;
   }
 
@@ -174,7 +180,8 @@ struct Param(alias M, A, B, C) if (isModel!(M, SteinhartHart) && isNumer!(A, B, 
 }
 
 /// Create parameters for Steinhart-Hart model of thermistor
-Param!(M, A, B, C) mk(alias M, A, B, C)(const A a, const B b, const C c) if (isModel!(M, SteinhartHart) && isNumer!(A, B, C)) {
+pure nothrow @nogc @safe Param!(M, A, B, C)
+mk(alias M, A, B, C)(const A a, const B b, const C c) if (isModel!(M, SteinhartHart) && isNumer!(A, B, C)) {
   return Param!(M, A, B, C)(a, b, c);
 }
 
@@ -191,7 +198,9 @@ nothrow @nogc unittest {
 /// Test NTC 100K thermistor (fixed-point)
 nothrow @nogc unittest {
   // a = -0.00400110693, b = 0.00077306258, c = -0.00000099773
-  static immutable ntc100k = mk!(calcT!SteinhartHart)(asfix!(-0.00400110693), asfix!(0.00077306258), asfix!(-0.00000099773));
+  static immutable ntc100k = mk!(calcT!SteinhartHart)(asfix!(-0.00400110693),
+                                                      asfix!(0.00077306258),
+                                                      asfix!(-0.00000099773));
 
   alias R = fix!(15e3, 150e3);
   alias T = fix!(230, 580);
@@ -202,7 +211,10 @@ nothrow @nogc unittest {
 }
 
 /// Thermistor parameters for simplified β-model
-struct Param(alias M, R, T, B) if (isModel!(M, Beta) && (isNumer!(R, T, B) || hasUnits!(R, Resistance) && hasUnits!(T, Temperature) && isNumer!(R.raw_t, T.raw_t, B))) {
+struct Param(alias M, R, T, B) if (isModel!(M, Beta) &&
+                                   (isNumer!(R, T, B) || (hasUnits!(R, Resistance) &&
+                                                          hasUnits!(T, Temperature) &&
+                                                          isNumer!(R.raw_t, T.raw_t, B)))) {
   static if (M.calcT) {
     static if (hasUnits!R) {
       alias InvR = typeof(asnum!(1, R.raw_t) / R.raw_t());
@@ -216,16 +228,22 @@ struct Param(alias M, R, T, B) if (isModel!(M, Beta) && (isNumer!(R, T, B) || ha
     }
     alias InvB = typeof(asnum!(1, B) / B());
 
+    /// $(MATH \frac{1}{R_0}) value
     InvR inv_r0;
+    /// $(MATH \frac{1}{T_0}) value
     InvT inv_t0;
+    /// $(MATH \frac{1}{\beta}) value
     InvB inv_beta;
   }
 
   static if (M.calcR) {
     alias BInvT = typeof(B() / T());
 
+    /// $(MATH R_0) value
     R r0;
+    /// $(MATH \frac{\beta}{T_0}) value
     BInvT beta_inv_t0;
+    /// $(MATH \frac{1}{\beta}) value
     B beta;
   }
 
@@ -275,7 +293,8 @@ struct Param(alias M, R, T, B) if (isModel!(M, Beta) && (isNumer!(R, T, B) || ha
 }
 
 /// Create parameters for simplified β-model of thermistor
-Param!(M, R, T, B) mk(alias M, R, T, B)(const R r0, const T t0, const B beta) if (isModel!(M, Beta) && isNumer!(R, T, B)) {
+pure nothrow @nogc @safe Param!(M, R, T, B)
+mk(alias M, R, T, B)(const R r0, const T t0, const B beta) if (isModel!(M, Beta) && isNumer!(R, T, B)) {
   return Param!(M, R, T, B)(r0, t0, beta);
 }
 
@@ -339,7 +358,9 @@ nothrow @nogc unittest {
 /// Test NTC 100K thermistor (fixed-point)
 nothrow @nogc unittest {
   // Points: [100KΩ, 24°C], [24KΩ, 80°C]
-  static immutable ntc100k = mk!(calcT!Beta)(asfix!100e3, asfix!(25.as!degC.to!degK.raw), asfix!24e3, asfix!(61.as!degC.to!degK.raw));
+  static immutable ntc100k = mk!(calcT!Beta)(asfix!100e3,
+                                             asfix!(25.as!degC.to!degK.raw),
+                                             asfix!24e3, asfix!(61.as!degC.to!degK.raw));
 
   assert_eq(ntc100k.inv_r0, asfix!9.999999996e-6);
   assert_eq(ntc100k.inv_t0, asfix!0.003355704697);

@@ -50,9 +50,9 @@ public import Regul = uctl.regul;
 public import Simul = uctl.simul;
 public import Modul = uctl.modul;
 
-alias uctl.filt.mk mk;
-alias uctl.trans.mk mk;
-alias uctl.regul.mk mk;
-alias uctl.simul.mk mk;
-alias uctl.modul.mk mk;
-alias uctl.util.mk mk;
+alias mk = uctl.filt.mk;
+alias mk = uctl.trans.mk;
+alias mk = uctl.regul.mk;
+alias mk = uctl.simul.mk;
+alias mk = uctl.modul.mk;
+alias mk = uctl.util.mk;

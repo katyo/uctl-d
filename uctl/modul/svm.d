@@ -113,8 +113,8 @@ auto svm(alias S, alias R = [3], T)(const T phase) if (isSinOrCos!(S, T) && isGe
   auto sphase = cast(T) phase;
   auto sector = sectorize(sphase);
 
-  auto dx = S(pi!(1.0/3.0, T) - sphase);
-  auto dy = S(sphase);
+  immutable dx = S(pi!(1.0/3.0, T) - sphase);
+  immutable dy = S(sphase);
 
   version(always) {
     template P3(ubyte a, ubyte b, ubyte c) {
@@ -128,19 +128,19 @@ auto svm(alias S, alias R = [3], T)(const T phase) if (isSinOrCos!(S, T) && isGe
                                    P3!(2, 0, 1),
                                    P3!(0, 2, 1)];
 
-    auto p = ps[sector];
-    auto p0 = p >> 4;
-    auto p1 = (p >> 2) & 3;
-    auto p2 = p & 3;
+    immutable p = ps[sector];
+    immutable p0 = p >> 4;
+    immutable p1 = (p >> 2) & 3;
+    immutable p2 = p & 3;
   } else {
-    auto p0 = ((sector + 1) / 2) % 3;
-    auto p1 = 2 - ((sector + 1) % 3);
-    auto p2 = ((sector + 4) / 2) % 3;
+    immutable p0 = ((sector + 1) / 2) % 3;
+    immutable p1 = 2 - ((sector + 1) % 3);
+    immutable p2 = ((sector + 4) / 2) % 3;
   }
 
-  auto a = cast(O) (dx + dy);
-  auto b = cast(O) (-a);
-  auto c = cast(O) (b + asnum!(2, O) * (sector & 1 ? dy : dx));
+  immutable a = cast(O) (dx + dy);
+  immutable b = cast(O) (-a);
+  immutable c = cast(O) (b + asnum!(2, O) * (sector & 1 ? dy : dx));
 
   res.sliceof[p2] = a;
   res.sliceof[p0] = b;

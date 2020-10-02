@@ -1,11 +1,11 @@
 import uctl.util;
 
-nothrow @nogc void entry() {
+private nothrow @nogc void entry() {
   static immutable win = func!(size, double);
 
   foreach (i; 0 .. size+1) {
-    auto x = cast(double)i / cast(double)size;
-    auto y = win[i];
+    immutable auto x = cast(double)i / cast(double)size;
+    immutable auto y = win[i];
     printf("%g %g\n", x, y);
   }
 }

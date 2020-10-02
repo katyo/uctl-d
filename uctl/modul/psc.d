@@ -40,7 +40,7 @@
 */
 module uctl.modul.psc;
 
-import std.traits: isInstanceOf;
+import std.traits: isInstanceOf, Unqual;
 import uctl.num: isNumer, typeOf, asnum;
 import uctl.unit: to, hasUnits, Frequency, Time, sec, Hz;
 import uctl.util.vec: isVec, VecType, sliceof, isGenVec, GenVec;
@@ -59,13 +59,14 @@ version(unittest) {
    T = The type to operate
  */
 struct Param(T_) if (isNumer!T_) {
-  alias T = T_;
+  alias T = Unqual!T_;
 
   /// Minimum relative time for compensation
   T delay;
 
-  const pure nothrow @nogc @safe
-  this(const T delay_) {
+  /// Initialize parameters uing minimum delay for measurement complete
+  pure nothrow @nogc @safe
+  this(const T delay_) const {
     delay = delay_;
   }
 }
@@ -77,7 +78,10 @@ struct Param(T_) if (isNumer!T_) {
    crit_time = Critical time to adjust to (Usually the minimum required time to measure current)
    period = Pulse-width modulation period
  */
-auto mk(alias P, T, D)(const T crit_time, const D period) if (__traits(isSame, Param, P) && hasUnits!(T, Time) && hasUnits!(D, Time) && isNumer!(T.raw_t, D.raw_t)) {
+auto mk(alias P, T, D)(const T crit_time, const D period) if (__traits(isSame, Param, P) &&
+                                                              hasUnits!(T, Time) &&
+                                                              hasUnits!(D, Time) &&
+                                                              isNumer!(T.raw_t, D.raw_t)) {
   auto delay = crit_time.to!(D.units).raw / period.raw;
   return Param!(typeof(delay))(delay);
 }
@@ -96,7 +100,10 @@ nothrow @nogc unittest {
    crit_time = Critical time to adjust to (Usually the minimum required time to measure current)
    frequency = Pulse-width modulation frequency
 */
-auto mk(alias P, T, F)(const T crit_time, const F frequency) if (__traits(isSame, Param, P) && hasUnits!(T, Time) && hasUnits!(F, Frequency) && isNumer!(T.raw_t, F.raw_t)) {
+auto mk(alias P, T, F)(const T crit_time, const F frequency) if (__traits(isSame, Param, P) &&
+                                                                 hasUnits!(T, Time) &&
+                                                                 hasUnits!(F, Frequency) &&
+                                                                 isNumer!(T.raw_t, F.raw_t)) {
   auto delay = crit_time.to!sec.raw * frequency.to!Hz.raw;
   return Param!(typeof(delay))(delay);
 }
@@ -112,15 +119,16 @@ nothrow @nogc unittest {
    Corrector state type
  */
 struct State(alias P_, V_) if (isInstanceOf!(Param, typeOf!P_) && isVec!(V_, 3) && isNumer!(VecType!V_, P_.T)) {
-  alias P = typeOf!P_;
-  alias V = V_;
+  alias P = Unqual!(typeOf!P_);
+  alias V = Unqual!V_;
   alias T = VecType!V;
 
   /// Phase shifting
   V shift = 0.0;
 
-  const pure nothrow @nogc @safe
-  this(const V shift_) {
+  /// Initialize state
+  pure nothrow @nogc @safe
+  this(const V shift_) const {
     shift = shift_;
   }
 
@@ -212,8 +220,8 @@ struct State(alias P_, V_) if (isInstanceOf!(Param, typeOf!P_) && isVec!(V_, 3) 
            T1 T2
       */
 
-      auto T1 = abc.sliceof[iab.sliceof[0]] - abc.sliceof[mid];
-      auto T2 = abc.sliceof[mid] - abc.sliceof[iab.sliceof[1]];
+      immutable T1 = abc.sliceof[iab.sliceof[0]] - abc.sliceof[mid];
+      immutable T2 = abc.sliceof[mid] - abc.sliceof[iab.sliceof[1]];
 
       auto dT = cast(T) 0;
 

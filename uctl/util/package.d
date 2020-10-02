@@ -12,4 +12,4 @@ public import uctl.util.vec;
 
 public import OSC = uctl.util.osc;
 
-alias uctl.util.osc.mk mk;
+alias mk = uctl.util.osc.mk;

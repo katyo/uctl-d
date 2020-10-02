@@ -31,20 +31,20 @@ struct PFDL(uint L, T) {
   private val_t[len] val;
 
   /// Initialize delay line using initial value
-  const pure nothrow @nogc @safe
-  this(const val_t initial) {
+  pure nothrow @nogc @safe
+  this(const val_t initial) const {
     val[0..$] = initial;
   }
 
   /// Put value to line by assign
   pure nothrow @nogc @safe
   opAssign(const val_t value) {
-    push(value);
+    return push(value);
   }
 
   /// Get oldest value from line by cast
-  const pure nothrow @nogc @safe @property
-  val_t opCast() {
+  pure nothrow @nogc @safe @property
+  val_t opCast() const {
     return oldest;
   }
 
@@ -54,18 +54,18 @@ struct PFDL(uint L, T) {
   pure nothrow @nogc @safe
   push(const val_t value) {
     end = _next(end);
-    val[end] = value;
+    return val[end] = value;
   }
 
   /// Get latest value from line
-  const pure nothrow @nogc @safe @property
-  val_t latest() {
+  pure nothrow @nogc @safe @property
+  val_t latest() const {
     return val[end];
   }
 
   /// Get oldest value from line
-  const pure nothrow @nogc @safe @property
-  val_t oldest() {
+  pure nothrow @nogc @safe @property
+  val_t oldest() const {
     return val[_next(end)];
   }
 
@@ -73,8 +73,8 @@ struct PFDL(uint L, T) {
   ///
   /// 0 means last pushed value
   /// 1 previous pushed value and so on
-  const pure nothrow @nogc @safe
-  val_t opIndex(uint idx) {
+  pure nothrow @nogc @safe
+  val_t opIndex(uint idx) const {
     return val[idx > end ? len + end - idx : end - idx];
   }
 

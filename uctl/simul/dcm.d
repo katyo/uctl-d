@@ -102,8 +102,10 @@ struct Param(real dt_, R_, L_, F_, J_) if (isNumer!(R_, L_, F_, J_)) {
   alias F = F_;
   alias J = J_;
 
-  enum auto rdt = dt_;
-  enum auto dt = asnum!(dt_, R);
+  /// Sampling time
+  enum rdt = dt_;
+  /// Sampling time
+  enum dt = asnum!(dt_, R);
 
   alias DtInvL = typeof(dt / L());
   alias DtInvJ = typeof(dt / J());
@@ -149,7 +151,8 @@ struct Param(real dt_, R_, L_, F_, J_) if (isNumer!(R_, L_, F_, J_)) {
    Fs = Stator flux
    Jr = Rotor inertia
 */
-Param!(dt, R, L, F, J) mk(alias P, real dt, R, L, F, J)(R Rr, L Lr, F Fs, J Jr) if (__traits(isSame, Param, P) && isNumer!(R, L, F, J)) {
+pure nothrow @nogc @safe Param!(dt, R, L, F, J)
+mk(alias P, real dt, R, L, F, J)(R Rr, L Lr, F Fs, J Jr) if (__traits(isSame, Param, P) && isNumer!(R, L, F, J)) {
   return Param!(dt, R, L, F, J)(Rr, Lr, Fs, Jr);
 }
 

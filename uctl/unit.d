@@ -155,42 +155,44 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
   T raw;
 
   /// Wrap raw value to units
-  const pure nothrow @nogc @safe
-  this(X)(const X val) if (__traits(compiles, cast(T) val)) { raw = cast(T) val; }
+  pure nothrow @nogc @safe
+  this(X)(const X val) const if (__traits(compiles, cast(T) val)) { raw = cast(T) val; }
 
   /// Get raw value back
-  const pure nothrow @nogc @safe
-  X opCast(X)() if (is(X == T)) { return raw; }
+  pure nothrow @nogc @safe
+  X opCast(X)() const if (is(X == T)) { return raw; }
 
   /// Convert underlying raw value
-  const pure nothrow @nogc @safe
-  X opCast(X)() if (hasUnits!(X, U)) {
+  pure nothrow @nogc @safe
+  X opCast(X)() const if (hasUnits!(X, U)) {
     return (cast(X.raw_t) raw).as!U;
   }
 
   /// Negation
-  const pure nothrow @nogc @safe
-  auto opUnary(string op)() if (op == "-") {
+  pure nothrow @nogc @safe
+  auto opUnary(string op)() const if (op == "-") {
     return (- cast(T) raw).as!U;
   }
 
   /// Addition/subtraction
-  const pure nothrow @nogc @safe
-  auto opBinary(string op, A)(const A other) if ((op == "+" || op == "-") && hasUnits!A && is(U.Class == A.units.Class)) {
+  pure nothrow @nogc @safe
+  auto opBinary(string op, A)(const A other) const if ((op == "+" || op == "-") &&
+                                                       hasUnits!A && is(U.Class == A.units.Class)) {
     auto raw1 = cast(T) raw;
     static if(is(U == A.units)) { // same units
       // casting needs for removing const qualifiers
       auto raw2 = cast(A.raw_t) other.raw;
     } else { // same class
-      auto other2 = other.to!U;
+      const auto other2 = other.to!U;
       auto raw2 = cast(typeof(other2).raw_t) other2.raw;
     }
     return mixin("raw1" ~ op ~ "raw2").as!U;
   }
 
   /// Multiplication/division by unit-less
-  const pure nothrow @nogc @safe
-  auto opBinary(string op, A)(const A other) if ((op == "*" || op == "/" || op == "%") && isNumer!A) {
+  pure nothrow @nogc @safe
+  auto opBinary(string op, A)(const A other) const if ((op == "*" || op == "/" ||
+                                                        op == "%") && isNumer!A) {
     auto raw1 = cast(T) raw;
     auto raw2 = cast(A) other;
 
@@ -198,8 +200,8 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
   }
 
   /// Equality (==)
-  const pure nothrow @nogc @safe
-  bool opEquals(A)(const A other) if (hasUnits!A && is(U.Class == A.units.Class)) {
+  pure nothrow @nogc @safe
+  bool opEquals(A)(const A other) const if (hasUnits!A && is(U.Class == A.units.Class)) {
     static if(is(U == A.units)) { // same units
       auto raw2 = other.raw;
     } else { // same class
@@ -208,13 +210,20 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
     return raw == raw2;
   }
 
+  /// Hashing
+  /// TODO: implement
+  pure nothrow @nogc @safe
+  size_t toHash(size_t seed = 0) const {
+    return seed;
+  }
+
   /// Comparison (<>)
-  const pure nothrow @nogc @safe
-  int opCmp(A)(const A other) if (hasUnits!A && is(U.Class == A.units.Class)) {
+  pure nothrow @nogc @safe
+  int opCmp(A)(const A other) const if (hasUnits!A && is(U.Class == A.units.Class)) {
     static if(is(U == A.units)) { // same units
-      auto raw2 = other.raw;
+      immutable raw2 = other.raw;
     } else { // same class
-      auto raw2 = other.to!U.raw;
+      immutable raw2 = other.to!U.raw;
     }
     return raw < raw2 ? -1 : raw > raw2 ? 1 : 0;
   }
@@ -223,17 +232,17 @@ struct Val(T, U) if (is(T) && isNumer!T && is(U) && isUnits!U) {
   pure nothrow @nogc @safe
   opOpAssign(string op, A)(const A other) if ((op == "+" || op == "-") && hasUnits!A && is(U.Class == A.units.Class)) {
     static if(is(U == A.units)) { // same units
-      auto raw2 = other.raw;
+      immutable raw2 = other.raw;
     } else { // same class
-      auto raw2 = other.to!U.raw;
+      immutable raw2 = other.to!U.raw;
     }
-    mixin("raw" ~ op ~ "=raw2;");
+    mixin("return raw" ~ op ~ "=raw2;");
   }
 
   /// Multiplying to/dividing by/remainder of raw value (*=, /=, %=)
   pure nothrow @nogc @safe
   opOpAssign(string op, A)(const A other) if ((op == "*" || op == "/" || op == "%") && isNumer!A) {
-    mixin("raw" ~ op ~ "=other;");
+    mixin("return raw" ~ op ~ "=other;");
   }
 }
 
@@ -516,17 +525,17 @@ alias GHz = Units!("GigaHertz", Frequency, 1e9);
 /// Units wrapping and conversion
 nothrow @nogc unittest {
   assert(1.25.as!m == cast(Val!(double, m)) 1.25);
-  assert(1.25.as!m.to!mm == 1250.0.as!mm);
+  assert(1.25.as!m.to!mm == 1_250.0.as!mm);
   assert(1.25.as!m.to!cm == 125.0.as!cm);
 
   assert(123.as!deg == cast(Val!(int, deg)) 123);
-  assert_eq(180.0.as!deg.to!rad, (cast(double) PI).as!rad, 0.00001);
-  assert_eq(60.0.as!deg.to!rad, (cast(double) PI / 3.0).as!rad, 0.000001);
+  assert_eq(180.0.as!deg.to!rad, (cast(double) PI).as!rad, 0.000_01);
+  assert_eq(60.0.as!deg.to!rad, (cast(double) PI / 3.0).as!rad, 0.000_001);
 
   assert(1.5.as!sec == cast(Val!(double, sec)) 1.5);
-  assert(1.5.as!sec.to!msec == 1500.0.as!msec);
-  assert(3.125.as!sec.to!usec == 3125000.0.as!usec);
-  assert(0.25.as!sec.to!usec == 250000.0.as!usec);
+  assert(1.5.as!sec.to!msec == 1_500.0.as!msec);
+  assert(3.125.as!sec.to!usec == 3_125_000.0.as!usec);
+  assert(0.25.as!sec.to!usec == 250_000.0.as!usec);
 
   assert_eq(25.0.as!degC.to!degK, 298.15.as!degK);
   assert_eq(298.15.as!degK.to!degC, 25.0.as!degC);
@@ -535,8 +544,8 @@ nothrow @nogc unittest {
   assert_eq(73.4.as!degF.to!degC, 23.0.as!degC, 1e-10);
   assert_eq(23.0.as!degC.to!degF, 73.4.as!degF);
 
-  assert_eq(1.0.as!HP.to!W, 735.49875.as!W);
-  assert_eq(1.0.as!W.to!HP, 0.001359621617303904.as!HP);
+  assert_eq(1.0.as!HP.to!W, 735.498_75.as!W);
+  assert_eq(1.0.as!W.to!HP, 0.001_359_621_617_303_904.as!HP);
 
   alias X = fix!(-10, 10);
 
@@ -544,8 +553,8 @@ nothrow @nogc unittest {
   assert(X(1.25).as!m == Val!(X, m)(X(1.25)));
   assert(X(1.25).as!m == cast(Val!(X, m)) 1.25);
 
-  assert_eq((fix!(-10, 10)(1.25)).as!m.to!mm, (fix!(-10000, 10000)(1250.0)).as!mm);
-  assert_eq(fix!(-10, 10)(1.25).as!m.to!cm, fix!(-1000, 1000)(125.0).as!cm);
+  assert_eq((fix!(-10, 10)(1.25)).as!m.to!mm, (fix!(-10_000, 10_000)(1_250.0)).as!mm);
+  assert_eq(fix!(-10, 10)(1.25).as!m.to!cm, fix!(-1_000, 1_000)(125.0).as!cm);
 }
 
 /// Arithmetic operations
@@ -553,11 +562,11 @@ nothrow @nogc unittest {
   assert_eq(-(1.0.as!V), (-1.0).as!V);
 
   assert_eq(1.0.as!V + 2.0.as!V, 3.0.as!V);
-  assert_eq(1.0.as!V + 2000.0.as!mV, 3.0.as!V);
+  assert_eq(1.0.as!V + 2_000.0.as!mV, 3.0.as!V);
   assert_eq(1.0.as!V + 0.002.as!MV, 3.0.as!V);
 
   assert_eq(1.0.as!V - 2.0.as!V, -1.0.as!V);
-  assert_eq(1.0.as!V - 2000.0.as!mV, -1.0.as!V);
+  assert_eq(1.0.as!V - 2_000.0.as!mV, -1.0.as!V);
   assert_eq(1.0.as!V - 0.002.as!MV, -1.0.as!V);
 
   assert_eq(1.0.as!V * 2.0, 2.0.as!V);
@@ -568,20 +577,20 @@ nothrow @nogc unittest {
 /// Comparison operations
 nothrow @nogc unittest {
   assert(1.0.as!V == 1.0.as!V);
-  assert(1.0.as!V == 1000.0.as!mV);
+  assert(1.0.as!V == 1_000.0.as!mV);
   assert(1.0.as!V == 0.001.as!MV);
 
   assert(1.0.as!V != 2.0.as!V);
-  assert(1.0.as!V != 1001.0.as!mV);
-  assert(1.0.as!V != 0.0011.as!MV);
+  assert(1.0.as!V != 1_001.0.as!mV);
+  assert(1.0.as!V != 0.001_1.as!MV);
 
   assert(1.0.as!V < 2.0.as!V);
-  assert(1.0.as!V < 2000.0.as!mV);
+  assert(1.0.as!V < 2_000.0.as!mV);
   assert(1.0.as!V < 0.002.as!MV);
 
   assert(1.0.as!V > 0.9.as!V);
   assert(1.0.as!V > 900.0.as!mV);
-  assert(1.0.as!V > 0.0009.as!MV);
+  assert(1.0.as!V > 0.000_9.as!MV);
 }
 
 /// Op-assign operations
@@ -594,16 +603,16 @@ nothrow @nogc unittest {
   a -= 1.5.as!V;
   assert_eq(a, 3.0.as!V);
 
-  a += 1500.0.as!mV;
+  a += 1_500.0.as!mV;
   assert_eq(a, 4.5.as!V);
 
-  a -= 1500.0.as!mV;
+  a -= 1_500.0.as!mV;
   assert_eq(a, 3.0.as!V);
 
-  a += 0.0015.as!MV;
+  a += 0.001_5.as!MV;
   assert_eq(a, 4.5.as!V);
 
-  a -= 0.0015.as!MV;
+  a -= 0.001_5.as!MV;
   assert_eq(a, 3.0.as!V);
 
   a *= 2.0;

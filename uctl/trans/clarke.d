@@ -55,20 +55,20 @@ struct AlphaBeta(T) if (isNumer!T) {
   const pure nothrow @nogc @safe
   auto to(alias R)() if (__traits(isSame, AB, R) || __traits(isSame, ABC, R)) {
     // a = α
-    auto a = alpha;
+    const auto a = alpha;
 
     // t1 = -α / 2
-    auto t1 = -a / asnum!(2, T);
+    const auto t1 = -a / asnum!(2, T);
 
     // t2 = β * sqrt(3) / 2
-    auto t2 = beta * asnum!(sqrt(3.0) / 2, T);
+    const auto t2 = beta * asnum!(sqrt(3.0) / 2, T);
 
     // b = t1 + t2
-    auto b = cast(T) (t1 + t2);
+    const auto b = cast(T) (t1 + t2);
 
     static if (__traits(isSame, ABC, R)) {
       // c = t1 - t2
-      auto c = cast(T) (t1 - t2);
+      const auto c = cast(T) (t1 - t2);
 
       return ABC!T(a, b, c);
     } else {
@@ -87,8 +87,8 @@ struct AlphaBeta(T) if (isNumer!T) {
 
      See_Also: [AlphaBeta.to]
   */
-  const pure nothrow @nogc @safe
-  R opCast(R)() if (isInstanceOf!(ABC, R) || isInstanceOf!(AB, R)) {
+  pure nothrow @nogc @safe
+  R opCast(R)() const if (isInstanceOf!(ABC, R) || isInstanceOf!(AB, R)) {
     static if (isInstanceOf!(ABC, R)) {
       return to!ABC;
     } else {
@@ -104,13 +104,16 @@ struct AlphaBeta(T) if (isNumer!T) {
      $(MATH d = α cos(θ) + β sin(θ)),
      $(MATH q = β cos(θ) - α sin(θ))
   */
-  const pure nothrow @nogc @safe
-  auto to(alias R, alias S, A)(const A theta) if (__traits(isSame, DQ, R) && hasUnits!(A, Angle) && isSinOrCos!(S, A) && isNumer!(T, A.raw_t)) {
-    auto sin_theta = S(theta);
-    auto cos_theta = S(asnum!(1, T).as!qrev.to!(A.units) - theta); // cos(a) == sin(pi/2-a)
+  pure nothrow @nogc @safe
+  auto to(alias R, alias S, A)(const A theta) const if (__traits(isSame, DQ, R) &&
+                                                        hasUnits!(A, Angle) &&
+                                                        isSinOrCos!(S, A) &&
+                                                        isNumer!(T, A.raw_t)) {
+    const auto sin_theta = S(theta);
+    const auto cos_theta = S(asnum!(1, T).as!qrev.to!(A.units) - theta); // cos(a) == sin(pi/2-a)
 
-    auto d = alpha * cos_theta + beta * sin_theta;
-    auto q = beta * cos_theta - alpha * sin_theta;
+    const auto d = alpha * cos_theta + beta * sin_theta;
+    const auto q = beta * cos_theta - alpha * sin_theta;
 
     return DQ!T(cast(T) d, cast(T) q);
   }
@@ -194,13 +197,13 @@ struct ABC(T) if (isNumer!T) {
      $(MATH α = A),
      $(MATH β = \frac{A + 2 B}{\sqrt{3}})
   */
-  const pure nothrow @nogc @safe
-  auto to(alias R)() if (__traits(isSame, AlphaBeta, R)) {
+  pure nothrow @nogc @safe
+  auto to(alias R)() const if (__traits(isSame, AlphaBeta, R)) {
     /* α = a */
-    auto alpha = a;
+    const auto alpha = a;
 
     /* β = (a + 2 * b) / sqrt(3) */
-    auto beta = cast(T) ((a + b * asnum!(2.0, T)) * asnum!(1.0 / sqrt(3.0), T));
+    const auto beta = cast(T) ((a + b * asnum!(2.0, T)) * asnum!(1.0 / sqrt(3.0), T));
 
     return AlphaBeta!T(alpha, beta);
   }
@@ -215,27 +218,27 @@ struct ABC(T) if (isNumer!T) {
 
      See_Also: [ABC.to]
    */
-  const pure nothrow @nogc @safe
-  R opCast(R)() if (isInstanceOf!(AlphaBeta, R)) {
+  pure nothrow @nogc @safe
+  R opCast(R)() const if (isInstanceOf!(AlphaBeta, R)) {
     return to!AlphaBeta;
   }
 
   /// Cast to ABC vector without C component
-  const pure nothrow @nogc @safe
-  auto to(alias R)() if (__traits(isSame, AB, R)) {
+  pure nothrow @nogc @safe
+  auto to(alias R)() const if (__traits(isSame, AB, R)) {
     return AB!T(a, b);
   }
 
   /// Cast to ABC vector without C component
-  const pure nothrow @nogc @safe
-  R opCast(R)() if (isInstanceOf!(AB, R)) {
+  pure nothrow @nogc @safe
+  R opCast(R)() const if (isInstanceOf!(AB, R)) {
     return to!AB;
   }
 }
 
 // Test direct Clarke transformation (floating-point)
 nothrow @nogc unittest {
-  auto a = mk!ABC(1.25, -1.361121595, 0.1111215949);
+  const auto a = mk!ABC(1.25, -1.361121595, 0.1111215949);
 
   // transform with to()
   auto b = a.to!AlphaBeta;
@@ -254,7 +257,7 @@ nothrow @nogc unittest {
 nothrow @nogc unittest {
   alias X = fix!(-5, 5);
 
-  auto a = mk!ABC(X(1.25), X(-1.361121595), X(0.1111215949));
+  const auto a = mk!ABC(X(1.25), X(-1.361121595), X(0.1111215949));
 
   // transform with to()
   auto b = a.to!AlphaBeta;
@@ -265,8 +268,8 @@ nothrow @nogc unittest {
   // transform using cast
   auto c = cast(AlphaBeta!X) a;
 
-  assert_eq(b.alpha, X(1.25));
-  assert_eq(b.beta, X(-0.85), X(1e-8));
+  assert_eq(c.alpha, X(1.25));
+  assert_eq(c.beta, X(-0.85), X(1e-8));
 }
 
 /**
@@ -314,8 +317,8 @@ struct AB(T) if (isNumer!T) {
      $(MATH α = A),
      $(MATH β = \frac{A + 2 B}{\sqrt{3}})
   */
-  const pure nothrow @nogc @safe
-  auto to(alias R)() if (__traits(isSame, AlphaBeta, R)) {
+  pure nothrow @nogc @safe
+  auto to(alias R)() const if (__traits(isSame, AlphaBeta, R)) {
     /* α = a */
     auto alpha = a;
 
@@ -335,27 +338,27 @@ struct AB(T) if (isNumer!T) {
 
      See_Also: [ABC.to]
   */
-  const pure nothrow @nogc @safe
-  R opCast(R)() if (isInstanceOf!(AlphaBeta, R)) {
+  pure nothrow @nogc @safe
+  R opCast(R)() const if (isInstanceOf!(AlphaBeta, R)) {
     return to!AlphaBeta;
   }
 
   /// Cast to ABC vector with C component
-  const pure nothrow @nogc @safe
-  auto to(alias R)() if (__traits(isSame, ABC, R)) {
+  pure nothrow @nogc @safe
+  auto to(alias R)() const if (__traits(isSame, ABC, R)) {
     return to!AlphaBeta.to!ABC;
   }
 
   /// Cast to ABC vector with C component
-  const pure nothrow @nogc @safe
-  R opCast(R)() if (isInstanceOf!(ABC, R)) {
+  pure nothrow @nogc @safe
+  R opCast(R)() const if (isInstanceOf!(ABC, R)) {
     return to!ABC;
   }
 }
 
 // Test direct Clarke transformation (floating-point)
 nothrow @nogc unittest {
-  auto a = AB!double(1.25, -1.361121595);
+  const auto a = AB!double(1.25, -1.361121595);
 
   // transform with to()
   auto b = a.to!AlphaBeta;
@@ -374,7 +377,7 @@ nothrow @nogc unittest {
 nothrow @nogc unittest {
   alias X = fix!(-5, 5);
 
-  auto a = AB!X(X(1.25), X(-1.361121595));
+  const auto a = AB!X(X(1.25), X(-1.361121595));
 
   // transform with to()
   auto b = a.to!AlphaBeta;

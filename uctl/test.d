@@ -39,7 +39,8 @@ version(unittest) {
 /**
    Unified assert equality of values
 */
-void assert_eq(T, S, string file = __FILE__, int line = __LINE__)(const T a, const S b) if (hasUnits!T && hasUnits!S && is(T.units == S.units) && isNumer!(T.raw_t, S.raw_t) || isNumer!(T, S)) {
+void assert_eq(T, S, string file = __FILE__, int line = __LINE__)(const T a, const S b)
+if ((hasUnits!T && hasUnits!S && is(T.units == S.units) && isNumer!(T.raw_t, S.raw_t)) || isNumer!(T, S)) {
   alias R = rawTypeOf!S;
 
   static if (isInt!R) {
@@ -56,7 +57,8 @@ void assert_eq(T, S, string file = __FILE__, int line = __LINE__)(const T a, con
 /**
    Unified assert equality of values with `max_error`
 */
-void assert_eq(T, S, E, string file = __FILE__, int line = __LINE__)(const T a, const S b, const E max_error) if (hasUnits!T && hasUnits!S && is(T.units == S.units) && isNumer!(T.raw_t, S.raw_t, E) || isNumer!(T, S, E)) {
+void assert_eq(T, S, E, string file = __FILE__, int line = __LINE__)(const T a, const S b, const E max_error)
+ if ((hasUnits!T && hasUnits!S && is(T.units == S.units) && isNumer!(T.raw_t, S.raw_t, E)) || isNumer!(T, S, E)) {
   static if (hasUnits!T) {
     alias T_ = T.raw_t;
     auto a_ = a.raw;
@@ -83,7 +85,8 @@ void assert_eq(T, S, E, string file = __FILE__, int line = __LINE__)(const T a, 
     static if (isInt!T_ || isFloat!T_) {
       snprintf(buf.ptr, buf.length, (F ~ " == " ~ F ~ " (error " ~ F ~ " > " ~ F ~ ")").ptr, a_, b_, d_, e_);
     } else static if (isFixed!T_) {
-      snprintf(buf.ptr, buf.length, (F ~ " == " ~ F ~ " (error " ~ F ~ " > " ~ F ~ ")").ptr, cast(double) a_, a_.raw, cast(double) b_, b_.raw, cast(double) d_, d_.raw, cast(double) e_, e_.raw);
+      snprintf(buf.ptr, buf.length, (F ~ " == " ~ F ~ " (error " ~ F ~ " > " ~ F ~ ")").ptr,
+               cast(double) a_, a_.raw, cast(double) b_, b_.raw, cast(double) d_, d_.raw, cast(double) e_, e_.raw);
     }
 
     __assert(buf.ptr, file.ptr, line);
@@ -92,13 +95,13 @@ void assert_eq(T, S, E, string file = __FILE__, int line = __LINE__)(const T a, 
 
 /// Test `assert_eq`
 nothrow @nogc unittest {
-  int i = 123;
+  immutable int i = 123;
   assert_eq(i, 123);
 
-  double d = -12.3;
+  immutable double d = -12.3;
   assert_eq(d, -12.3);
 
-  float f = 1.25;
+  immutable float f = 1.25;
   assert_eq(f, 1.25);
 
   assert_eq(1.2345678, 1.2345679, 1e-6);
@@ -126,13 +129,15 @@ nothrow @nogc unittest {
 /**
    Calculate maximum absolute error
  */
-template max_abs_error(alias F, alias R) if (isCallable!F && isCallable!R && is(ReturnType!F == ReturnType!R) && is(Parameters!F == Parameters!R)) {
+template max_abs_error(alias F, alias R) if (isCallable!F && isCallable!R &&
+                                             is(ReturnType!F == ReturnType!R) &&
+                                             is(Parameters!F == Parameters!R)) {
   alias A = Parameters!F[0];
   alias E = ReturnType!F;
 
   alias max_abs_error = (A x, A X, uint N = 32) pure nothrow @nogc @safe {
     static if (isFloat!A && isFloat!E) {
-      const auto step = (X - x) / (N - 1);
+      immutable step = (X - x) / (N - 1);
 
       /* Hmm... Strange. Unfortutately we cannot use closures without GC.
          return iota(0, N)
@@ -145,8 +150,8 @@ template max_abs_error(alias F, alias R) if (isCallable!F && isCallable!R && is(
       auto res = cast(E) 0;
 
       foreach (i; 0..N) {
-        auto arg = cast(A) (x + step * i);
-        auto err = cast(E) fabs(F(arg) - R(arg));
+        immutable arg = cast(A) (x + step * i);
+        immutable err = cast(E) fabs(F(arg) - R(arg));
 
         res = cast(E) fmax(res, err);
       }
@@ -167,18 +172,20 @@ nothrow @nogc unittest {
 /**
    Calculate mean absolute error
 */
-template mean_abs_error(alias F, alias R) if (isCallable!F && isCallable!R && is(ReturnType!F == ReturnType!R) && is(Parameters!F == Parameters!R)) {
+template mean_abs_error(alias F, alias R) if (isCallable!F && isCallable!R &&
+                                              is(ReturnType!F == ReturnType!R) &&
+                                              is(Parameters!F == Parameters!R)) {
   alias A = Parameters!F[0];
   alias E = ReturnType!F;
 
   alias mean_abs_error = (A x, A X, uint N = 32) pure nothrow @nogc @safe {
     static if (isFloat!A && isFloat!E) {
-      const auto step = (X - x) / (N - 1);
+      immutable step = (X - x) / (N - 1);
       auto res = cast(E) 0;
 
       foreach (i; 0..N) {
-        auto arg = cast(A) (x + step * i);
-        auto err = fabs(F(arg) - R(arg));
+        immutable arg = cast(A) (x + step * i);
+        immutable err = fabs(F(arg) - R(arg));
 
         res = cast(E) (res + err);
       }
@@ -199,19 +206,21 @@ nothrow @nogc unittest {
 /**
    Calculate mean square error
 */
-template mean_sqr_error(alias F, alias R) if (isCallable!F && isCallable!R && is(ReturnType!F == ReturnType!R) && is(Parameters!F == Parameters!R)) {
+template mean_sqr_error(alias F, alias R) if (isCallable!F && isCallable!R &&
+                                              is(ReturnType!F == ReturnType!R) &&
+                                              is(Parameters!F == Parameters!R)) {
   alias A = Parameters!F[0];
   alias E = typeof(ReturnType!F() * ReturnType!F());
 
   alias mean_sqr_error = (A x, A X, uint N = 32) pure nothrow @nogc @safe {
     static if (isFloat!A && isFloat!E) {
-      const auto step = (X - x) / (N - 1);
+      immutable step = (X - x) / (N - 1);
       auto res = cast(E) 0;
 
       foreach (i; 0..N) {
-        auto arg = cast(A) (x + step * i);
-        auto err = F(arg) - R(arg);
-        auto err2 = err * err;
+        immutable arg = cast(A) (x + step * i);
+        immutable err = F(arg) - R(arg);
+        immutable err2 = err * err;
 
         res = cast(E) (res + err2);
       }

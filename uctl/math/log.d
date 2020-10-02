@@ -25,7 +25,8 @@ version(unittest) {
 */
 auto log2(T)(const T x) if (isNumer!T) {
   static if (isFixed!T) {
-    static assert(T.rmin > 0, "Logarithm is negative infinity for values which can be zero. Argument has type " ~ T.stringof);
+    static assert(T.rmin > 0,
+                  "Logarithm is negative infinity for values which can be zero. Argument has type " ~ T.stringof);
 
     enum auto Rrmin = std_log2(T.rmin);
     enum auto Rrmax = std_log2(T.rmax);

@@ -38,7 +38,9 @@ struct Param(A_, U_) if (isNumer!(A_) && isUnits!(U_, Angle)) {
    Init oscillator parameters using frequency
  */
 pure nothrow @nogc @safe
-auto mk(alias P, U, real dt, F)(const F freq) if (__traits(isSame, Param, P) && isUnits!(U, Angle) && hasUnits!(F, Frequency)) {
+auto mk(alias P, U, real dt, F)(const F freq) if (__traits(isSame, Param, P) &&
+                                                  isUnits!(U, Angle) &&
+                                                  hasUnits!(F, Frequency)) {
   auto delta = (freq.to!Hz.raw * asnum!(dt, F.raw_t)).as!rev.to!U;
   return Param!(typeof(delta.raw), U)(delta);
 }
@@ -82,7 +84,9 @@ nothrow @nogc unittest {
 /**
    Init oscillator parameters using period
 */
-auto mk(alias P, U, real dt, T)(const T period) if (__traits(isSame, Param, P) && isUnits!(U, Angle) && hasUnits!(T, Time)) {
+auto mk(alias P, U, real dt, T)(const T period) if (__traits(isSame, Param, P) &&
+                                                    isUnits!(U, Angle) &&
+                                                    hasUnits!(T, Time)) {
   auto delta = (asnum!(dt, T.raw_t) / period.to!sec.raw).as!rev.to!U;
   return Param!(typeof(delta.raw), U)(delta);
 }

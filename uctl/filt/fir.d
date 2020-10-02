@@ -14,7 +14,7 @@ import std.traits: Unqual, isInstanceOf;
 import uctl.num: fix, asfix, isNumer, isFixed, typeOf;
 import uctl.math: isSinOrCos, sin, pi;
 import uctl.unit: Val, rawTypeOf, hasUnits, Angle, hrev, qrev, rad, Frequency, Hz, as, to;
-import uctl.util.vec: isVec, VecSize, VecType, sliceof;
+import uctl.util.vec: isVec, vecSize, VecType, sliceof;
 import uctl.util.win: isWindow;
 import uctl.util.dl: PFDL;
 
@@ -40,8 +40,10 @@ version(unittest) {
 struct Param(uint N_, B_) if (isNumer!B_ && N_ > 0) {
   alias B = Unqual!B_;
 
+  /// Filter order
   enum uint N = N_;
 
+  /// Window length
   enum uint L = N + 1;
 
   static if (isFixed!B) {
@@ -100,7 +102,9 @@ template mk(alias P, alias F, alias S = sin) if (__traits(isSame, Param, P) && i
    [Window function](https://en.wikipedia.org/wiki/Window_function) wikipedia article.
  */
 pure nothrow @nogc @safe
-auto mk(alias P, alias F, alias S, uint L, W, real dt, PF, CF)(const PF pass_freq, const CF cutoff_freq) if (__traits(isSame, Param, P) && isWindow!F && isSinOrCos!(S, Val!(W, qrev)) && isNumer!W && L > 1 && hasUnits!(PF, Frequency) && hasUnits!(CF, Frequency) && isNumer!(W, rawTypeOf!PF, rawTypeOf!CF)) {
+auto mk(alias P, alias F, alias S, uint L, W, real dt, PF, CF)(const PF pass_freq, const CF cutoff_freq)
+if (__traits(isSame, Param, P) && isWindow!F && isSinOrCos!(S, Val!(W, qrev)) && isNumer!W &&
+    L > 1 && hasUnits!(PF, Frequency) && hasUnits!(CF, Frequency) && isNumer!(W, rawTypeOf!PF, rawTypeOf!CF)) {
   auto sampling = (pass_freq + cutoff_freq).raw * dt;
   return mk!(P, F, S, L, W)(sampling.as!hrev);
 }
@@ -134,7 +138,9 @@ nothrow @nogc unittest {
  *   [Window function](https://en.wikipedia.org/wiki/Window_function) wikipedia article.
  */
 pure nothrow @nogc @safe
-auto mk(alias P, alias F, alias S, uint L, W, T)(const T sampling) if (__traits(isSame, Param, P) && isWindow!F && isSinOrCos!(S, Val!(W, qrev)) && isNumer!W && L > 1 && hasUnits!(T, Angle) && isNumer!(W, rawTypeOf!T)) {
+auto mk(alias P, alias F, alias S, uint L, W, T)(const T sampling)
+if (__traits(isSame, Param, P) && isWindow!F && isSinOrCos!(S, Val!(W, qrev)) && isNumer!W &&
+    L > 1 && hasUnits!(T, Angle) && isNumer!(W, rawTypeOf!T)) {
   enum uint N = L - 1;
 
   static if (isFixed!W) {
@@ -158,7 +164,7 @@ auto mk(alias P, alias F, alias S, uint L, W, T)(const T sampling) if (__traits(
 
   foreach (uint i; 1..L) {
     R.I index = i;
-    R.S ideal_pulse_behavior = S(qrev_sampling * index) / (pi!(rad, B).raw * index);
+    const R.S ideal_pulse_behavior = S(qrev_sampling * index) / (pi!(rad, B).raw * index);
     pulse_behavior[i] = ideal_pulse_behavior * window[i];
     accum_weight += pulse_behavior[i];
   }
@@ -197,8 +203,9 @@ nothrow @nogc unittest {
  * Create impulse response using predefined weights
  */
 pure nothrow @nogc @safe
-auto mk(alias P, V)(const V weights) if (__traits(isSame, Param, P) && isVec!V && isNumer!(VecType!V) && VecSize!V > 1) {
-  enum auto L = VecSize!V;
+auto mk(alias P, V)(const V weights) if (__traits(isSame, Param, P) && isVec!V &&
+                                         isNumer!(VecType!V) && vecSize!V > 1) {
+  enum auto L = vecSize!V;
   enum auto N = L - 1;
   alias W = VecType!V;
 

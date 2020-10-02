@@ -90,6 +90,7 @@ nothrow @nogc unittest {
 
 /// Filter parameters flavor
 struct Flavor(string name_) {
+  /// Human readable name
   enum string name = name_;
 }
 
@@ -325,7 +326,7 @@ nothrow @nogc unittest {
 nothrow @nogc unittest {
   enum auto dt = 0.1;
 
-  static immutable auto param = mk!(Time, 0.1)(4.0);
+  static immutable auto param = mk!(Time, dt)(4.0);
   static auto state = State!(param, double)();
 
   assert_eq(state(param, 1.3), 0.06341463327, 1e-8);

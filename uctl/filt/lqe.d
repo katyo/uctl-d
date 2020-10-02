@@ -92,7 +92,8 @@ struct Param(F_, H_, Q_, R_) if (isNumer!(F_, H_, Q_, R_)) {
 
 /// Create LQE parameters from coefficients
 pure nothrow @nogc @safe
-Param!(F, H, Q, R) mk(alias P, F, H, Q, R)(const F f, const H h, const Q q, const R r) if (__traits(isSame, P, Param) && isNumer!(F, H, Q, R)) {
+Param!(F, H, Q, R) mk(alias P, F, H, Q, R)(const F f, const H h, const Q q, const R r)
+if (__traits(isSame, P, Param) && isNumer!(F, H, Q, R)) {
   return Param!(F, H, Q, R)(f, h, q, r);
 }
 
@@ -124,8 +125,10 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.F, T
 
   /// Covariance type
   static if (isFixed!T) {
-    alias Cq = typeof((P.F2() * P.F2() - asfix!2 * P.F2() + asfix!1) * P.R() * P.R() + (asfix!2 * P.F2() + asfix!2) * P.H2() * P.Q() * P.R() + P.H2() * P.H2() * P.Q());
-    alias Cp = typeof((fix_sqrt_t!Cq() + (P.F2() - asfix!1) * P.R() - P.H2() * P.Q()) / (asfix!2 * P.F2() * P.H2()));
+    alias Cq = typeof((P.F2() * P.F2() - asfix!2 * P.F2() + asfix!1) * P.R() * P.R() +
+                      (asfix!2 * P.F2() + asfix!2) * P.H2() * P.Q() * P.R() + P.H2() * P.H2() * P.Q());
+    alias Cp = typeof((fix_sqrt_t!Cq() + (P.F2() - asfix!1) * P.R() - P.H2() * P.Q()) /
+                      (asfix!2 * P.F2() * P.H2()));
     alias C = fix!(Cp.rmin*2, Cp.rmax*2);
   } else {
     alias C = T;
@@ -149,16 +152,16 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.F, T
     enum auto one = asnum!(1, T);
 
     // Predict state: X0 = F * X
-    auto x0 = param.f * value;
+    const auto x0 = param.f * value;
 
     // Predict covariance: P0 = F^2 * P + Q
-    auto p0 = param.f2 * p + param.q;
+    const auto p0 = param.f2 * p + param.q;
 
     // S = H^2 * P0 + R
-    auto s = param.h2 * p0 + param.r;
+    const auto s = param.h2 * p0 + param.r;
 
     // K = H * P0 * S^-1
-    auto k = param.h * p0 / s;
+    const auto k = param.h * p0 / s;
 
     // P = (1 - K * H) * P0
     p = cast(C) ((one - k * param.h) * p0);

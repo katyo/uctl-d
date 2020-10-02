@@ -11,6 +11,6 @@ public import EMA = uctl.filt.ema;
 public import FIR = uctl.filt.fir;
 public import LQE = uctl.filt.lqe;
 
-alias uctl.filt.ema.mk mk;
-alias uctl.filt.fir.mk mk;
-alias uctl.filt.lqe.mk mk;
+alias mk = uctl.filt.ema.mk;
+alias mk = uctl.filt.fir.mk;
+alias mk = uctl.filt.lqe.mk;

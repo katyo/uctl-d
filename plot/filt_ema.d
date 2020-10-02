@@ -1,8 +1,7 @@
 import std.array: staticArray;
 import uctl.filt;
 
-nothrow @nogc
-void entry() {
+private nothrow @nogc void entry() {
   immutable auto p1 = mk!(EMA.Alpha)(0.9);
   auto s1 = EMA.State!(p1, float)();
 

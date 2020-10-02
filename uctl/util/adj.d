@@ -5,7 +5,7 @@ module uctl.util.adj;
 
 import uctl.num: isNum, fix, asfix, asnum, isFixed, isNumer, likeNum;
 import uctl.math: abs;
-import uctl.util.vec: isVec, VecSize, VecType, sliceof, GenVec, genVecOf;
+import uctl.util.vec: isVec, vecSize, VecType, sliceof, GenVec, genVecOf;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
@@ -111,7 +111,8 @@ template isAny(alias pred, X...) {
 template clamp(X...) if (X.length >= 0 && X.length <= 2 && isAll!(likeNum, X)) {
   static if (X.length == 0) {
     pure nothrow @nogc @safe
-    auto clamp(V, A, B)(const V val, const A min_, const B max_) if (isNumer!(V, A, B) || isVec!V && isNumer!(VecType!V, A, B)) {
+    auto clamp(V, A, B)(const V val, const A min_, const B max_) if (isNumer!(V, A, B) ||
+                                                                     (isVec!V && isNumer!(VecType!V, A, B))) {
       static if (isNumer!V) {
         alias T = V;
       } else {
@@ -124,7 +125,7 @@ template clamp(X...) if (X.length >= 0 && X.length <= 2 && isAll!(likeNum, X)) {
       static if (isNumer!V) {
         return val.minof(max).maxof(min);
       } else {
-        enum auto N = VecSize!V;
+        enum auto N = vecSize!V;
         GenVec!(genVecOf!V, T) ret;
 
         foreach (i; 0..N) {
@@ -136,14 +137,14 @@ template clamp(X...) if (X.length >= 0 && X.length <= 2 && isAll!(likeNum, X)) {
     }
 
     pure nothrow @nogc @safe
-    auto clamp(V, A)(const V val, const A lim_) if (isNumer!(V, A) || isVec!V && isNumer!(VecType!V, A)) {
+    auto clamp(V, A)(const V val, const A lim_) if (isNumer!(V, A) || (isVec!V && isNumer!(VecType!V, A))) {
       auto lim = lim_.abs;
 
       return clamp(val, -lim, lim);
     }
   } else {
     pure nothrow @nogc @safe
-    V clamp(V)(const V val) if (isNumer!V || isVec!V && isNumer!(VecType!V)) {
+    V clamp(V)(const V val) if (isNumer!V || (isVec!V && isNumer!(VecType!V))) {
       static if (isNumer!V) {
         alias T = V;
       } else {
@@ -162,7 +163,7 @@ template clamp(X...) if (X.length >= 0 && X.length <= 2 && isAll!(likeNum, X)) {
       static if (isNumer!V) {
         return val.minof(max).maxof(min);
       } else {
-        enum auto N = VecSize!V;
+        enum auto N = vecSize!V;
         GenVec!(genVecOf!V, T) ret;
 
         foreach (i; 0..N) {
@@ -220,7 +221,9 @@ nothrow @nogc unittest {
 template scale(X...) if ((X.length == 0 || X.length == 2 || X.length == 4) && isAll!(likeNum, X)) {
   static if (X.length == 0) {
     pure nothrow @nogc @safe
-    auto scale(V, FA, FB, TA, TB)(const V val, const FA from_min, const FB from_max, const TA to_min, const TB to_min) if (isNumer!V || isVec!V && isNumer!(VecType!V)) {
+    auto scale(V, FA, FB, TA, TB)(const V val, const FA from_min, const FB from_max,
+                                  const TA to_min, const TB to_min) if (isNumer!V ||
+                                                                        (isVec!V && isNumer!(VecType!V))) {
       static if (isNumer!V) {
         alias T = V;
       } else {
@@ -233,7 +236,7 @@ template scale(X...) if ((X.length == 0 || X.length == 2 || X.length == 4) && is
       static if (isNumer!V) {
         return val * scale + offset;
       } else {
-        enum auto N = VecSize!V;
+        enum auto N = vecSize!V;
         alias R = typeof(T() * scale + offset);
 
         GenVec!(genVecOf!V, R) ret;
@@ -247,20 +250,20 @@ template scale(X...) if ((X.length == 0 || X.length == 2 || X.length == 4) && is
     }
 
     pure nothrow @nogc @safe
-    auto scale(V, F, T)(const V val, const F from_, const T to_) if (isNumer!V || isVec!V && isNumer!(VecType!V)) {
-      auto from = from_.abs;
-      auto to = to_.abs;
+    auto scale(V, F, T)(const V val, const F from_, const T to_) if (isNumer!V || (isVec!V && isNumer!(VecType!V))) {
+      const auto from = from_.abs;
+      const auto to = to_.abs;
 
-      auto from_min = -from;
-      auto from_max = from;
-      auto to_min = -to;
-      auto to_max = to;
+      const auto from_min = -from;
+      const auto from_max = from;
+      const auto to_min = -to;
+      const auto to_max = to;
 
       return scale(val, from_min, from_max, to_min, to_max);
     }
   } else {
     pure nothrow @nogc @safe
-    auto scale(V)(const V val) if (isNumer!V || isVec!V && isNumer!(VecType!V)) {
+    auto scale(V)(const V val) if (isNumer!V || (isVec!V && isNumer!(VecType!V))) {
       static if (X.length == 4) {
         enum auto from_min = X[0];
         enum auto from_max = X[1];
@@ -288,7 +291,7 @@ template scale(X...) if ((X.length == 0 || X.length == 2 || X.length == 4) && is
       static if (isNumer!V) {
         return val * scale + offset;
       } else {
-        enum auto N = VecSize!V;
+        enum auto N = vecSize!V;
         alias R = typeof(T() * scale + offset);
 
         GenVec!(genVecOf!V, R) ret;
@@ -324,7 +327,7 @@ nothrow @nogc unittest {
 
 /// Scale vector (floating-point)
 nothrow @nogc unittest {
-  double[2] ab = [33.4, 0.5];
+  const double[2] ab = [33.4, 0.5];
   auto sab = ab.scale!(-11.5, 39.0, -1.15, 3.9);
 
   assert_eq(sab.sliceof[0], 3.34);
@@ -336,7 +339,7 @@ nothrow @nogc unittest {
   alias X = fix!(-15, 40);
   alias Y = fix!(-1.5, 4);
 
-  X[2] ab = [X(33.4), X(0.5)];
+  const X[2] ab = [X(33.4), X(0.5)];
   auto sab = ab.scale!(-11.5, 39.0, -1.15, 3.9);
 
   assert_eq(sab.sliceof[0], Y(3.339999996));

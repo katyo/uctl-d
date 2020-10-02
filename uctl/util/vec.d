@@ -71,11 +71,11 @@ template VecType(X...) if (X.length == 1 && isVec!(X[0])) {
 /**
    Get vector size in elements
 */
-template VecSize(X...) if (X.length == 1 && isVec!(X[0])) {
+template vecSize(X...) if (X.length == 1 && isVec!(X[0])) {
   static if (isArray!(X[0])) {
-    enum uint VecSize = X[0].length;
+    enum uint vecSize = X[0].length;
   } else static if (is(X[0] == struct)) {
-    enum uint VecSize = Fields!(X[0]).length;
+    enum uint vecSize = Fields!(X[0]).length;
   }
 }
 
@@ -110,7 +110,7 @@ template isVec(X...) if (X.length >= 1 || X.length <= 3) {
       static if (is(X[1])) {
         enum bool isVec = is(VecType!(X[0]) == X[1]);
       } else static if (isInt!(X[1])) {
-        enum bool isVec = VecSize!(X[0]) == X[1];
+        enum bool isVec = vecSize!(X[0]) == X[1];
       } else {
         enum bool isVec = false;
       }
@@ -187,8 +187,8 @@ nothrow @nogc @safe unittest {
 
 /// Interpret vector-like value as slice
 pure nothrow @nogc @trusted
-ref VecType!V[VecSize!V] sliceof(V)(ref V v) if (isVec!V) {
-  return * cast(VecType!V[VecSize!V]*) &v;
+ref VecType!V[vecSize!V] sliceof(V)(ref V v) if (isVec!V) {
+  return * cast(typeof(return)*) &v;
 }
 
 /// Test `sliceof`
@@ -351,7 +351,7 @@ nothrow @nogc unittest {
   assert(i2[1] == 3);
 
   /// Return as ABC vector
-  auto abc = retVec!ABC(0.25);
+  const auto abc = retVec!ABC(0.25);
 
   assert(abc.a == 0.25);
   assert(abc.b == 0.25);
@@ -366,7 +366,7 @@ template genVecOf(X...) if (X.length == 1 && isVec!(X[0])) {
     alias T = typeof(X[0]);
   }
   static if (isArray!T) {
-    enum uint[1] genVecOf = [VecSize!T];
+    enum uint[1] genVecOf = [vecSize!T];
   } else static if (is(T == struct)) {
     alias genVecOf = TemplateOf!T;
   }
@@ -377,7 +377,7 @@ nothrow @nogc unittest {
   alias A = genVecOf!(float[2]);
   assert(isArray!(typeof(A)) && A.length == 1 && A[0] == 2);
 
-  int[3] ab;
+  const int[3] ab;
   alias B = genVecOf!(ab);
   assert(isArray!(typeof(B)) && B.length == 1 && B[0] == 3);
 

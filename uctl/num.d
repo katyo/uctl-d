@@ -220,8 +220,7 @@ nothrow @nogc @safe unittest {
   assert(bitsOf!ulong == 64);
   assert(bitsOf!long == 64);
 
-  ubyte a;
-
+  immutable ubyte a;
   assert(bitsOf!a == 8);
 }
 
@@ -284,11 +283,9 @@ template filledBit(T, int index) if (isIntegral!T) {
 
 /// Test `filledBit`
 nothrow @nogc unittest {
-  static const ulong[] a = [0b1, 0b10, 0b100, 0b1000, 0b10000, 0b100000, 0b1000000, 0b10000000, 0b100000000, 0b1000000000, 0b10000000000, 0b100000000000, 0b1000000000000, 0b10000000000000, 0b100000000000000, 0b1000000000000000, 0b10000000000000000, 0b100000000000000000, 0b1000000000000000000, 0b10000000000000000000, 0b100000000000000000000, 0b1000000000000000000000, 0b10000000000000000000000, 0b100000000000000000000000, 0b1000000000000000000000000, 0b10000000000000000000000000, 0b100000000000000000000000000, 0b1000000000000000000000000000, 0b10000000000000000000000000000, 0b100000000000000000000000000000, 0b1000000000000000000000000000000, 0b10000000000000000000000000000000, 0b100000000000000000000000000000000, 0b1000000000000000000000000000000000, 0b10000000000000000000000000000000000, 0b100000000000000000000000000000000000, 0b1000000000000000000000000000000000000, 0b10000000000000000000000000000000000000, 0b100000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000, 0b10000000000000000000000000000000000000000, 0b100000000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000000, 0b10000000000000000000000000000000000000000000, 0b100000000000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000000000, 0b10000000000000000000000000000000000000000000000, 0b100000000000000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000000000000, 0b10000000000000000000000000000000000000000000000000, 0b100000000000000000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000000000000000, 0b10000000000000000000000000000000000000000000000000000, 0b100000000000000000000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000000000000000000, 0b10000000000000000000000000000000000000000000000000000000, 0b100000000000000000000000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000000000000000000000, 0b10000000000000000000000000000000000000000000000000000000000, 0b100000000000000000000000000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000000000000000000000000, 0b10000000000000000000000000000000000000000000000000000000000000, 0b100000000000000000000000000000000000000000000000000000000000000, 0b1000000000000000000000000000000000000000000000000000000000000000];
-
   static foreach (T; AliasSeq!(ubyte, byte, ushort, short, uint, int, ulong, long)) {
     static foreach (int i; 0 .. bitsOf!T) {
-      assert_eq(filledBit!(T, i), cast(T) (a[i]));
+      assert_eq(filledBit!(T, i), cast(T) (1L << i));
     }
     static foreach (int i; bitsOf!T .. 2 * bitsOf!T) {
       assert_eq(filledBit!(T, i), 0);
@@ -321,20 +318,20 @@ template filledBits(T, int start_, int end_) if (isIntegral!T) {
 /// Test `filledBits`
 nothrow @nogc unittest {
   static foreach (T; AliasSeq!(ubyte, byte, ushort, short, uint, int, ulong, long)) {
-    assert_eq(filledBits!(T, 0, 0), cast(T) 0b00000000);
-    assert_eq(filledBits!(T, 8, 8), cast(T) 0b00000000);
-    assert_eq(filledBits!(T, 0, 8), cast(T) 0b11111111);
-    assert_eq(filledBits!(T, -8, 8), cast(T) 0b11111111);
-    assert_eq(filledBits!(T, 2, 7), cast(T) 0b01111100);
-    assert_eq(filledBits!(T, 0, 1), cast(T) 0b00000001);
-    assert_eq(filledBits!(T, 1, 2), cast(T) 0b00000010);
-    assert_eq(filledBits!(T, 1, 3), cast(T) 0b00000110);
-    assert_eq(filledBits!(T, 7, 8), cast(T) 0b10000000);
+    assert_eq(filledBits!(T, 0, 0), cast(T) 0b0000_0000);
+    assert_eq(filledBits!(T, 8, 8), cast(T) 0b0000_0000);
+    assert_eq(filledBits!(T, 0, 8), cast(T) 0b1111_1111);
+    assert_eq(filledBits!(T, -8, 8), cast(T) 0b111_11111);
+    assert_eq(filledBits!(T, 2, 7), cast(T) 0b0111_1100);
+    assert_eq(filledBits!(T, 0, 1), cast(T) 0b0000_0001);
+    assert_eq(filledBits!(T, 1, 2), cast(T) 0b0000_0010);
+    assert_eq(filledBits!(T, 1, 3), cast(T) 0b0000_0110);
+    assert_eq(filledBits!(T, 7, 8), cast(T) 0b1000_0000);
   }
-  assert_eq(filledBits!(uint, -32, 64), 0xffffffff);
-  assert_eq(filledBits!(int, -32, 64), 0xffffffff);
-  assert_eq(filledBits!(uint, 31, 32), 0x80000000);
-  assert_eq(filledBits!(int, 31, 32), 0x80000000);
+  assert_eq(filledBits!(uint, -32, 64), 0xffff_ffff);
+  assert_eq(filledBits!(int, -32, 64), 0xffff_ffff);
+  assert_eq(filledBits!(uint, 31, 32), 0x8000_0000);
+  assert_eq(filledBits!(int, 31, 32), 0x8000_0000);
 }
 
 /**
@@ -391,7 +388,7 @@ nothrow @nogc @safe unittest {
   assert(fmtOf!float == "%0.9f");
   assert(fmtOf!double == "%0.18g");
 
-  short a;
+  immutable short a;
   assert(fmtOf!a == "%hd");
 }
 
@@ -426,13 +423,13 @@ do {
     return 1 - cast(int) bits;
   }
 
-  auto lim = fmax(fabs(min), fabs(max));
-  auto dig = cast(int) lim.log2().ceil();
+  immutable lim = fmax(fabs(min), fabs(max));
+  immutable dig = cast(int) lim.log2().ceil();
   auto exp = dig + 1 - cast(int) bits;
 
-  auto alim = (cast(real_t) 2).pow(dig);
-  auto amin = -alim;
-  auto amax = alim - (cast(real_t) 2).pow(exp);
+  immutable alim = (cast(real_t) 2).pow(dig);
+  immutable amin = -alim;
+  immutable amax = alim - (cast(real_t) 2).pow(exp);
 
   if (min < amin || max > amax) {
     exp += 1;
@@ -472,14 +469,14 @@ intType!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T) 
 
   static if (rexp < exp && rbits > bits) {
     // adjust raw type first
-    auto raw2 = raw.raw_to!rbits;
+    immutable raw2 = raw.raw_to!rbits;
   } else {
-    auto raw2 = raw;
+    immutable raw2 = raw;
   }
 
   static if (rexp < exp) {
     enum int dexp = exp - rexp;
-    auto raw3 = raw2 << dexp;
+    immutable auto raw3 = raw2 << dexp;
   } else static if (rexp > exp) {
     enum int dexp = rexp - exp;
     enum typeof(raw2) half = 1 << (dexp - 1);
@@ -487,28 +484,28 @@ intType!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T) 
 
     version(fixRoundToNearest) {
       // FIXME: rounding ~ floor(raw + 0.5)
-      auto raw21 = raw2 + (raw2 < 0 ? -half : half);
+      immutable raw21 = raw2 + (raw2 < 0 ? -half : half);
     }
 
     version(fixRoundToZero) {
-      auto raw21 = raw2 < 0 ? raw2 + one : raw2;
+      immutable raw21 = raw2 < 0 ? raw2 + one : raw2;
     }
 
     version(fixRoundDown) {
-      auto raw21 = raw2;
+      immutable raw21 = raw2;
     }
 
-    auto raw3 = raw21 >> dexp;
+    immutable raw3 = raw21 >> dexp;
     //auto raw3 = raw21 / one;
   } else {
-    auto raw3 = raw2;
+    immutable raw3 = raw2;
   }
 
   static if (rexp < exp && rbits > bits) {
-    auto raw4 = raw3;
+    immutable raw4 = raw3;
   } else {
     // finally adjust raw type
-    auto raw4 = raw3.raw_to!rbits;
+    immutable raw4 = raw3.raw_to!rbits;
   }
 
   return raw4;
@@ -516,20 +513,20 @@ intType!(rbits) raw_to(int exp, int rexp, uint rbits, T)(const T raw) if (is(T) 
 
 nothrow @nogc unittest {
   version(fixRoundDown) {
-    assert_eq(0b01010.raw_to!(0, 1), 0b0101);
-    assert_eq(0b01010.raw_to!(0, 2), 0b010);
-    assert_eq(0b01010.raw_to!(0, 3), 0b01);
-    assert_eq((-0b01010).raw_to!(0, 1), -0b0101);
-    assert_eq((-0b01010).raw_to!(0, 2), -0b011);
-    assert_eq((-0b01010).raw_to!(0, 3), -0b10);
+    assert_eq((0b01_010).raw_to!(0, 1), 0b0101);
+    assert_eq((0b01_010).raw_to!(0, 2), 0b010);
+    assert_eq((0b01_010).raw_to!(0, 3), 0b01);
+    assert_eq((-0b0_1010).raw_to!(0, 1), -0b0101);
+    assert_eq((-0b0_1010).raw_to!(0, 2), -0b011);
+    assert_eq((-0b0_1010).raw_to!(0, 3), -0b10);
   }
   version(fixRoundToNearest) {
-    assert_eq(0b01010.raw_to!(0, 1), 0b0101);
-    assert_eq(0b01010.raw_to!(0, 2), 0b011);
-    assert_eq(0b01010.raw_to!(0, 3), 0b01);
-    assert_eq((-0b01010).raw_to!(0, 1), -0b0101);
-    assert_eq((-0b01010).raw_to!(0, 2), -0b011);
-    assert_eq((-0b01010).raw_to!(0, 3), -0b10);
+    assert_eq((0b0_1010).raw_to!(0, 1), 0b0101);
+    assert_eq((0b0_1010).raw_to!(0, 2), 0b011);
+    assert_eq((0b0_1010).raw_to!(0, 3), 0b01);
+    assert_eq((-0b0_1010).raw_to!(0, 1), -0b0101);
+    assert_eq((-0b0_1010).raw_to!(0, 2), -0b011);
+    assert_eq((-0b0_1010).raw_to!(0, 3), -0b10);
   }
 }
 
@@ -598,8 +595,10 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   /// Mantissa type
   alias raw_t = intType!(bits);
 
+  /// Integer part mask
   enum raw_t intmask = filledBits!(raw_t, -exp, bits);
 
+  /// Fraction part mask
   enum raw_t fracmask = filledBits!(raw_t, 0, -exp);
 
   /// Self type alias
@@ -625,44 +624,44 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Create number from generic integer value
-  const pure nothrow @nogc @safe
-  this(T)(const T val) if (is(T) && isInt!T) {
+  pure nothrow @nogc @safe
+  this(T)(const T val) const if (is(T) && isInt!T) {
     raw = val.raw_to!(0, exp, bits);
   }
 
   /// Convert number into generic floating-point value
-  const pure nothrow @nogc @safe
-  T opCast(T)() if (is(T) && isFloat!T) {
+  pure nothrow @nogc @safe
+  T opCast(T)() const if (is(T) && isFloat!T) {
     return (cast(T) raw) * (cast(T) (cast(real_t) 2).pow(exp));
   }
 
   /// Convert number into generic integer value
-  const pure nothrow @nogc @safe
-  T opCast(T)() if (is(T) && isInt!T) {
+  pure nothrow @nogc @safe
+  T opCast(T)() const if (is(T) && isInt!T) {
     return raw.raw_to!(exp, 0, bitsOf!T)();
   }
 
   /// Convert number to different range or mantissa width
-  const pure nothrow @nogc @safe
-  this(T)(const T other) if (is(T) && isFixed!T) {
+  pure nothrow @nogc @safe
+  this(T)(const T other) const if (is(T) && isFixed!T) {
     raw = other.raw.raw_to!(T.exp, exp, bits)();
   }
 
   /// Convert number to different range or mantissa width
-  const pure nothrow @nogc @safe
-  T opCast(T)() if (is(T) && isFixed!T) {
+  pure nothrow @nogc @safe
+  T opCast(T)() const if (is(T) && isFixed!T) {
     return T.from_raw(raw.raw_to!(exp, T.exp, T.bits)());
   }
 
   /// Unified cast operation
-  const pure nothrow @nogc @safe
-  T to(T)() if (is(T) && isNumer!T) {
+  pure nothrow @nogc @safe
+  T to(T)() const if (is(T) && isNumer!T) {
     return cast(T) this;
   }
 
   /// Get integer part of number
-  const pure nothrow @nogc @property @safe
-  auto intof() {
+  pure nothrow @nogc @safe
+  auto intof() const {
     enum real_t Rrmin = rmin.abs_floor();
     enum real_t Rrmax = rmax.abs_floor();
 
@@ -682,8 +681,8 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Get fraction part of number
-  const pure nothrow @nogc @property @safe
-  auto fracof() {
+  pure nothrow @nogc @safe
+  auto fracof() const {
     static if (hasfrac) {
       enum real_t Rrmin = fmin(fmax(rmin, -1.0), 1.0);
       enum real_t Rrmax = fmax(fmin(rmax, 1.0), -1.0);
@@ -704,8 +703,8 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Get absolute value
-  const pure nothrow @nogc @property @safe
-  auto absof() {
+  pure nothrow @nogc @safe
+  auto absof() const {
     static if (isntneg) {
       return this;
     } else static if (isneg) {
@@ -719,8 +718,8 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Negation (unary -)
-  const pure nothrow @nogc @safe
-  auto opUnary(string op)() if (op == "-") {
+  pure nothrow @nogc @safe
+  auto opUnary(string op)() const if (op == "-") {
     enum real_t Rrmin = -rmax;
     enum real_t Rrmax = -rmin;
 
@@ -732,8 +731,8 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Addition of fixed-point value (binary +)
-  const pure nothrow @nogc @safe
-  auto opBinary(string op, T)(const T other) if (op == "+" && is(T) && isFixed!T) {
+  pure nothrow @nogc @safe
+  auto opBinary(string op, T)(const T other) const if (op == "+" && is(T) && isFixed!T) {
     enum real_t Rrmin = rmin + T.rmin;
     enum real_t Rrmax = rmax + T.rmax;
 
@@ -748,8 +747,8 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Subtraction of fixed-point value (binary -)
-  const pure nothrow @nogc @safe
-  auto opBinary(string op, T)(const T other) if (op == "-" && is(T) && isFixed!T) {
+  pure nothrow @nogc @safe
+  auto opBinary(string op, T)(const T other) const if (op == "-" && is(T) && isFixed!T) {
     enum real_t Rrmin = rmin - T.rmax;
     enum real_t Rrmax = rmax - T.rmin;
 
@@ -764,8 +763,8 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Fixed-point multiplication (binary *)
-  const pure nothrow @nogc @safe
-  auto opBinary(string op, T)(const T other) if (op == "*" && is(T) && isFixed!T) {
+  pure nothrow @nogc @safe
+  auto opBinary(string op, T)(const T other) const if (op == "*" && is(T) && isFixed!T) {
     enum real_t minXmin = rmin * T.rmin;
     enum real_t minXmax = rmin * T.rmax;
     enum real_t maxXmin = rmax * T.rmin;
@@ -790,9 +789,11 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Fixed-point division (binary /)
-  const pure nothrow @nogc @safe
-  auto opBinary(string op, T)(const T other) if (op == "/" && is(T) && isFixed!T) {
-    static assert(((T.rmin < 0 && T.rmax < 0) || (T.rmin > 0 && T.rmax > 0)), "Fixed-point division is undefined for divider which can be zero.");
+  pure nothrow @nogc @safe
+  auto opBinary(string op, T)(const T other) const if (op == "/" && is(T) &&
+                                                       isFixed!T) {
+    static assert(((T.rmin < 0 && T.rmax < 0) || (T.rmin > 0 && T.rmax > 0)),
+                  "Fixed-point division is undefined for divider which can be zero.");
 
     enum real_t minXmin = rmin / T.rmin;
     enum real_t minXmax = rmin / T.rmax;
@@ -818,9 +819,11 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   }
 
   /// Fixed-point remainder (binary %)
-  const pure nothrow @nogc @safe
-  auto opBinary(string op, T)(const T other) if (op == "%" && is(T) && isFixed!T) {
-    static assert(((T.rmin < 0 && T.rmax < 0) || (T.rmin > 0 && T.rmax > 0)), "Fixed-point remainder is undefined for divider which can be zero.");
+  pure nothrow @nogc @safe
+  auto opBinary(string op, T)(const T other) const if (op == "%" && is(T) &&
+                                                       isFixed!T) {
+    static assert(((T.rmin < 0 && T.rmax < 0) || (T.rmin > 0 && T.rmax > 0)),
+                  "Fixed-point remainder is undefined for divider which can be zero.");
 
     enum real_t Trlim = fmax(fabs(T.rmin), fabs(T.rmax));
 
@@ -838,32 +841,39 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 
     enum uint op_bits = bits > T.bits ? bits : T.bits;
 
-    auto a = raw.raw_to!op_bits();
-    auto b = other.raw.raw_to!(T.exp, exp, op_bits);
+    immutable a = raw.raw_to!op_bits();
+    immutable b = other.raw.raw_to!(T.exp, exp, op_bits);
 
-    auto r = (a % b).raw_to!(exp, R.exp, R.bits);
+    immutable r = (a % b).raw_to!(exp, R.exp, R.bits);
 
     return R.from_raw(r);
   }
 
   /// Fixed-point equality (==)
-  const pure nothrow @nogc @safe
-  bool opEquals(T)(const T other) if (is(T) && isFixed!T) {
+  pure nothrow @nogc @safe
+  bool opEquals(T)(const T other) const if (is(T) && isFixed!T) {
     alias C = cmp!(self, T);
 
-    auto a = raw.raw_to!(exp, C.exp, C.bits);
-    auto b = other.raw.raw_to!(T.exp, C.exp, C.bits);
+    immutable a = raw.raw_to!(exp, C.exp, C.bits);
+    immutable b = other.raw.raw_to!(T.exp, C.exp, C.bits);
 
     return a == b;
   }
 
+  /// Hashing
+  /// TODO: implement
+  pure nothrow @nogc @safe
+  size_t toHash(size_t seed = 0) const {
+    return seed;
+  }
+
   /// Fixed-point comparison (<>)
-  const pure nothrow @nogc @safe
-  int opCmp(T)(const T other) if (is(T) && isFixed!T) {
+  pure nothrow @nogc @safe
+  int opCmp(T)(const T other) const if (is(T) && isFixed!T) {
     alias C = cmp!(self, T);
 
-    auto a = raw.raw_to!(exp, C.exp, C.bits);
-    auto b = other.raw.raw_to!(T.exp, C.exp, C.bits);
+    immutable a = raw.raw_to!(exp, C.exp, C.bits);
+    immutable b = other.raw.raw_to!(T.exp, C.exp, C.bits);
 
     return a < b ? -1 : a > b ? 1 : 0;
   }
@@ -874,6 +884,7 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   pure nothrow @nogc @safe
   opOpAssign(string op, T)(const T other) if (op == "+" && isFixed!T) {
     raw += other.raw.raw_to!(T.exp, exp, bits)();
+    return this;
   }
 
   /// Subtracting fixed-point value (+=)
@@ -882,6 +893,7 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   pure nothrow @nogc @safe
   opOpAssign(string op, T)(const T other) if (op == "-" && isFixed!T) {
     raw -= other.raw.raw_to!(T.exp, exp, bits)();
+    return this;
   }
 
   /// Multiplying to integer value (*=)
@@ -890,18 +902,21 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
   pure nothrow @nogc @safe
   opOpAssign(string op, T)(const T other) if (op == "*" && isInt!T) {
     raw *= other;
+    return this;
   }
 
   /// Dividing by integer value (/=)
   pure nothrow @nogc @safe
   opOpAssign(string op, T)(const T other) if (op == "/" && isInt!T) {
     raw /= other;
+    return this;
   }
 
   /// Remainding by integer value (%=)
   pure nothrow @nogc @safe
   opOpAssign(string op, T)(const T other) if (op == "%" && isInt!T) {
     raw %= other.raw_to!(0, exp, bits);
+    return this;
   }
 }
 
@@ -909,22 +924,22 @@ struct fix(real_t rmin_, real_t rmax_ = rmin_, uint bits_ = 32) {
 nothrow @nogc unittest {
   assert_eq(fix!(0, 0, 32).exp, -31);
 
-  assert_eq(fix!(-1, 0.999999999534338712692260742188, 32).exp, -31);
+  assert_eq(fix!(-1, 0.999_999_999_534_338_712_692_260_742_188, 32).exp, -31);
   assert_eq(fix!(-1, 1, 32).exp, -30);
-  assert_eq(fix!(-2, 1.99999999906867742538452148438, 32).exp, -30);
+  assert_eq(fix!(-2, 1.999_999_999_068_677_425_384_521_484_38, 32).exp, -30);
   assert_eq(fix!(-2, 2, 32).exp, -29);
-  assert_eq(fix!(-4, 3.99999999813735485076904296875, 32).exp, -29);
+  assert_eq(fix!(-4, 3.999_999_998_137_354_850_769_042_968_75, 32).exp, -29);
   assert_eq(fix!(-4, 4, 32).exp, -28);
-  assert_eq(fix!(-8, 7.9999999962747097015380859375, 32).exp, -28);
+  assert_eq(fix!(-8, 7.999_999_996_274_709_701_538_085_937_5, 32).exp, -28);
   assert_eq(fix!(-8, 8, 32).exp, -27);
-  assert_eq(fix!(-16, 15.999999992549419403076171875, 32).exp, -27);
-  assert_eq(fix!(-32, 31.99999998509883880615234375, 32).exp, -26);
-  assert_eq(fix!(-64, 63.9999999701976776123046875, 32).exp, -25);
-  assert_eq(fix!(-128, 127.999999940395355224609375, 32).exp, -24);
-  assert_eq(fix!(-256, 255.99999988079071044921875, 32).exp, -23);
-  assert_eq(fix!(-512, 511.9999997615814208984375, 32).exp, -22);
-  assert_eq(fix!(-1024, 1023.999999523162841796875, 32).exp, -21);
-  assert_eq(fix!(-2048, 2047.99999904632568359375, 32).exp, -20);
+  assert_eq(fix!(-16, 15.999_999_992_549_419_403_076_171_875, 32).exp, -27);
+  assert_eq(fix!(-32, 31.999_999_985_098_838_806_152_343_75, 32).exp, -26);
+  assert_eq(fix!(-64, 63.999_999_970_197_677_612_304_687_5, 32).exp, -25);
+  assert_eq(fix!(-128, 127.999_999_940_395_355_224_609_375, 32).exp, -24);
+  assert_eq(fix!(-256, 255.999_999_880_790_710_449_218_75, 32).exp, -23);
+  assert_eq(fix!(-512, 511.999_999_761_581_420_898_437_5, 32).exp, -22);
+  assert_eq(fix!(-1_024, 1_023.999_999_523_162_841_796_875, 32).exp, -21);
+  assert_eq(fix!(-2_048, 2_047.999_999_046_325_683_593_75, 32).exp, -20);
 
   assert_eq(fix!(-2, 0, 32).exp, -30);
   assert_eq(fix!(0, 1, 32).exp, -30);
@@ -933,18 +948,18 @@ nothrow @nogc unittest {
   assert_eq(fix!(-32, 0, 32).exp, -26);
   assert_eq(fix!(0, 32, 32).exp, -25);
 
-  assert_eq(fix!(-0.5, 0.499999999767169356346130371094, 32).exp, -32);
+  assert_eq(fix!(-0.5, 0.499_999_999_767_169_356_346_130_371_094, 32).exp, -32);
   assert_eq(fix!(-0.5, 0.5, 32).exp, -31);
-  assert_eq(fix!(-0.25, 0.249999999883584678173065185547, 32).exp, -33);
+  assert_eq(fix!(-0.25, 0.249_999_999_883_584_678_173_065_185_547, 32).exp, -33);
   assert_eq(fix!(-0.25, 0.25, 32).exp, -32);
-  assert_eq(fix!(-0.125, 0.124999999941792339086532592773, 32).exp, -34);
+  assert_eq(fix!(-0.125, 0.124_999_999_941_792_339_086_532_592_773, 32).exp, -34);
   assert_eq(fix!(-0.125, 0.125, 32).exp, -33);
-  assert_eq(fix!(-0.0625, 0.0623999999999999999985959581866, 32).exp, -35);
-  assert_eq(fix!(-0.0625, 0.0625, 32).exp, -34);
-  assert_eq(fix!(-0.03125, 0.0312499999854480847716331481934, 32).exp, -36);
-  assert_eq(fix!(-0.03125, 0.03125, 32).exp, -35);
-  assert_eq(fix!(-0.015625, 0.0156249999927240423858165740967, 32).exp, -37);
-  assert_eq(fix!(-0.015625, 0.015625, 32).exp, -36);
+  assert_eq(fix!(-0.0625, 0.062_399_999_999_999_999_998_595_958_186_6, 32).exp, -35);
+  assert_eq(fix!(-0.0625, 0.062_5, 32).exp, -34);
+  assert_eq(fix!(-0.03125, 0.031_249_999_985_448_084_771_633_148_193_4, 32).exp, -36);
+  assert_eq(fix!(-0.03125, 0.031_25, 32).exp, -35);
+  assert_eq(fix!(-0.015625, 0.015_624_999_992_724_042_385_816_574_096_7, 32).exp, -37);
+  assert_eq(fix!(-0.015625, 0.015_625, 32).exp, -36);
 
   assert_eq(fix!(0.8, 0.8, 32).exp, -31);
   assert_eq(fix!(0, 0.1, 32).exp, -34);
@@ -955,10 +970,10 @@ nothrow @nogc unittest {
   assert_eq(fix!(-100, 0, 32).exp, -24);
   assert_eq(fix!(-100, 100, 32).exp, -24);
   assert_eq(fix!(-100, 1000, 32).exp, -21);
-  assert_eq(fix!(0, 100000000, 32).exp, -4);
-  assert_eq(fix!(0, 1000000000, 32).exp, -1);
-  assert_eq(fix!(0, 10000000000, 32).exp, 3);
-  assert_eq(fix!(0, 100000000000, 32).exp, 6);
+  assert_eq(fix!(0, 100_000_000, 32).exp, -4);
+  assert_eq(fix!(0, 1_000_000_000, 32).exp, -1);
+  assert_eq(fix!(0, 10_000_000_000, 32).exp, 3);
+  assert_eq(fix!(0, 100_000_000_000, 32).exp, 6);
 
   assert_eq(fix!(-10, 10).exp, -27);
   assert_eq(asfix!(1e3 / 1e0).exp, -21);
@@ -966,14 +981,14 @@ nothrow @nogc unittest {
 
 /// Test step (or precision)
 nothrow @nogc unittest {
-  assert_eq(cast(double) fix!(1).step, 9.313225746154785e-10);
-  assert_eq(cast(double) fix!(10).step, 7.450580596923828e-9);
-  assert_eq(cast(double) fix!(100).step, 5.960464477539063e-8);
-  assert_eq(cast(double) fix!(1000).step, 4.76837158203125e-7);
-  assert_eq(cast(double) fix!(100000000).step, 0.0625);
-  assert_eq(cast(double) fix!(1000000000).step, 0.5);
-  assert_eq(cast(double) fix!(10000000000).step, 8.0);
-  assert_eq(cast(double) fix!(100000000000).step, 64.0);
+  assert_eq(cast(double) fix!(1).step, 9.313_225_746_154_785e-10);
+  assert_eq(cast(double) fix!(10).step, 7.450_580_596_923_828e-9);
+  assert_eq(cast(double) fix!(100).step, 5.960_464_477_539_063e-8);
+  assert_eq(cast(double) fix!(1_000).step, 4.768_371_582_031_25e-7);
+  assert_eq(cast(double) fix!(100_000_000).step, 0.062_5);
+  assert_eq(cast(double) fix!(1_000_000_000).step, 0.5);
+  assert_eq(cast(double) fix!(10_000_000_000).step, 8.0);
+  assert_eq(cast(double) fix!(100_000_000_000).step, 64.0);
 }
 
 /// Casting to float and int
@@ -1081,7 +1096,7 @@ nothrow @nogc unittest {
 
   assert_eq(fix!(-1e10, 1e10)(0).fracof, fix!(0, 0)(0));
 
-  assert_eq(fix!(-10, 15)(-3.09).fracof, fix!(-1, 1)(-0.09), fix!(-1, 1)(0.00000001));
+  assert_eq(fix!(-10, 15)(-3.09).fracof, fix!(-1, 1)(-0.09), fix!(-1, 1)(0.000_000_01));
 }
 
 /// Integer part
@@ -1147,20 +1162,20 @@ nothrow @nogc unittest {
 
 /// Multiplication
 nothrow @nogc unittest {
-  assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(4.5), fix!(-4000, 2000)(5.625));
-  assert_eq(fix!(-100, 200)(-1.25) * fix!(-20, 10)(4.5), fix!(-4000, 2000)(-5.625));
-  assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(-4.5), fix!(-4000, 2000)(-5.625));
-  assert_eq(fix!(-100, 200)(-1.25) * fix!(-20, 10)(-4.5), fix!(-4000, 2000)(5.625));
+  assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(4.5), fix!(-4_000, 2_000)(5.625));
+  assert_eq(fix!(-100, 200)(-1.25) * fix!(-20, 10)(4.5), fix!(-4_000, 2_000)(-5.625));
+  assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(-4.5), fix!(-4_000, 2_000)(-5.625));
+  assert_eq(fix!(-100, 200)(-1.25) * fix!(-20, 10)(-4.5), fix!(-4_000, 2_000)(5.625));
 
   version(fixRoundToNearest) {
-    assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.625));
+    assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4_000, 2_000)(6.625));
     assert_eq(asfix!(1.25) * asfix!(5.3), asfix!(6.625));
   } else {
-    assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4000, 2000)(6.624999));
+    assert_eq(fix!(-100, 200)(1.25) * fix!(-20, 10)(5.3), fix!(-4_000, 2_000)(6.624_999));
   }
 
-  assert_eq(fix!(-10, 10)(1.25) * asfix!(1e3), fix!(-10000, 10000)(1250.0));
-  assert_eq(fix!(-10, 10)(1.25) * asfix!(1/1e-3), fix!(-10000, 10000)(1250.0));
+  assert_eq(fix!(-10, 10)(1.25) * asfix!(1e3), fix!(-10_000, 10_000)(1_250.0));
+  assert_eq(fix!(-10, 10)(1.25) * asfix!(1/1e-3), fix!(-10_000, 10_000)(1_250.0));
 }
 
 /// Division
@@ -1221,7 +1236,7 @@ nothrow @nogc unittest {
 nothrow @nogc unittest {
   alias X = fix!(-100, 50);
   alias Y = fix!(0, 5);
-  alias Z = fix!(-200, 10000);
+  alias Z = fix!(-200, 10_000);
 
   X a = 11.25;
 
@@ -1312,7 +1327,7 @@ nothrow @nogc unittest {
   assert_eq(cast(double) asfix!1, 1.0);
 
   assert_eq(asfix!0.1.exp, -34);
-  assert_eq(cast(double) asfix!0.1, 0.09999999997671694);
+  assert_eq(cast(double) asfix!0.1, 0.099_999_999_976_716_94);
 
   assert_eq(asfix!100.exp, -24);
   assert_eq(cast(double) asfix!100, 100.0);
@@ -1321,8 +1336,9 @@ nothrow @nogc unittest {
   assert_eq(asfix!(100, 64).exp, -56);
   assert_eq(cast(double) asfix!(100, 64), 100.0);
 
-  enum auto a = asfix!(1e3);
-  enum auto b = asfix!(1/1e-3);
+  enum a = asfix!(1e3);
+  enum b = asfix!(1/1e-3);
+  assert_eq(a, b);
 }
 
 /// Checks that types or expressions is fixed-point number
@@ -1370,8 +1386,8 @@ nothrow @nogc @safe unittest {
   assert(isSameFixed!(typeof(fix!(-1.1, 0.3)(0.0) * asfix!(1e3)), fix!(-1100, 300)));
   assert(isSameFixed!(typeof(fix!(-5, 10)(0.0) * asfix!(1e-3)), fix!(-0.005, 0.01)));
   assert(isSameFixed!(asfix!(1/1e-3), asfix!(1e3)));
-  assert(isSameFixed!(fix!(-10, 10)(1.25) * asfix!(1e3), fix!(-10000, 10000)(1250.0)));
-  assert(isSameFixed!(fix!(-10, 10)(1.25) * asfix!(1/1e-3), fix!(-10000, 10000)(1250.0)));
+  assert(isSameFixed!(fix!(-10, 10)(1.25) * asfix!(1e3), fix!(-10_000, 10_000)(1_250.0)));
+  assert(isSameFixed!(fix!(-10, 10)(1.25) * asfix!(1/1e-3), fix!(-10_000, 10_000)(1_250.0)));
 
   assert(!isSameFixed!(fix!(-1, 1), fix!(0, 2)));
   assert(!isSameFixed!(double, double));

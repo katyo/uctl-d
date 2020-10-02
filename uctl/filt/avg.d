@@ -120,7 +120,7 @@ nothrow @nogc unittest {
 
   static const auto s1 = [A(true, 0.0, 1), A(true, 0.25, 5), A(false, -1.75, 2)].staticArray;
 
-  assert_eq(s.avg!(ref (ref immutable A a) => a.b), -0.5);
+  assert_eq(s1.avg!(ref (ref const A a) => a.b), -0.5);
 
   static auto s2 = [A(true, 0.0, 1), A(true, 0.25, 5), A(false, -1.75, 2)].staticArray;
 

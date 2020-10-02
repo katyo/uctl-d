@@ -54,13 +54,16 @@ struct DQ(T) if (isNumer!T) {
    $(MATH α = d cos(θ) - q sin(θ)),
    $(MATH β = q cos(θ) + d sin(θ))
    */
-  const pure nothrow @nogc @safe
-  auto to(alias R, alias S, A)(const A theta) if (__traits(isSame, AlphaBeta, R) && hasUnits!(A, Angle) && isSinOrCos!(S, A) && isNumer!(T, A.raw_t)) {
-    auto sin_theta = S(theta);
-    auto cos_theta = S(asnum!(1, T).as!qrev.to!(A.units) - theta); // cos(a) == sin(pi/2-a)
+  pure nothrow @nogc @safe
+  auto to(alias R, alias S, A)(const A theta) const if (__traits(isSame, AlphaBeta, R) &&
+                                                        hasUnits!(A, Angle) &&
+                                                        isSinOrCos!(S, A) &&
+                                                        isNumer!(T, A.raw_t)) {
+    const auto sin_theta = S(theta);
+    const auto cos_theta = S(asnum!(1, T).as!qrev.to!(A.units) - theta); // cos(a) == sin(pi/2-a)
 
-    auto alpha = d * cos_theta - q * sin_theta;
-    auto beta = q * cos_theta + d * sin_theta;
+    const auto alpha = d * cos_theta - q * sin_theta;
+    const auto beta = q * cos_theta + d * sin_theta;
 
     return AlphaBeta!T(cast(T) alpha, cast(T) beta);
   }

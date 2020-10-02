@@ -7,4 +7,4 @@ public import uctl.modul.swm: swm;
 public import uctl.modul.svm: svm;
 public import PSC = uctl.modul.psc;
 
-alias uctl.modul.psc.mk mk;
+alias mk = uctl.modul.psc.mk;

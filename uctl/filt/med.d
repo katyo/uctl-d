@@ -44,7 +44,8 @@ version(unittest) {
  *
  * See_Also: [uctl.filt.avg.avg]
  */
-auto med(uint M = 1, uint N, T, alias P = ident_picker!T, alias S = bubble_sort)(ref T[N] data) if (isPicker!(P, T) && isMutable!(ReturnType!P) && isNumer!(ReturnType!P) && M >= 1 && M <= N) {
+auto med(uint M = 1, uint N, T, alias P = ident_picker!T, alias S = bubble_sort)(ref T[N] data)
+if (isPicker!(P, T) && isMutable!(ReturnType!P) && isNumer!(ReturnType!P) && M >= 1 && M <= N) {
   S!P(data);
   enum uint S = (N - M) / 2;
   enum uint E = S + M;
@@ -100,7 +101,8 @@ nothrow @nogc unittest {
  *
  * See_Also: [uctl.filt.avg.avg]
  */
-auto med(alias P, alias S = bubble_sort, uint M = 1, uint N, T)(ref T[N] data) if (isPicker!(P, T) && isMutable!(ReturnType!P) && isNumer!(ReturnType!P) && M >= 1 && M <= N) {
+auto med(alias P, alias S = bubble_sort, uint M = 1, uint N, T)(ref T[N] data)
+if (isPicker!(P, T) && isMutable!(ReturnType!P) && isNumer!(ReturnType!P) && M >= 1 && M <= N) {
   return med!(M, N, T, P, S)(data);
 }
 

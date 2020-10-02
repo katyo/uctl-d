@@ -34,10 +34,12 @@ struct Window(uint N_, W_) if (isNumer!W_ && N_ > 0) {
   /// Number of weights
   enum uint L = N + 1;
 
+  /// Window weights
   W[L] weight;
 
   alias weight this;
 
+  /// Initialize window with conatant
   const pure nothrow @nogc @safe
   this(const W w) {
     weight = () {
@@ -249,19 +251,19 @@ template cosine(real a0 = 0, real a1 = 0, real a2 = 0, real a3 = 0, real a4 = 0)
 alias hamming = cosine!(25.0 / 46.0, 1.0 - 25.0 / 46.0);
 
 /// Blackman window
-alias blackman = cosine!(7938.0 / 18608.0, 9240.0 / 18608.0, 1430.0 / 18608.0);
+alias blackman = cosine!(7_938.0 / 18_608.0, 9_240.0 / 18_608.0, 1_430.0 / 18_608.0);
 
 /// Nuttall window function
-alias nuttall = cosine!(0.355768, 0.487396, 0.144232, 0.012604);
+alias nuttall = cosine!(0.355_768, 0.487_396, 0.144_232, 0.012_604);
 
 /// Blackman-Nuttall window function
-alias blackman_nuttall = cosine!(0.3635819, 0.4891775, 0.1365995,  0.0106411);
+alias blackman_nuttall = cosine!(0.363_581_9, 0.489_177_5, 0.136_599_5,  0.010_641_1);
 
 /// Blackman-Harris window function
-alias blackman_harris = cosine!(0.35875, 0.48829, 0.14128, 0.01168);
+alias blackman_harris = cosine!(0.358_75, 0.488_29, 0.141_28, 0.011_68);
 
 /// Flat top window function
-alias flat_top = cosine!(0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368);
+alias flat_top = cosine!(0.215_578_95, 0.416_631_58, 0.277_263_158, 0.083_578_947, 0.006_947_368);
 
 /// Flat top window function
 alias flat_top2 = cosine!(1.0, 1.93, 1.29, 0.388, 0.028);

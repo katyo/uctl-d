@@ -28,7 +28,8 @@ version(unittest) {
    ---
 */
 pure nothrow @nogc @safe
-R lt1(uint len, R, A, real start, real end, real function(real) pure nothrow @nogc @safe gen)(A arg) if (isFloat!R && isFloat!A) {
+R lt1(uint len, R, A, real start, real end, real function(real) pure nothrow @nogc @safe gen)(A arg) if (isFloat!R &&
+                                                                                                         isFloat!A) {
   enum A init = cast(A) start;
   enum A fact = (cast(A) (len - 1)) / (end - start);
 
@@ -40,7 +41,7 @@ R lt1(uint len, R, A, real start, real end, real function(real) pure nothrow @no
     return data;
   }();
 
-  auto pos = (arg - init) * fact;
+  const auto pos = (arg - init) * fact;
   auto idx = cast(int) pos;
 
   if (idx < 0) {
@@ -108,7 +109,7 @@ R lt1(uint len, R, A, real function(real) pure nothrow @nogc @safe gen)(A arg) i
     return data;
   }();
 
-  auto pos = (arg - init) * fact;
+  const auto pos = (arg - init) * fact;
   auto idx = cast(int) pos;
 
   if (idx < 0) {
@@ -140,10 +141,10 @@ R lt1(uint len, R, A, real function(real) pure nothrow @nogc @safe gen)(A arg) i
   assert_eq(sqr(cast(X) 1), cast(X) 1, cast(X) 0.000001);
 
   void test_as_func(X delegate(X) pure nothrow @safe @nogc f) {
-    assert_eq(sqr(cast(X) 0), cast(X) 0);
-    assert_eq(sqr(cast(X) 0.1), cast(X) 0.01, cast(X) 0.002);
-    assert_eq(sqr(cast(X) 0.5), cast(X) 0.25, cast(X) 0.005);
-    assert_eq(sqr(cast(X) 1), cast(X) 1, cast(X) 0.000001);
+    assert_eq(f(cast(X) 0), cast(X) 0);
+    assert_eq(f(cast(X) 0.1), cast(X) 0.01, cast(X) 0.002);
+    assert_eq(f(cast(X) 0.5), cast(X) 0.25, cast(X) 0.005);
+    assert_eq(f(cast(X) 1), cast(X) 1, cast(X) 0.000001);
   }
 
   test_as_func(&sqr);

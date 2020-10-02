@@ -22,7 +22,9 @@ template isPicker(alias P, T) {
   import std.traits;
 
   static if (isCallable!P) {
-    enum bool isPicker = Parameters!P.length == 1 && is(Parameters!P[0] == T) && (ParameterStorageClassTuple!P[0] & (ParameterStorageClass.ref_ | ParameterStorageClass.return_)) && hasFunctionAttributes!(P, "pure", "nothrow", "@nogc", "ref");
+    enum bool isPicker = Parameters!P.length == 1 && is(Parameters!P[0] == T) &&
+      (ParameterStorageClassTuple!P[0] & (ParameterStorageClass.ref_ | ParameterStorageClass.return_)) &&
+      hasFunctionAttributes!(P, "pure", "nothrow", "@nogc", "ref");
   } else {
     enum bool isPicker = false;
   }
@@ -62,7 +64,7 @@ nothrow @nogc unittest {
 
 /// Swap two elements entirely
 void swap(T, alias P = ident_picker!T)(ref T a, ref T b) if (isPicker!(P, T) && isMutable!(ReturnType!P)) {
-  auto c = P(a);
+  const auto c = P(a);
   P(a) = P(b);
   P(b) = c;
 }
@@ -118,7 +120,9 @@ nothrow @nogc unittest {
  *
  * See_Also: [comb_sort]
  */
-void bubble_sort(uint N, T, alias C = ident_picker!T, alias S = C)(ref T[N] data) if (isPicker!(C, T) && isPicker!(S, T) && isMutable!(ReturnType!S)) {
+void bubble_sort(uint N, T, alias C = ident_picker!T, alias S = C)(ref T[N] data) if (isPicker!(C, T) &&
+                                                                                      isPicker!(S, T) &&
+                                                                                      isMutable!(ReturnType!S)) {
   enum uint L = N - 1;
 
   for (uint i = 0; i < L; i ++) {
@@ -174,7 +178,9 @@ nothrow @nogc unittest {
  *
  * See_Also: [comb_sort]
  */
-void bubble_sort(alias C, alias S = C, uint N, T)(ref T[N] data) if (isPicker!(C, T) && isPicker!(S, T) && isMutable!(ReturnType!S)) {
+void bubble_sort(alias C, alias S = C, uint N, T)(ref T[N] data) if (isPicker!(C, T) &&
+                                                                     isPicker!(S, T) &&
+                                                                     isMutable!(ReturnType!S)) {
   bubble_sort!(N, T, C, S)(data);
 }
 
@@ -222,7 +228,9 @@ nothrow @nogc unittest {
  *
  * See_Also: [bubble_sort]
  */
-void comb_sort(uint N, T, alias C = ident_picker!T, alias S = C)(ref T[N] data) if (isPicker!(C, T) && isPicker!(S, T) && isMutable!(ReturnType!S)) {
+void comb_sort(uint N, T, alias C = ident_picker!T, alias S = C)(ref T[N] data) if (isPicker!(C, T) &&
+                                                                                    isPicker!(S, T) &&
+                                                                                    isMutable!(ReturnType!S)) {
   import std.math: E, pow;
   import uctl.num: PHI, fix, asfix;
 
@@ -233,7 +241,7 @@ void comb_sort(uint N, T, alias C = ident_picker!T, alias S = C)(ref T[N] data) 
   uint step = N - 1;
 
   for (; step >= 1; ) {
-    uint top = N - step;
+    const uint top = N - step;
 
     for (uint i = 0; i < top; ++ i) {
       auto a = &data[i];
@@ -283,7 +291,9 @@ nothrow @nogc unittest {
  *
  * See_Also: [bubble_sort]
  */
-void comb_sort(alias C, alias S = C, uint N, T)(ref T[N] data) if (isPicker!(C, T) && isPicker!(S, T) && isMutable!(ReturnType!S)) {
+void comb_sort(alias C, alias S = C, uint N, T)(ref T[N] data) if (isPicker!(C, T) &&
+                                                                   isPicker!(S, T) &&
+                                                                   isMutable!(ReturnType!S)) {
   comb_sort!(N, T, C, S)(data);
 }
 

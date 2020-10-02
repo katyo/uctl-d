@@ -101,7 +101,9 @@ struct Param(real dt_, C_, M_, R_) if (isNumer!(C_, M_, R_)) {
   alias M = M_;
   alias R = R_;
 
+  /// Sampling time
   enum rdt = dt_;
+  /// Sampling time
   enum dt = asnum!(dt_, C);
 
   alias CmR = typeof(C() * M() * R());
@@ -149,8 +151,8 @@ struct Param(real dt_, C_, M_, R_) if (isNumer!(C_, M_, R_)) {
 }
 
 /// Create heater parameters
-pure nothrow @nogc @safe
-Param!(dt, C, M, R) mk(alias P, real dt, C, M, R)(C C_, M m_, R R_) if (isNumer!(C, M, R) && __traits(isSame, P, Param)) {
+pure nothrow @nogc @safe Param!(dt, C, M, R)
+mk(alias P, real dt, C, M, R)(C C_, M m_, R R_) if (isNumer!(C, M, R) && __traits(isSame, P, Param)) {
   return Param!(dt, C, M, R)(C_, m_, R_);
 }
 
