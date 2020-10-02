@@ -7,30 +7,30 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
   pull_request:
 jobs:
-  analyze:
+  check:
     strategy:
-      fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-        dc:
-          - ldc-latest
-          - ldc-master
+        include:
+          - os: ubuntu-latest
+            dscanner: 0.11.0
+            reporter: github-check
+            level: warning
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Setup D compiler and tools
-        uses: dlang-community/setup-dlang@v1
-        with:
-          compiler: ${{ matrix.dc }}
+      - name: Setup reviewdog
+        uses: reviewdog/action-setup@v1
+      - name: Setup D scanner
+        run: curl -L https://github.com/dlang-community/D-Scanner/releases/download/v${{ matrix.dscanner }}/dscanner-v${{ matrix.dscanner }}-linux-x86_64.tar.gz | sudo tar -xz -C /usr/bin
       - name: Checkout sources
         uses: actions/checkout@v2
-      - name: Run D scanner
-        uses: dgellow/action-dscanner@v1.0.1
-        with:
-          level: warning
-          reporter: github-check
+      - name: Check style
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ github.token }}
+        run: 'dscanner --styleCheck | reviewdog -efm="%f(%l:%c)[%tarn]: %m" -efm="%f(%l:%c)[%trror]: %m" -name="Coding style" -reporter="${{ matrix.reporter }}" -level="${{ matrix.level }}"'
 
   build:
+    needs:
+      - check
     strategy:
       fail-fast: false
       matrix:
