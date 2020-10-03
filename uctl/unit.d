@@ -358,7 +358,7 @@ Val!(T, U) as(U, T)(T val) if (is(T) && isNumer!T && is(U) && isUnits!U) {
 
 /// Convert values from some units to another
 pure nothrow @nogc @safe
-auto to(U, T)(const T val) if (hasUnits!T && isUnits!(T.units) && isUnits!U && is(T.units.Class == U.Class)) {
+auto to(U, T)(const T val) if (isUnits!U && hasUnits!(T, U.Class)) {
   static if (is(T.units == U)) { // units is same
     return val;
   } else {
@@ -658,4 +658,37 @@ struct UnitsClass(string name_) {
 /// Checks if something is measurement units class
 template isUnitsClass(X...) if (X.length == 1) {
   enum bool isUnitsClass = isInstanceOf!(UnitsClass, X[0]);
+}
+
+/// Checks that units is time or frequency
+template isSamplingUnits(X...) if (X.length == 1) {
+  enum bool isSamplingUnits = isUnits!(X[0], Time) || isUnits!(X[0], Frequency);
+}
+
+/// Checks that value is time or frequency
+template isSampling(X...) if (X.length == 1) {
+  enum bool isSampling = hasUnits!(X[0], Time) || hasUnits!(X[0], Frequency);
+}
+
+/// Convert sampling units
+pure nothrow @nogc @safe
+auto to(U, T)(const T val) if ((isUnits!(U, Time) && hasUnits!(T, Frequency)) ||
+                               (isUnits!(U, Frequency) && hasUnits!(T, Time))) {
+  static if (hasUnits!(T, Time)) {
+    return (asnum!(1, T.raw_t) / val.to!sec.raw).as!Hz.to!U;
+  } else {
+    return (asnum!(1, T.raw_t) / val.to!Hz.raw).as!sec.to!U;
+  }
+}
+
+/// Test convert sampling units
+nothrow @nogc unittest {
+  assert_eq(50.0.as!Hz.to!sec, 20e-3.as!sec);
+  assert_eq(20e-3.as!sec.to!Hz, 50.0.as!Hz);
+
+  assert_eq(1.0.as!KHz.to!msec, 1.0.as!msec);
+  assert_eq(1.0.as!msec.to!KHz, 1.0.as!KHz);
+
+  assert_eq(250.0f.as!MHz.to!nsec, 4.0f.as!nsec);
+  assert_eq(4.0f.as!nsec.to!MHz, 250.0f.as!MHz);
 }
