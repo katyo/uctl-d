@@ -36,6 +36,10 @@ jobs:
             adrdox: 2.4.1
     runs-on: ubuntu-latest
     steps:
+      - name: Prepare config
+        id: config
+        run: |
+          echo "::set-output name=outdir::$(printf '${{ github.ref }}' | sed 's/.*\/\([^\/]*\)$/\1/g')"
       - name: Setup adrdox
         run: |
           curl -L https://github.com/katyo/adrdox/releases/download/v${{ matrix.adrdox }}/adrdox_linux-x86_64.zip > ${{ runner.temp }}/adrdox.zip
@@ -53,7 +57,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           BRANCH: gh-pages
           FOLDER: doc
-          TARGET_FOLDER: ${{ github.ref }}
+          TARGET_FOLDER: ${{ steps.config.outputs.outdir }}
 
   build:
     needs:
