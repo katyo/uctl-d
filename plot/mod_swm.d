@@ -1,13 +1,14 @@
 import uctl.util: OSC;
 import uctl.modul: swm;
 import uctl.math.trig: sin;
-import uctl.unit: as, Hz, rev;
+import uctl.unit: as, Hz, rev, sec;
 import uctl: mk;
 
-private nothrow @nogc void entry() {
-  alias sine = sin!5;
+alias sine = sin!5;
+enum dts = dt.as!sec;
 
-  auto param = mk!(OSC.Param, rev, dt)(float(freq).as!Hz);
+private nothrow @nogc void entry() {
+  immutable param = mk!(OSC.Param, rev, dts)(float(freq).as!Hz);
   auto state = OSC.State!(param, float)();
 
   foreach (i; 0 .. cast(int)(tend/dt)) {

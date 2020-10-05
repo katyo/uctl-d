@@ -6,9 +6,10 @@ import uctl.util: scale;
 import uctl: mk;
 
 alias sine = sin!5;
+enum dts = dt.as!sec;
 
 private nothrow @nogc void entry() {
-  immutable osc_param = mk!(OSC.Param, qrev, dt)(freq.as!Hz);
+  immutable osc_param = mk!(OSC.Param, qrev, dts)(freq.as!Hz);
   auto osc_state = OSC.State!(osc_param, float)();
 
   immutable auto psc_param = mk!(PSC.Param)(tcrit.as!sec, mfreq.as!Hz);

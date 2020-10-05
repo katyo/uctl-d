@@ -7,12 +7,13 @@ module uctl.util.osc;
 
 import std.traits: isInstanceOf, Unqual;
 import uctl.num: isNumer, asnum, typeOf;
-import uctl.unit: Val, hasUnits, isUnits, Frequency, Time, Angle, Hz, sec, to, as, rev, qrev;
+import uctl.unit: Val, hasUnits, isUnits, isSampling, Frequency, Time, Angle, Hz, sec, to, as, rev, qrev, rawTypeOf;
 import uctl.math: pi;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
   import uctl.num: fix, asfix;
+  import uctl.unit: msec;
 
   mixin unittests;
 }
@@ -20,9 +21,14 @@ version(unittest) {
 /**
    Oscillator parameters
 */
-struct Param(A_, U_) if (isNumer!(A_) && isUnits!(U_, Angle)) {
+struct Param(A_, alias dt_) if (hasUnits!(A_, Angle) &&
+                                !is(s_) && isSampling!dt_ && hasUnits!(dt_, sec) &&
+                                isNumer!(rawTypeOf!dt_, rawTypeOf!A_)) {
+  /// Sampling time in seconds
+  enum dt = dt_;
+
   /// Phase type
-  alias A = Val!(Unqual!A_, U_);
+  alias A = Unqual!A_;
 
   /// Phase increment for single step
   A delta;
@@ -32,89 +38,124 @@ struct Param(A_, U_) if (isNumer!(A_) && isUnits!(U_, Angle)) {
   this(const A delta_) {
     delta = delta_;
   }
+
+  /// Set new oscillation frequency or period
+  pure nothrow @nogc @safe
+  void opAssign(T)(const T timing) if (isSampling!T &&
+                                       isNumer!(rawTypeOf!A, rawTypeOf!T)) {
+    delta = cast(A) timing_to_angle!(A.units, dt)(timing);
+  }
+}
+
+private auto timing_to_angle(U, alias dt, T)(const T timing) if (isUnits!(U, Angle) &&
+                                                                 !is(dt) &&
+                                                                 hasUnits!(dt, sec) &&
+                                                                 isSampling!T &&
+                                                                 isNumer!(rawTypeOf!dt, rawTypeOf!T)) {
+
+  static if (hasUnits!(T, Frequency)) {
+    auto delta = dt.raw * timing.to!Hz.raw;
+  } else {
+    auto delta = dt.raw / timing.to!sec.raw;
+  }
+  return delta.as!rev.to!U;
 }
 
 /**
-   Init oscillator parameters using frequency
+   Initialize oscillator parameters using oscillation frequency or period
  */
 pure nothrow @nogc @safe
-auto mk(alias P, U, real dt, F)(const F freq) if (__traits(isSame, Param, P) &&
-                                                  isUnits!(U, Angle) &&
-                                                  hasUnits!(F, Frequency)) {
-  auto delta = (freq.to!Hz.raw * asnum!(dt, F.raw_t)).as!rev.to!U;
-  return Param!(typeof(delta.raw), U)(delta);
+auto mk(alias P, U, alias dt, T)(const T timing) if (__traits(isSame, Param, P) &&
+                                                    isUnits!(U, Angle) &&
+                                                    !is(dt) && isSampling!dt &&
+                                                     isSampling!T) {
+  enum dts_raw = dt.to!sec.raw;
+  enum dts = asnum!(dts_raw, rawTypeOf!T).as!sec;
+  auto delta = timing_to_angle!(U, dts)(timing);
+  return Param!(typeof(delta), dts)(delta);
 }
 
 /// Test oscillator parameters (floating-point)
 nothrow @nogc unittest {
-  enum dt = 0.001;
+  enum dt = 1.0.as!msec;
   auto param = mk!(Param, rev, dt)(50.0.as!Hz);
 
   assert_eq(param.delta, 50e-3.as!rev);
+
+  param = 100.0.as!Hz;
+  assert_eq(param.delta, 100e-3.as!rev);
 }
 
 /// Test oscillator parameters (fixed-point)
 nothrow @nogc unittest {
-  enum dt = 0.001;
+  enum dt = 1.0.as!msec;
   auto param = mk!(Param, rev, dt)(asfix!50.0.as!Hz);
 
   assert_eq(param.delta, asfix!50e-3.as!rev);
+
+  param = asfix!100.0.as!Hz;
+  assert_eq(param.delta, asfix!100e-3.as!rev);
 }
 
 /// Test oscillator parameters (fixed-point)
 nothrow @nogc unittest {
-  enum dt = 0.001;
+  enum dt = 1.0.as!msec;
   alias F = fix!(0.0, 500.0);
   alias P = fix!(1e-3, 0.5);
   auto param = mk!(Param, rev, dt)(F(50.0).as!Hz);
 
   assert_eq(param.delta, P(50e-3).as!rev);
+
+  param = F(25.0).as!Hz;
+  assert_eq(param.delta, P(25e-3).as!rev);
 }
 
 /// Test oscillator parameters (fixed-point)
 nothrow @nogc unittest {
-  enum dt = 0.001;
+  enum dt = 1.0.as!msec;
   alias F = fix!(0.0, 500.0);
   alias P = fix!(1e-3, 0.5);
   auto param = mk!(Param, qrev, dt)(F(50.0).as!Hz);
 
   assert_eq(param.delta, P(200e-3).as!qrev);
-}
 
-/**
-   Init oscillator parameters using period
-*/
-auto mk(alias P, U, real dt, T)(const T period) if (__traits(isSame, Param, P) &&
-                                                    isUnits!(U, Angle) &&
-                                                    hasUnits!(T, Time)) {
-  auto delta = (asnum!(dt, T.raw_t) / period.to!sec.raw).as!rev.to!U;
-  return Param!(typeof(delta.raw), U)(delta);
+  param = F(100.0).as!Hz;
+  assert_eq(param.delta, P(400e-3).as!qrev);
 }
 
 /// Test oscillator parameters (floating-point)
 nothrow @nogc unittest {
-  enum dt = 0.001;
+  enum dt = 1.0.as!msec;
   auto param = mk!(Param, rev, dt)(20e-3.as!sec);
 
   assert_eq(param.delta, 50e-3.as!rev);
+
+  param = 10e-3.as!sec;
+  assert_eq(param.delta, 100e-3.as!rev);
 }
 
 /// Test oscillator parameters (fixed-point)
 nothrow @nogc unittest {
-  enum dt = 0.001;
-  auto param = mk!(Param, rev, dt)(asfix!20e-3.as!sec);
+  enum dt = 1.0.as!msec;
+  auto param = mk!(Param, rev, dt)(asfix!20.0.as!msec);
 
   assert_eq(param.delta, asfix!49.99999997e-3.as!rev);
+
+  param = asfix!40.0.as!msec;
+  assert_eq(param.delta, asfix!24.99999999e-3.as!rev);
 }
 
 /// Test oscillator parameters (fixed-point)
 nothrow @nogc unittest {
-  enum dt = 0.001;
+  enum dt = 1.0.as!msec;
   alias T = fix!(1e-6, 1.0);
   alias P = fix!(1e-3, 1e3);
   auto param = mk!(Param, rev, dt)(T(20e-3).as!sec);
 
   assert_eq(param.delta, P(49.9997139e-3).as!rev);
+
+  param = T(10e-3).as!sec;
+  assert_eq(param.delta, P(99.99990463e-3).as!rev);
 }
 
 /**
@@ -162,7 +203,7 @@ private auto _unwind(A)(const A phase) if (hasUnits!(A, Angle)) {
 
 /// Test oscillator (floating-point)
 nothrow @nogc unittest {
-  enum dt = 0.001;
+  enum dt = 1.0.as!msec;
 
   auto param = mk!(Param, rev, dt)(50.0.as!Hz);
   auto state = State!(param, double)();
@@ -182,7 +223,7 @@ nothrow @nogc unittest {
 /// Test oscillator (fixed-point)
 nothrow @nogc unittest {
   alias A = fix!(-10, 10);
-  enum dt = 0.001;
+  enum dt = 1.0.as!msec;
 
   auto param = mk!(Param, rev, dt)(asfix!50.0.as!Hz);
   auto state = State!(param, A)();

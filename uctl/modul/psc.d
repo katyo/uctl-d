@@ -252,7 +252,7 @@ nothrow @nogc unittest {
   import uctl.modul: svm;
   import uctl.math: sin;
 
-  enum auto dt = 1e-4;
+  enum auto dt = 100.0.as!usec;
   alias sine = sin!5;
 
   immutable auto osc_param = mk!(Osc.Param, rev, dt)(30.0.as!Hz);
