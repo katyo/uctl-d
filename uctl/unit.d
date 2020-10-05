@@ -329,6 +329,16 @@ nothrow @nogc @safe unittest {
   assert(is(rawTypeOf!(X(1).as!mm) == X));
 }
 
+/// Get raw value
+pure nothrow @nogc @safe
+auto rawOf(T)(const T val) if (isNumer!T || hasUnits!T) {
+  static if (hasUnits!T) {
+    return val.raw;
+  } else {
+    return val;
+  }
+}
+
 /// Create value literal of same class
 template asval(T, real raw) if (hasUnits!T) {
   enum auto asval = asval!(raw, T);
