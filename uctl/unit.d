@@ -661,16 +661,18 @@ template isUnitsClass(X...) if (X.length == 1) {
 }
 
 /// Checks that units is time or frequency
-template isSamplingUnits(X...) if (X.length == 1) {
-  enum bool isSamplingUnits = isUnits!(X[0], Time) || isUnits!(X[0], Frequency);
+template isTimingUnits(X...) if (X.length == 1) {
+  enum bool isTimingUnits = isUnits!(X[0], Time) || isUnits!(X[0], Frequency);
+}
 }
 
 /// Checks that value is time or frequency
-template isSampling(X...) if (X.length == 1) {
-  enum bool isSampling = hasUnits!(X[0], Time) || hasUnits!(X[0], Frequency);
+template isTiming(X...) if (X.length == 1) {
+  enum bool isTiming = hasUnits!(X[0], Time) || hasUnits!(X[0], Frequency);
+}
 }
 
-/// Convert sampling units
+/// Convert timing units
 pure nothrow @nogc @safe
 auto to(U, T)(const T val) if ((isUnits!(U, Time) && hasUnits!(T, Frequency)) ||
                                (isUnits!(U, Frequency) && hasUnits!(T, Time))) {

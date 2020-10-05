@@ -7,7 +7,7 @@ module uctl.util.osc;
 
 import std.traits: isInstanceOf, Unqual;
 import uctl.num: isNumer, asnum, typeOf;
-import uctl.unit: Val, hasUnits, isUnits, isSampling, Frequency, Time, Angle, Hz, sec, to, as, rev, qrev, rawTypeOf;
+import uctl.unit: Val, hasUnits, isUnits, isTiming, rawTypeOf, Frequency, Time, Angle, Hz, sec, to, as, rev, qrev;
 import uctl.math: pi;
 
 version(unittest) {
@@ -22,7 +22,7 @@ version(unittest) {
    Oscillator parameters
 */
 struct Param(A_, alias dt_) if (hasUnits!(A_, Angle) &&
-                                !is(s_) && isSampling!dt_ && hasUnits!(dt_, sec) &&
+                                !is(s_) && isTiming!dt_ && hasUnits!(dt_, sec) &&
                                 isNumer!(rawTypeOf!dt_, rawTypeOf!A_)) {
   /// Sampling time in seconds
   enum dt = dt_;
@@ -41,7 +41,7 @@ struct Param(A_, alias dt_) if (hasUnits!(A_, Angle) &&
 
   /// Set new oscillation frequency or period
   pure nothrow @nogc @safe
-  void opAssign(T)(const T timing) if (isSampling!T &&
+  void opAssign(T)(const T timing) if (isTiming!T &&
                                        isNumer!(rawTypeOf!A, rawTypeOf!T)) {
     delta = cast(A) timing_to_angle!(A.units, dt)(timing);
   }
@@ -50,7 +50,7 @@ struct Param(A_, alias dt_) if (hasUnits!(A_, Angle) &&
 private auto timing_to_angle(U, alias dt, T)(const T timing) if (isUnits!(U, Angle) &&
                                                                  !is(dt) &&
                                                                  hasUnits!(dt, sec) &&
-                                                                 isSampling!T &&
+                                                                 isTiming!T &&
                                                                  isNumer!(rawTypeOf!dt, rawTypeOf!T)) {
 
   static if (hasUnits!(T, Frequency)) {
@@ -67,8 +67,8 @@ private auto timing_to_angle(U, alias dt, T)(const T timing) if (isUnits!(U, Ang
 pure nothrow @nogc @safe
 auto mk(alias P, U, alias dt, T)(const T timing) if (__traits(isSame, Param, P) &&
                                                     isUnits!(U, Angle) &&
-                                                    !is(dt) && isSampling!dt &&
-                                                     isSampling!T) {
+                                                    !is(dt) && isTiming!dt &&
+                                                     isTiming!T) {
   enum dts_raw = dt.to!sec.raw;
   enum dts = asnum!(dts_raw, rawTypeOf!T).as!sec;
   auto delta = timing_to_angle!(U, dts)(timing);
