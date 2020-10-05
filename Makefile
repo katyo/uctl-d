@@ -88,7 +88,7 @@ BUILD_DIR = obj/$(TARGET)
 DC = ldc2 -od=$(BUILD_DIR) -of=$(2) $(3) $(1)
 
 ifeq ($(RUNNER),qemu)
-	  RUN = qemu-$(call gcc_arch,$(TARGET)) -L /usr/$(call gcc_tool,$(TARGET)) $(1)
+    RUN = qemu-$(call gcc_arch,$(TARGET)) -L /usr/$(call gcc_tool,$(TARGET)) $(1)
 else
     RUN = $(1)
 endif

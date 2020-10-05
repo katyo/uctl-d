@@ -24,12 +24,11 @@ module uctl.filt.ema;
 
 import std.traits: isInstanceOf;
 import uctl.num: fix, asnum, isNumer, isFixed, typeOf;
-import uctl.unit: to, hasUnits, Time, isTiming, asTiming, rawTypeOf, sec;
+import uctl.unit: Val, as, to, hasUnits, Time, isTiming, asTiming, rawTypeOf, rawOf, sec;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
   import uctl.num: asfix;
-  import uctl.unit: as;
 
   mixin unittests;
 }
@@ -317,7 +316,7 @@ nothrow @nogc unittest {
  *   P = parameters type
  *   T = input value type
  */
-struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.A, T_)) {
+struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && (isNumer!(P_.A, T_) || (hasUnits!T_ && isNumer!(P_.A, rawTypeOf!T_)))) {
   /// Parameters type
   alias P = typeOf!P_;
 
@@ -328,7 +327,7 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.A, T
   alias Self = typeof(this);
 
   /// Output value type
-  alias R = typeof(P().alpha * T() + P().cmpl_alpha * T());
+  alias R = typeof((P().alpha * rawTypeOf!T() + P().cmpl_alpha * rawTypeOf!T()).as!T);
 
   /// The last output value
   R last_out = 0.0;
@@ -340,19 +339,19 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.A, T
   }
 
   /**
-   * Apply filter or evaluate filtering step
-   *
-   * Params:
-   *   param = filter parameters
-   *   value = input value
-   *
-   * Returns: filtered value
+     Apply filter or evaluate filtering step
+
+     Params:
+     param = filter parameters
+     value = input value
+
+     Returns: filtered value
    */
   pure nothrow @nogc @safe
   R opCall(const ref P param, const T value) {
     // X = alpha * X + (1 - alpha) * X0
-    auto res = (param.alpha * value +
-                param.cmpl_alpha * last_out);
+    auto res = (param.alpha * value.rawOf +
+                param.cmpl_alpha * last_out.rawOf).as!R;
     last_out = res;
     return res;
   }
@@ -414,4 +413,19 @@ nothrow @nogc unittest {
   assert_eq(state(param, cast(X) 0.8), cast(X) 0.09934562445);
   assert_eq(state(param, cast(X) -0.5), cast(X) 0.07010925002);
   assert_eq(state(param, cast(X) -0.3), cast(X) 0.05205513909);
+}
+
+/// Params from time (with units)
+nothrow @nogc unittest {
+  import uctl.unit: degC;
+
+  enum auto dt = 0.1.as!sec;
+
+  static immutable auto param = mk!(Window, dt)(4.0.as!sec);
+  static auto state = State!(param, Val!(double, degC))();
+
+  assert_eq(state(param, 1.3.as!degC), 0.06341463327.as!degC, 1e-8);
+  assert_eq(state(param, 0.8.as!degC), 0.09934562445.as!degC, 1e-8);
+  assert_eq(state(param, -0.5.as!degC), 0.07010925002.as!degC, 1e-8);
+  assert_eq(state(param, -0.3.as!degC), 0.05205513909.as!degC, 1e-8);
 }
