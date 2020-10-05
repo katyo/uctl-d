@@ -7,7 +7,7 @@ module uctl.util.osc;
 
 import std.traits: isInstanceOf, Unqual;
 import uctl.num: isNumer, asnum, typeOf;
-import uctl.unit: Val, hasUnits, isUnits, isTiming, rawTypeOf, Frequency, Time, Angle, Hz, sec, to, as, rev, qrev;
+import uctl.unit: Val, hasUnits, isUnits, isTiming, asTiming, rawTypeOf, Frequency, Time, Angle, Hz, sec, to, as, rev, qrev;
 import uctl.math: pi;
 
 version(unittest) {
@@ -21,14 +21,10 @@ version(unittest) {
 /**
    Oscillator parameters
 */
-struct Param(A_, alias dt_) if (hasUnits!(A_, Angle) &&
-                                !is(s_) && isTiming!dt_ && hasUnits!(dt_, sec) &&
-                                isNumer!(rawTypeOf!dt_, rawTypeOf!A_)) {
-  /// Sampling time in seconds
-  enum dt = dt_;
-
-  /// Sampling frequency in Hz
-  enum f = dt_.to!Hz;
+struct Param(A_, alias s_) if (hasUnits!(A_, Angle) &&
+                               !is(s_) && isTiming!s_) {
+  /// Sampling
+  enum s = s_;
 
   /// Phase type
   alias A = Unqual!A_;
@@ -46,16 +42,14 @@ struct Param(A_, alias dt_) if (hasUnits!(A_, Angle) &&
   pure nothrow @nogc @safe
   void opAssign(T)(const T timing) if (isTiming!T &&
                                        isNumer!(rawTypeOf!A, rawTypeOf!T)) {
-    delta = cast(A) timing_to_angle!(A.units, dt)(timing);
+    delta = cast(A) timing_to_angle!(A.units, s)(timing);
   }
 }
 
-private auto timing_to_angle(U, alias dt, T)(const T timing) if (isUnits!(U, Angle) &&
-                                                                 !is(dt) &&
-                                                                 hasUnits!(dt, sec) &&
-                                                                 isTiming!T &&
-                                                                 isNumer!(rawTypeOf!dt, rawTypeOf!T)) {
-
+private auto timing_to_angle(U, alias s, T)(const T timing) if (isUnits!(U, Angle) &&
+                                                                !is(s) && isTiming!(s) &&
+                                                                isTiming!T) {
+  enum dt = asTiming!(s, sec, T);
   static if (hasUnits!(T, Frequency)) {
     auto delta = dt.raw * timing.to!Hz.raw;
   } else {
@@ -68,14 +62,12 @@ private auto timing_to_angle(U, alias dt, T)(const T timing) if (isUnits!(U, Ang
    Initialize oscillator parameters using oscillation frequency or period
  */
 pure nothrow @nogc @safe
-auto mk(alias P, U, alias dt, T)(const T timing) if (__traits(isSame, Param, P) &&
+auto mk(alias P, U, alias s, T)(const T timing) if (__traits(isSame, Param, P) &&
                                                     isUnits!(U, Angle) &&
-                                                    !is(dt) && isTiming!dt &&
-                                                     isTiming!T) {
-  enum dts_raw = dt.to!sec.raw;
-  enum dts = asnum!(dts_raw, rawTypeOf!T).as!sec;
-  auto delta = timing_to_angle!(U, dts)(timing);
-  return Param!(typeof(delta), dts)(delta);
+                                                    !is(s) && isTiming!s &&
+                                                    isTiming!T) {
+  auto delta = timing_to_angle!(U, s)(timing);
+  return Param!(typeof(delta), s)(delta);
 }
 
 /// Test oscillator parameters (floating-point)
@@ -189,7 +181,8 @@ struct State(alias P_, A_) if (isInstanceOf!(Param, typeOf!P_) && isNumer!(P_.A.
   /// Set phase from time
   pure nothrow @nogc @safe
   void opAssign(T)(const T time) if (hasUnits!(T, Time) && isNumer!(rawTypeOf!A, rawTypeOf!T)) {
-    phase = cast(A) (time.to!sec.raw * P.f).as!rev.to!(A.units)._unwind();
+    enum f = asTiming!(P.s, Hz, T);
+    phase = cast(A) (time.to!sec.raw * f.raw).as!rev.to!(A.units)._unwind();
   }
 
   /// Apply oscillator step

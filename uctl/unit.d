@@ -706,3 +706,30 @@ nothrow @nogc unittest {
   assert_eq(250.0f.as!MHz.to!nsec, 4.0f.as!nsec);
   assert_eq(4.0f.as!nsec.to!MHz, 250.0f.as!MHz);
 }
+
+/// Generate timing constants
+template asTiming(alias s, U, T) if (!is(s) && isTiming!s && isTimingUnits!U && (isNumer!T || hasUnits!T)) {
+  enum raw = s.to!U.raw;
+
+  enum asTiming = asnum!(raw, rawTypeOf!T).as!U;
+}
+
+/// Test `asTiming`
+nothrow @nogc unittest {
+  enum s = 1.0.as!msec;
+  alias dt = asTiming!(s, sec, float);
+  alias f = asTiming!(s, Hz, float);
+
+  assert(dt == 1.0f.as!msec);
+  assert(f == 1.0f.as!KHz);
+}
+
+/// Test `asTiming`
+nothrow @nogc unittest {
+  enum s = 1.0.as!KHz;
+  alias dt = asTiming!(s, sec, float);
+  alias f = asTiming!(s, Hz, float);
+
+  assert(dt == 1.0f.as!msec);
+  assert(f == 1.0f.as!KHz);
+}
