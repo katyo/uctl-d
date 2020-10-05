@@ -664,12 +664,24 @@ template isUnitsClass(X...) if (X.length == 1) {
 template isTimingUnits(X...) if (X.length == 1) {
   enum bool isTimingUnits = isUnits!(X[0], Time) || isUnits!(X[0], Frequency);
 }
+
+/// Test `isTimingUnits`
+nothrow @nogc unittest {
+  assert(isTimingUnits!usec);
+  assert(isTimingUnits!MHz);
+  assert(!isTimingUnits!deg);
 }
 
 /// Checks that value is time or frequency
 template isTiming(X...) if (X.length == 1) {
   enum bool isTiming = hasUnits!(X[0], Time) || hasUnits!(X[0], Frequency);
 }
+
+/// Test `isTiming`
+nothrow @nogc unittest {
+  assert(isTiming!(1.0.as!usec));
+  assert(isTiming!(0.5.as!MHz));
+  assert(!isTiming!(45.0.as!deg));
 }
 
 /// Convert timing units
