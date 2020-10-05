@@ -32,7 +32,7 @@
 <span class="br">4 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">modul</span>: <span class="hid">svm</span>;
 <span class="br">5 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">math</span>: <span class="hid">sin</span>;
 <span class="br">6 </span>
-<span class="br">7 </span><span class="kwrd">enum</span> <span class="kwrd">auto</span> <span class="hid">dt</span> = <span class="num">1e-4</span>;
+<span class="br">7 </span><span class="kwrd">enum</span> <span class="kwrd">auto</span> <span class="hid">dt</span> = <span class="num">100.0</span>.<span class="hid">as</span>!<span class="hid">usec</span>;
 <span class="br">8 </span><span class="kwrd">alias</span> <span class="hid">sine</span> = <span class="hid">sin</span>!<span class="num">5</span>;
 <span class="br">9 </span>
 <span class="br">10 </span><span class="kwrd">immutable</span> <span class="kwrd">auto</span> <span class="hid">osc_param</span> = <span class="hid">mk</span>!(<span class="hid">Osc</span>.<span class="hid">Param</span>, <span class="hid">rev</span>, <span class="hid">dt</span>)(<span class="num">30.0</span>.<span class="hid">as</span>!<span class="hid">Hz</span>);

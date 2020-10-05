@@ -1,1 +1,83 @@
-<html class="overload-redirect"><script>location.href = 'uctl.util.osc.mk.2.html';</script> <a href="uctl.util.osc.mk.2.html">Continue to overload</a></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>mk (uctl.util.osc.mk)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>mk</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.util.html">util</a> <a class="breadcrumb" href="uctl.util.osc.html">osc</a> </div><div><div class="documentation-comment synopsis"><div><p>Initialize oscillator parameters using oscillation frequency or period</p></div></div></div><div class="annotated-prototype"><div class="function-prototype"><div class="attributes">pure nothrow @<span class="name" data-ident="nogc">nogc</span> @<span class="name" data-ident="safe">safe</span> </div><div class="return-type"><a class="lang-feature" href="http://dpldocs.info/auto-function-return-prototype">auto</a> </div><div class="function-name">mk</div><div class="template-parameters" data-count="4">(<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="P">P</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="U">U</span></span></div><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="s">s</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="T">T</span></span></div></div>)</div><div class="runtime-parameters" data-count="1"><div class="parameters-list toplevel"><span class="paren">(</span><div class="runtime-parameter-item parameter-item"><span class="parameter-type-holder"><span class="parameter-type"><span class="storage-class">const</span> <span class="name" data-ident="T">T</span></span></span> <span class="parameter-name name" data-ident="timing"><a href="#param-timing">timing</a></span></div><span class="paren">)</span></div></div><div class="template-constraint"> <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><div class="andand-left"><div class="andand-left"><div class="andand-left">__traits(<span class="name" data-ident="isSame">isSame</span>, <a class="name" data-ident="Param" href="uctl.util.osc.Param.html" title="uctl.util.osc.Param">Param</a>, <span class="name" data-ident="P">P</span>) &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isUnits" href="uctl.unit.isUnits.html" title="uctl.unit.isUnits">isUnits</a>!(<span class="name" data-ident="U">U</span>, <a class="name" data-ident="Angle" href="uctl.unit.Angle.html" title="uctl.unit.Angle">Angle</a>)</div> &amp;&amp; </div><div class="andand-right">!<a class="lang-feature" href="http://dpldocs.info/is-expression">is</a>(<span class="name" data-ident="s">s</span>)</div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isTiming" href="uctl.unit.isTiming.html" title="uctl.unit.isTiming">isTiming</a>!<span class="name" data-ident="s">s</span></div> &amp;&amp; </div><div class="andand-right"><a class="name" data-ident="isTiming" href="uctl.unit.isTiming.html" title="uctl.unit.isTiming">isTiming</a>!<span class="name" data-ident="T">T</span></div></div>)</div><div class="function-contracts"></div></div></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test oscillator parameters (floating-point)</p></div><pre class="d_code highlighted"><span class="kwrd">enum</span> <span class="hid">dt</span> = <span class="num">1.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>;
+<span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">rev</span>, <span class="hid">dt</span>)(<span class="num">50.0</span>.<span class="hid">as</span>!<span class="hid">Hz</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="num">50e-3</span>.<span class="hid">as</span>!<span class="hid">rev</span>);
+
+<span class="hid">param</span> = <span class="num">100.0</span>.<span class="hid">as</span>!<span class="hid">Hz</span>;
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="num">100e-3</span>.<span class="hid">as</span>!<span class="hid">rev</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test oscillator parameters (fixed-point)</p></div><pre class="d_code highlighted"><span class="kwrd">enum</span> <span class="hid">dt</span> = <span class="num">1.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>;
+<span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">rev</span>, <span class="hid">dt</span>)(<span class="hid">asfix</span>!<span class="num">50.0</span>.<span class="hid">as</span>!<span class="hid">Hz</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">asfix</span>!<span class="num">50e-3</span>.<span class="hid">as</span>!<span class="hid">rev</span>);
+
+<span class="hid">param</span> = <span class="hid">asfix</span>!<span class="num">100.0</span>.<span class="hid">as</span>!<span class="hid">Hz</span>;
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">asfix</span>!<span class="num">100e-3</span>.<span class="hid">as</span>!<span class="hid">rev</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test oscillator parameters (fixed-point)</p></div><pre class="d_code highlighted"><span class="kwrd">enum</span> <span class="hid">dt</span> = <span class="num">1.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>;
+<span class="kwrd">alias</span> <span class="hid">F</span> = <span class="hid">fix</span>!(<span class="num">0.0</span>, <span class="num">500.0</span>);
+<span class="kwrd">alias</span> <span class="hid">P</span> = <span class="hid">fix</span>!(<span class="num">1e-3</span>, <span class="num">0.5</span>);
+<span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">rev</span>, <span class="hid">dt</span>)(<span class="hid">F</span>(<span class="num">50.0</span>).<span class="hid">as</span>!<span class="hid">Hz</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">P</span>(<span class="num">50e-3</span>).<span class="hid">as</span>!<span class="hid">rev</span>);
+
+<span class="hid">param</span> = <span class="hid">F</span>(<span class="num">25.0</span>).<span class="hid">as</span>!<span class="hid">Hz</span>;
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">P</span>(<span class="num">25e-3</span>).<span class="hid">as</span>!<span class="hid">rev</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test oscillator parameters (fixed-point)</p></div><pre class="d_code highlighted"><span class="kwrd">enum</span> <span class="hid">dt</span> = <span class="num">1.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>;
+<span class="kwrd">alias</span> <span class="hid">F</span> = <span class="hid">fix</span>!(<span class="num">0.0</span>, <span class="num">500.0</span>);
+<span class="kwrd">alias</span> <span class="hid">P</span> = <span class="hid">fix</span>!(<span class="num">1e-3</span>, <span class="num">0.5</span>);
+<span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">qrev</span>, <span class="hid">dt</span>)(<span class="hid">F</span>(<span class="num">50.0</span>).<span class="hid">as</span>!<span class="hid">Hz</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">P</span>(<span class="num">200e-3</span>).<span class="hid">as</span>!<span class="hid">qrev</span>);
+
+<span class="hid">param</span> = <span class="hid">F</span>(<span class="num">100.0</span>).<span class="hid">as</span>!<span class="hid">Hz</span>;
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">P</span>(<span class="num">400e-3</span>).<span class="hid">as</span>!<span class="hid">qrev</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test oscillator parameters (floating-point)</p></div><pre class="d_code highlighted"><span class="kwrd">enum</span> <span class="hid">dt</span> = <span class="num">1.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>;
+<span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">rev</span>, <span class="hid">dt</span>)(<span class="num">20e-3</span>.<span class="hid">as</span>!<span class="hid">sec</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="num">50e-3</span>.<span class="hid">as</span>!<span class="hid">rev</span>);
+
+<span class="hid">param</span> = <span class="num">10e-3</span>.<span class="hid">as</span>!<span class="hid">sec</span>;
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="num">100e-3</span>.<span class="hid">as</span>!<span class="hid">rev</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test oscillator parameters (fixed-point)</p></div><pre class="d_code highlighted"><span class="kwrd">enum</span> <span class="hid">dt</span> = <span class="num">1.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>;
+<span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">rev</span>, <span class="hid">dt</span>)(<span class="hid">asfix</span>!<span class="num">20.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">asfix</span>!<span class="num">49.99999997e-3</span>.<span class="hid">as</span>!<span class="hid">rev</span>);
+
+<span class="hid">param</span> = <span class="hid">asfix</span>!<span class="num">40.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>;
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">asfix</span>!<span class="num">24.99999999e-3</span>.<span class="hid">as</span>!<span class="hid">rev</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test oscillator parameters (fixed-point)</p></div><pre class="d_code highlighted"><span class="kwrd">enum</span> <span class="hid">dt</span> = <span class="num">1.0</span>.<span class="hid">as</span>!<span class="hid">msec</span>;
+<span class="kwrd">alias</span> <span class="hid">T</span> = <span class="hid">fix</span>!(<span class="num">1e-6</span>, <span class="num">1.0</span>);
+<span class="kwrd">alias</span> <span class="hid">P</span> = <span class="hid">fix</span>!(<span class="num">1e-3</span>, <span class="num">1e3</span>);
+<span class="kwrd">auto</span> <span class="hid">param</span> = <span class="hid">mk</span>!(<span class="hid">Param</span>, <span class="hid">rev</span>, <span class="hid">dt</span>)(<span class="hid">T</span>(<span class="num">20e-3</span>).<span class="hid">as</span>!<span class="hid">sec</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">P</span>(<span class="num">49.9997139e-3</span>).<span class="hid">as</span>!<span class="hid">rev</span>);
+
+<span class="hid">param</span> = <span class="hid">T</span>(<span class="num">10e-3</span>).<span class="hid">as</span>!<span class="hid">sec</span>;
+<span class="hid">assert_eq</span>(<span class="hid">param</span>.<span class="hid">delta</span>, <span class="hid">P</span>(<span class="num">99.99990463e-3</span>).<span class="hid">as</span>!<span class="hid">rev</span>);</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.util.html">util</a> <a class="parent" href="uctl.util.osc.html">osc</a> 
+		<span class="type-separator">functions</span><ul><li><a class="function current" href="uctl.util.osc.mk.html">mk</a></li></ul><span class="type-separator">structs</span><ul><li><a class="struct" href="uctl.util.osc.Param.html">Param</a></li><li><a class="struct" href="uctl.util.osc.State.html">State</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>
