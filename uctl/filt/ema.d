@@ -24,10 +24,12 @@ module uctl.filt.ema;
 
 import std.traits: isInstanceOf;
 import uctl.num: fix, asnum, isNumer, isFixed, typeOf;
+import uctl.unit: to, hasUnits, Time, isTiming, asTiming, sec;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
   import uctl.num: asfix;
+  import uctl.unit: as;
 
   mixin unittests;
 }
@@ -179,7 +181,7 @@ nothrow @nogc unittest {
 }
 
 /// Filter parameters using time window to smooth
-alias Time = Flavor!("Time window");
+alias Window = Flavor!("Time window");
 
 /**
  * Init EMA parameters using time window
@@ -199,17 +201,18 @@ alias Time = Flavor!("Time window");
  * See_Also: [mk].
  */
 pure nothrow @nogc @safe
-auto mk(F, real dt, T)(const T time) if (isFlavor!(F, Time) && isNumer!T) {
+auto mk(F, alias s, T)(const T time) if (isFlavor!(F, Window) && isTiming!s && hasUnits!(T, Time)) {
+  enum dt = asTiming!(s, sec, T).raw;
   /// α = 2 * dt / (t + dt)
-  auto alpha = asnum!(dt + dt, T) / (time + asnum!(dt, T));
+  auto alpha = (dt + dt) / (time.to!sec.raw + dt);
 
   return mk!Alpha(alpha);
 }
 
 /// Test params from time window
 nothrow @nogc unittest {
-  enum auto dt = 0.1;
-  static immutable auto param = mk!(Time, dt)(4.0);
+  enum auto dt = 0.1.as!sec;
+  static immutable auto param = mk!(Window, dt)(4.0.as!sec);
 
   assert_eq(param.alpha, 0.0487805, 1e-6);
   assert_eq(param.cmpl_alpha, 0.951219, 1e-6);
@@ -217,8 +220,8 @@ nothrow @nogc unittest {
 
 /// Test params from time window (fixed)
 nothrow @nogc unittest {
-  enum auto dt = 0.1;
-  static immutable auto param = mk!(Time, dt)(asfix!4.0);
+  enum auto dt = 0.1.as!sec;
+  static immutable auto param = mk!(Window, dt)(asfix!4.0.as!sec);
 
   assert_eq(param.alpha, asfix!0.0487804878);
   assert_eq(param.cmpl_alpha, asfix!0.9512195126);
@@ -239,16 +242,17 @@ alias PT1 = Flavor!("PT1 model");
  * See_Also: [mk].
  */
 pure nothrow @nogc @safe
-auto mk(F, real dt, T)(const T time) if (isFlavor!(F, PT1) && isNumer!T) {
-  auto alpha = asnum!(dt, T) / (time + asnum!(dt, T));
+auto mk(F, alias s, T)(const T time) if (isFlavor!(F, PT1) && isTiming!s && hasUnits!(T, Time)) {
+  enum dt = asTiming!(s, sec, T).raw;
+  auto alpha = dt / (time.to!sec.raw + dt);
 
   return mk!Alpha(alpha);
 }
 
 /// Test params as PT1
 nothrow @nogc unittest {
-  enum auto dt = 0.1;
-  static immutable auto param = mk!(PT1, dt)(4.0);
+  enum auto dt = 0.1.as!sec;
+  static immutable auto param = mk!(PT1, dt)(4.0.as!sec);
 
   assert_eq(param.alpha, 0.0243902, 1e-6);
   assert_eq(param.cmpl_alpha, 0.97561, 1e-6);
@@ -324,9 +328,9 @@ nothrow @nogc unittest {
 
 /// Params from time
 nothrow @nogc unittest {
-  enum auto dt = 0.1;
+  enum auto dt = 0.1.as!sec;
 
-  static immutable auto param = mk!(Time, dt)(4.0);
+  static immutable auto param = mk!(Window, dt)(4.0.as!sec);
   static auto state = State!(param, double)();
 
   assert_eq(state(param, 1.3), 0.06341463327, 1e-8);
@@ -348,10 +352,10 @@ nothrow @nogc unittest {
 
 /// Params from time (fixed)
 nothrow @nogc unittest {
-  enum auto dt = 0.1;
+  enum auto dt = 0.1.as!sec;
   alias X = fix!(-1, 2);
 
-  static immutable auto param = mk!(Time, dt)(asfix!4.0);
+  static immutable auto param = mk!(Window, dt)(asfix!4.0.as!sec);
   static auto state = State!(param, X)();
 
   assert_eq(state(param, cast(X) 1.3), cast(X) 0.06341463327);

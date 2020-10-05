@@ -1,5 +1,8 @@
 import std.array: staticArray;
+import uctl.unit: as, sec, msec;
 import uctl.filt;
+
+enum s = dt.as!sec;
 
 private nothrow @nogc void entry() {
   immutable auto p1 = mk!(EMA.Alpha)(0.9);
@@ -20,22 +23,22 @@ private nothrow @nogc void entry() {
   immutable auto p6 = mk!(EMA.Samples)(7.0);
   auto s6 = EMA.State!(p6, float)();
 
-  immutable auto p7 = mk!(EMA.Time, dt)(0.02);
+  immutable auto p7 = mk!(EMA.Window, s)(20.0.as!msec);
   auto s7 = EMA.State!(p7, float)();
 
-  immutable auto p8 = mk!(EMA.Time, dt)(0.05);
+  immutable auto p8 = mk!(EMA.Window, s)(50.0.as!msec);
   auto s8 = EMA.State!(p8, float)();
 
-  immutable auto p9 = mk!(EMA.Time, dt)(0.1);
+  immutable auto p9 = mk!(EMA.Window, s)(100.0.as!msec);
   auto s9 = EMA.State!(p9, float)();
 
-  immutable auto p10 = mk!(EMA.PT1, dt)(0.01);
+  immutable auto p10 = mk!(EMA.PT1, s)(10.0.as!msec);
   auto s10 = EMA.State!(p10, float)();
 
-  immutable auto p11 = mk!(EMA.PT1, dt)(0.03);
+  immutable auto p11 = mk!(EMA.PT1, s)(30.0.as!msec);
   auto s11 = EMA.State!(p11, float)();
 
-  immutable auto p12 = mk!(EMA.PT1, dt)(0.06);
+  immutable auto p12 = mk!(EMA.PT1, s)(60.0.as!msec);
   auto s12 = EMA.State!(p12, float)();
 
   foreach (i; 0 .. data.length) {
