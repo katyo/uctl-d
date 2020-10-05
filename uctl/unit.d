@@ -366,6 +366,16 @@ Val!(T, U) as(U, T)(T val) if (is(T) && isNumer!T && is(U) && isUnits!U) {
   return typeof(return)(val);
 }
 
+/// Add measurement units from another type to raw value
+pure nothrow @nogc @safe
+auto as(V, T)(T val) if (is(T) && isNumer!T && is(V) && (isNumer!V || hasUnits!V)) {
+  static if (hasUnits!V) {
+    return val.as!(V.units);
+  } else {
+    return val;
+  }
+}
+
 /// Convert values from some units to another
 pure nothrow @nogc @safe
 auto to(U, T)(const T val) if (isUnits!U && hasUnits!(T, U.Class)) {
