@@ -27,6 +27,9 @@ struct Param(A_, alias dt_) if (hasUnits!(A_, Angle) &&
   /// Sampling time in seconds
   enum dt = dt_;
 
+  /// Sampling frequency in Hz
+  enum f = dt_.to!Hz;
+
   /// Phase type
   alias A = Unqual!A_;
 
@@ -179,14 +182,14 @@ struct State(alias P_, A_) if (isInstanceOf!(Param, typeOf!P_) && isNumer!(P_.A.
 
   /// Set phase from angle
   pure nothrow @nogc @safe
-  void set(T)(const T angle) if (hasUnits!(T, Angle)) {
+  void opAssign(T)(const T angle) if (hasUnits!(T, Angle) && isNumer!(rawTypeOf!A, rawTypeOf!T)) {
     phase = cast(A) angle.to!(A.units)._unwind();
   }
 
   /// Set phase from time
   pure nothrow @nogc @safe
-  void set(real dt, T)(const T time) if (hasUnits!(T, Time)) {
-    phase = cast(A) (time.to!sec.raw * asnum!(1.0 / dt, T.raw_t)).as!rev.to!(A.units)._unwind();
+  void opAssign(T)(const T time) if (hasUnits!(T, Time) && isNumer!(rawTypeOf!A, rawTypeOf!T)) {
+    phase = cast(A) (time.to!sec.raw * P.f).as!rev.to!(A.units)._unwind();
   }
 
   /// Apply oscillator step
@@ -210,10 +213,10 @@ nothrow @nogc unittest {
 
   assert_eq(state.phase, 0.0.as!rev);
 
-  state.set(2.0.as!qrev);
+  state = 2.0.as!qrev;
   assert_eq(state.phase, 0.5.as!rev);
 
-  state.set(5.0.as!qrev);
+  state = 5.0.as!qrev;
   assert_eq(state.phase, 0.25.as!rev);
 
   assert_eq(state(param), 0.3.as!rev);
@@ -230,10 +233,10 @@ nothrow @nogc unittest {
 
   assert_eq(state.phase, A(0.0).as!rev);
 
-  state.set(A(2.0).as!qrev);
+  state = A(2.0).as!qrev;
   assert_eq(state.phase, A(0.5).as!rev);
 
-  state.set(A(5.0).as!qrev);
+  state = A(5.0).as!qrev;
   assert_eq(state.phase, A(0.25).as!rev);
 
   assert_eq(state(param), A(0.3).as!rev);
