@@ -24,7 +24,7 @@ module uctl.filt.ema;
 
 import std.traits: isInstanceOf;
 import uctl.num: fix, asnum, isNumer, isFixed, typeOf;
-import uctl.unit: to, hasUnits, Time, isTiming, asTiming, sec;
+import uctl.unit: to, hasUnits, Time, isTiming, asTiming, rawTypeOf, sec;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
@@ -40,18 +40,26 @@ version(unittest) {
  * Params:
  *   A = filter weights type
  */
-struct Param(A_ = float) if (isNumer!A_) {
+struct Param(A_ = float, F_, alias s_ = void) if (isNumer!A_ &&
+                                                  isFlavor!F_ &&
+                                                  (is(s_ == void) ||
+                                                   (!is(s_) && isTiming!s_))) {
+  /// Parameters flavor
+  alias F = F_;
+
+  static if (!is(s_ == void)) {
+    /// Sampling
+    enum s = s_;
+  }
+
   /// Self type
   alias Self = typeof(this);
 
   /// Alpha type
   alias A = A_;
 
-  static if (isFixed!A) {
-    alias Acmpl = typeof(asfix!1.0 - alpha);
-  } else {
-    alias Acmpl = A;
-  }
+  /// Complementary alpha type
+  alias Acmpl = typeof(asnum!(1, A_) - A_());
 
   /// The value of `α` parameter
   A alpha = 1.0;
@@ -74,17 +82,41 @@ struct Param(A_ = float) if (isNumer!A_) {
   }
 
   /**
-   * Adjust parameters gain
+   * Adjust gain
    */
   const pure nothrow @nogc @safe
   auto opBinary(string op, G)(const G gain) if ((op == "*" || op == "/") && isNumer!(A, G)) {
     return Param(alpha * gain, cmpl_alpha * gain);
   }
+
+  /// Change parameters according to flavor
+  pure nothrow @nogc @safe
+  void opAssign(T)(const T arg) if (((isFlavor!(F, Alpha) || isFlavor!(F, Samples)) &&
+                                     isNumer!(T, A)) ||
+                                    ((isFlavor!(F, Window) || isFlavor!(F, PT1)) &&
+                                     hasUnits!(T, Time) && isNumer!(rawTypeOf!T, A))) {
+    static if (isFlavor!(F, Alpha)) {
+      auto alpha_ = arg;
+    } else static if (isFlavor!(F, Samples)) {
+      auto alpha_ = asnum!(2, T) / (arg + asnum!(1, T));
+    } else {
+      enum dt = asTiming!(s, sec, T).raw;
+      auto time = arg.to!sec.raw;
+
+      static if (isFlavor!(F, Window)) {
+        auto alpha_ = (dt + dt) / (time + dt);
+      } else static if (isFlavor!(F, PT1)) {
+        auto alpha_ = dt / (time + dt);
+      }
+    }
+    alpha = cast(A) alpha_;
+    cmpl_alpha = cast(A) (asnum!(1, typeof(alpha_)) - alpha_);
+  }
 }
 
 /// Params with gain
 nothrow @nogc unittest {
-  static immutable auto param = mk!Alpha(0.6) * 1.2;
+  static immutable param = mk!Alpha(0.6) * 1.2;
 
   assert_eq(param.alpha, 0.72, 1e-6);
   assert_eq(param.cmpl_alpha, 0.48, 1e-6);
@@ -125,16 +157,21 @@ alias Alpha = Flavor!("Alpha factor");
  * Filter formula: $(MATH y = α x + (1 - α) y_{z^{-1}})
  */
 pure nothrow @nogc @safe
-Param!A mk(F, A)(const A alpha) if (isFlavor!(F, Alpha) && isNumer!A) {
-  return Param!A(alpha);
+auto mk(F, A)(const A alpha) if (isFlavor!(F, Alpha) && isNumer!A) {
+  return Param!(A, Alpha)(alpha);
 }
 
 /// Test params from alpha
 nothrow @nogc unittest {
-  static immutable auto param = mk!Alpha(0.6);
+  static param = mk!Alpha(0.6);
 
   assert_eq(param.alpha, 0.6, 1e-6);
   assert_eq(param.cmpl_alpha, 0.4, 1e-6);
+
+  param = 0.5;
+
+  assert_eq(param.alpha, 0.5);
+  assert_eq(param.cmpl_alpha, 0.5);
 }
 
 /// Filter parameters using number of samples to smooth
@@ -161,15 +198,20 @@ auto mk(F, N)(const N n) if (isFlavor!(F, Samples) && isNumer!N) {
   // α = 2 / (n + 1)
   auto alpha = asnum!(2, N) / (n + asnum!(1, N));
 
-  return mk!Alpha(alpha);
+  return Param!(typeof(alpha), Samples)(alpha);
 }
 
 /// Params from samples
 nothrow @nogc unittest {
-  static immutable auto param = mk!Samples(2.0);
+  static param = mk!Samples(2.0);
 
   assert_eq(param.alpha, 0.6666667, 1e-6);
   assert_eq(param.cmpl_alpha, 0.3333333, 1e-6);
+
+  param = 3.0;
+
+  assert_eq(param.alpha, 0.5);
+  assert_eq(param.cmpl_alpha, 0.5);
 }
 
 /// Params from samples (fixed)
@@ -206,22 +248,27 @@ auto mk(F, alias s, T)(const T time) if (isFlavor!(F, Window) && isTiming!s && h
   /// α = 2 * dt / (t + dt)
   auto alpha = (dt + dt) / (time.to!sec.raw + dt);
 
-  return mk!Alpha(alpha);
+  return Param!(typeof(alpha), Window, s)(alpha);
 }
 
 /// Test params from time window
 nothrow @nogc unittest {
   enum auto dt = 0.1.as!sec;
-  static immutable auto param = mk!(Window, dt)(4.0.as!sec);
+  static param = mk!(Window, dt)(4.0.as!sec);
 
   assert_eq(param.alpha, 0.0487805, 1e-6);
   assert_eq(param.cmpl_alpha, 0.951219, 1e-6);
+
+  param = 2.0.as!sec;
+
+  assert_eq(param.alpha, 0.095238, 1e-6);
+  assert_eq(param.cmpl_alpha, 0.904762, 1e-6);
 }
 
 /// Test params from time window (fixed)
 nothrow @nogc unittest {
   enum auto dt = 0.1.as!sec;
-  static immutable auto param = mk!(Window, dt)(asfix!4.0.as!sec);
+  static immutable param = mk!(Window, dt)(asfix!4.0.as!sec);
 
   assert_eq(param.alpha, asfix!0.0487804878);
   assert_eq(param.cmpl_alpha, asfix!0.9512195126);
@@ -246,16 +293,21 @@ auto mk(F, alias s, T)(const T time) if (isFlavor!(F, PT1) && isTiming!s && hasU
   enum dt = asTiming!(s, sec, T).raw;
   auto alpha = dt / (time.to!sec.raw + dt);
 
-  return mk!Alpha(alpha);
+  return Param!(typeof(alpha), PT1, s)(alpha);
 }
 
 /// Test params as PT1
 nothrow @nogc unittest {
   enum auto dt = 0.1.as!sec;
-  static immutable auto param = mk!(PT1, dt)(4.0.as!sec);
+  static param = mk!(PT1, dt)(4.0.as!sec);
 
   assert_eq(param.alpha, 0.0243902, 1e-6);
   assert_eq(param.cmpl_alpha, 0.97561, 1e-6);
+
+  param = 2.0.as!sec;
+
+  assert_eq(param.alpha, 0.047619, 1e-6);
+  assert_eq(param.cmpl_alpha, 0.95238, 1e-6);
 }
 
 /**
