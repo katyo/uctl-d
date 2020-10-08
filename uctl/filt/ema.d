@@ -22,7 +22,7 @@
  */
 module uctl.filt.ema;
 
-import std.traits: isInstanceOf;
+import std.traits: isInstanceOf, Unqual;
 import uctl.num: fix, asnum, isNumer, isFixed, typeOf;
 import uctl.unit: Val, as, to, hasUnits, Time, isTiming, asTiming, rawTypeOf, rawOf, sec;
 
@@ -31,6 +31,25 @@ version(unittest) {
   import uctl.num: asfix;
 
   mixin unittests;
+}
+
+/// Filter parameters flavor
+struct Flavor(string name_) {
+  /// Human readable name
+  enum string name = name_;
+}
+
+/// Check for parameters flavor
+template isFlavor(X...) if (X.length == 1 || X.length == 2) {
+  static if (X.length == 1) {
+    static if (is(X[0])) {
+      enum bool isFlavor = isInstanceOf!(Flavor, X[0]);
+    } else {
+      enum bool isFlavor = isFlavor!(typeof(X[0]));
+    }
+  } else {
+    enum bool isFlavor = isFlavor!(X[0]) && is(X[0] == X[1]);
+  }
 }
 
 /**
@@ -55,7 +74,7 @@ struct Param(A_ = float, F_, alias s_ = void) if (isNumer!A_ &&
   alias Self = typeof(this);
 
   /// Alpha type
-  alias A = A_;
+  alias A = Unqual!A_;
 
   /// Complementary alpha type
   alias Acmpl = typeof(asnum!(1, A_) - A_());
@@ -80,14 +99,6 @@ struct Param(A_ = float, F_, alias s_ = void) if (isNumer!A_ &&
     cmpl_alpha = asnum!(1, A) - alpha_;
   }
 
-  /**
-   * Adjust gain
-   */
-  const pure nothrow @nogc @safe
-  auto opBinary(string op, G)(const G gain) if ((op == "*" || op == "/") && isNumer!(A, G)) {
-    return Param(alpha * gain, cmpl_alpha * gain);
-  }
-
   /// Change parameters according to flavor
   pure nothrow @nogc @safe
   void opAssign(T)(const T arg) if (((isFlavor!(F, Alpha) || isFlavor!(F, Samples)) &&
@@ -109,34 +120,7 @@ struct Param(A_ = float, F_, alias s_ = void) if (isNumer!A_ &&
       }
     }
     alpha = cast(A) alpha_;
-    cmpl_alpha = cast(A) (asnum!(1, typeof(alpha_)) - alpha_);
-  }
-}
-
-/// Params with gain
-nothrow @nogc unittest {
-  static immutable param = mk!Alpha(0.6) * 1.2;
-
-  assert_eq(param.alpha, 0.72, 1e-6);
-  assert_eq(param.cmpl_alpha, 0.48, 1e-6);
-}
-
-/// Filter parameters flavor
-struct Flavor(string name_) {
-  /// Human readable name
-  enum string name = name_;
-}
-
-/// Check for parameters flavor
-template isFlavor(X...) if (X.length == 1 || X.length == 2) {
-  static if (X.length == 1) {
-    static if (is(X[0])) {
-      enum bool isFlavor = isInstanceOf!(Flavor, X[0]);
-    } else {
-      enum bool isFlavor = isFlavor!(typeof(X[0]));
-    }
-  } else {
-    enum bool isFlavor = isFlavor!(X[0]) && is(X[0] == X[1]);
+    cmpl_alpha = cast(Acmpl) (asnum!(1, typeof(alpha_)) - alpha_);
   }
 }
 
@@ -320,22 +304,34 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && (isNumer!(P_.A, 
   /// Parameters type
   alias P = typeOf!P_;
 
-  /// Input value type
-  alias T = T_;
+  /// Value type
+  alias T = Unqual!T_;
+
+  /// Raw value type
+  alias Traw = rawTypeOf!T;
 
   /// Self type
   alias Self = typeof(this);
 
-  /// Output value type
-  alias R = typeof((P().alpha * rawTypeOf!T() + P().cmpl_alpha * rawTypeOf!T()).as!T);
-
   /// The last output value
-  R last_out = 0.0;
+  T last_out = 0.0;
 
   /// Initialize using initial value
-  const pure nothrow @nogc @safe
-  this(const R initial) {
+  pure nothrow @nogc @safe
+  this(const T initial) const {
     last_out = initial;
+  }
+
+  /// Set last filtered value
+  pure nothrow @nogc @safe
+  void opAssign(const T value) {
+    last_out = value;
+  }
+
+  /// Get last filtered value
+  pure nothrow @nogc @safe
+  T opCast() const {
+    return last_out;
   }
 
   /**
@@ -348,12 +344,10 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && (isNumer!(P_.A, 
      Returns: filtered value
    */
   pure nothrow @nogc @safe
-  R opCall(const ref P param, const T value) {
+  T opCall(const ref P param, const T value) {
     // X = alpha * X + (1 - alpha) * X0
-    auto res = (param.alpha * value.rawOf +
-                param.cmpl_alpha * last_out.rawOf).as!R;
-    last_out = res;
-    return res;
+    return last_out = Traw(param.alpha * value.rawOf +
+                           param.cmpl_alpha * last_out.rawOf).as!T;
   }
 }
 
