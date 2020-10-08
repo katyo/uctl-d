@@ -40,6 +40,7 @@ In my experience currently $(I D) is a best choice to achieve the goals pursued 
 */
 module uctl;
 
+public import uctl.num;
 public import uctl.math;
 public import uctl.unit;
 public import uctl.util;
