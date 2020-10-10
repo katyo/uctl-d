@@ -97,12 +97,6 @@ if (__traits(isSame, P, Param) && isNumer!(F, H, Q, R)) {
   return Param!(F, H, Q, R)(f, h, q, r);
 }
 
-private template fix_sqrt_t(T) if (isFixed!T) {
-  import std.math: sqrt;
-  static assert(T.isntneg, "Square root is undefined for negative values.");
-  alias fix_sqrt_t = fix!(sqrt(T.rmin), sqrt(T.rmax));
-}
-
 /**
    LQE filter state
 
@@ -110,7 +104,7 @@ private template fix_sqrt_t(T) if (isFixed!T) {
      P = parameters type
      T = input value type
 */
-struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.F, T_)) {
+struct State(alias P_, T_) if (isInstanceOf!(Param, typeOf!P_) && isNumer!(P_.F, T_)) {
   /// Parameters type
   alias P = typeOf!P_;
 
@@ -120,28 +114,17 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && isNumer!(P_.F, T
   /// Input value type
   alias T = T_;
 
-  /// Result type
-  alias R = T;
-
   /// Covariance type
-  static if (isFixed!T) {
-    alias Cq = typeof((P.F2() * P.F2() - asfix!2 * P.F2() + asfix!1) * P.R() * P.R() +
-                      (asfix!2 * P.F2() + asfix!2) * P.H2() * P.Q() * P.R() + P.H2() * P.H2() * P.Q());
-    alias Cp = typeof((fix_sqrt_t!Cq() + (P.F2() - asfix!1) * P.R() - P.H2() * P.Q()) /
-                      (asfix!2 * P.F2() * P.H2()));
-    alias C = fix!(Cp.rmin*2, Cp.rmax*2);
-  } else {
-    alias C = T;
-  }
+  alias C = typeof(P.Q() / (asnum!(1, P.F) - P.F2()));
 
   /// State value
-  R x = 0.0;
+  T x = 0.0;
   /// Covariance
   C p = 0.0;
 
   /// Initialize using initial value
   const pure nothrow @nogc @safe
-  this(const R initial, const C covariance = 0.0) {
+  this(const T initial, const C covariance = 0.0) {
     x = initial;
     p = covariance;
   }
@@ -179,8 +162,8 @@ nothrow @nogc unittest {
   static auto state = State!(param, double)();
 
   assert_eq(state(param, 0.123456), 0.0658432);
-  assert_eq(state(param, 1.01246), 0.54008947, 1e-7);
-  assert_eq(state(param, -5.198), -2.49042048, 1e-8);
+  assert_eq(state(param, 1.01246), 0.5400894901287552);
+  assert_eq(state(param, -5.198), -2.4904204701174825);
 }
 
 /// Test LQE filter (fixed-point)
@@ -190,7 +173,20 @@ nothrow @nogc unittest {
   static immutable auto param = mk!Param(asfix!0.6, asfix!0.5, asfix!0.2, asfix!0.4);
   static auto state = State!(param, X)();
 
-  assert_eq(state(param, cast(X) 0.123456), cast(X) 0.0658432, cast(X) 1e-8);
-  assert_eq(state(param, cast(X) 1.01246), cast(X) 0.54008947, cast(X) 1e-8);
-  assert_eq(state(param, cast(X) -5.198), cast(X) -2.49042048, cast(X) 1e-8);
+  assert_eq(state(param, cast(X) 0.123456), cast(X) 0.0658432);
+  assert_eq(state(param, cast(X) 1.01246), cast(X) 0.54008947);
+  assert_eq(state(param, cast(X) -5.198), cast(X) -2.49042048);
+}
+
+/// Test LQE filter (fixed-point)
+nothrow @nogc unittest {
+  alias P = fix!(0.01, 0.9);
+  alias X = fix!(-10, 10);
+
+  static immutable auto param = mk!Param(P(0.6), P(0.5), P(0.2), P(0.4));
+  static auto state = State!(param, X)();
+
+  assert_eq(state(param, cast(X) 0.123456), cast(X) 0.0658432, cast(X) 1e-5);
+  assert_eq(state(param, cast(X) 1.01246), cast(X) 0.54008947, cast(X) 1e-5);
+  assert_eq(state(param, cast(X) -5.198), cast(X) -2.49042048, cast(X) 1e-5);
 }
