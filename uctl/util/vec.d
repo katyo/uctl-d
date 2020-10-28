@@ -240,13 +240,20 @@ private template isGenVecStruct(alias V) {
 }
 
 /// Check for generic vector
-template isGenVec(alias V) {
-  static if (isNumer!V || hasUnits!V) {
-    enum bool isGenVec = false;
-  } else static if (isGenVecArray!V) {
-    enum bool isGenVec = V[0] > 0;
-  } else static if (isGenVecStruct!V) {
-    enum bool isGenVec = Fields!(V!float).length > 0;
+template isGenVec(X...) if (X.length >= 1 && X.length <= 2) {
+  static if (X.length == 1) {
+    static if (isNumer!(X[0]) || hasUnits!(X[0])) {
+      enum bool isGenVec = false;
+    } else static if (isGenVecArray!(X[0])) {
+      enum bool isGenVec = X[0][0] > 0;
+    } else static if (isGenVecStruct!(X[0])) {
+      alias V = X[0];
+      enum bool isGenVec = Fields!(V!float).length > 0;
+    } else {
+      enum bool isGenVec = false;
+    }
+  } else static if (isGenVec!(X[0]) && isInt!(X[1])) {
+    enum bool isGenVec = genVecSize!(X[0]) == X[1];
   } else {
     enum bool isGenVec = false;
   }
@@ -258,6 +265,9 @@ nothrow @nogc @safe unittest {
   assert(isGenVec!([3]));
   assert(!isGenVec!([0]));
 
+  assert(isGenVec!([3], 3));
+  assert(!isGenVec!([3], 2));
+
   struct ABC(T) {
     T a;
     T b;
@@ -265,6 +275,8 @@ nothrow @nogc @safe unittest {
   }
 
   assert(isGenVec!ABC);
+  assert(isGenVec!(ABC, 3));
+  assert(!isGenVec!(ABC, 4));
 
   struct ABX(T) {
     T a;
@@ -296,11 +308,6 @@ nothrow @nogc @safe unittest {
   }
 
   assert(genVecSize!ABC == 3);
-}
-
-/// Check for generic vector of given size
-template isGenVec(alias V, uint N) {
-  enum bool isGenVec = isGenVec!V && genVecSize!V == N;
 }
 
 /// Instantiate generic vector
