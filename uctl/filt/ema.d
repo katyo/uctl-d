@@ -24,7 +24,7 @@ module uctl.filt.ema;
 
 import std.traits: isInstanceOf, Unqual;
 import uctl.num: fix, asnum, isNumer, isFixed, typeOf;
-import uctl.unit: Val, as, to, hasUnits, Time, isTiming, asTiming, rawTypeOf, rawOf, sec;
+import uctl.unit: Val, as, to, hasUnits, Time, isTiming, asTiming, rawTypeOf, rawof, sec;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
@@ -346,8 +346,8 @@ struct State(alias P_, T_) if (isInstanceOf!(Param, P_.Self) && (isNumer!(P_.A, 
   pure nothrow @nogc @safe
   T opCall(const ref P param, const T value) {
     // X = alpha * X + (1 - alpha) * X0
-    return last_out = Traw(param.alpha * value.rawOf +
-                           param.cmpl_alpha * last_out.rawOf).as!T;
+    return last_out = Traw(param.alpha * value.rawof +
+                           param.cmpl_alpha * last_out.rawof).as!T;
   }
 }
 

@@ -343,12 +343,28 @@ nothrow @nogc @safe unittest {
 
 /// Get raw value
 pure nothrow @nogc @safe
-auto rawOf(T)(const T val) if (isNumer!T || hasUnits!T) {
+ref rawof(T)(ref T val) if (isNumer!T || hasUnits!T) {
   static if (hasUnits!T) {
     return val.raw;
   } else {
     return val;
   }
+}
+
+/// Test `rawof`
+nothrow @nogc unittest {
+  immutable a = 1.25;
+  assert_eq(a.rawof, 1.25);
+
+  auto b = 2.25;
+  assert_eq(b.rawof, 2.25);
+  b.rawof = 2.0;
+  assert_eq(b.rawof, 2.0);
+
+  auto c = 0.25.as!A;
+  assert_eq(c.rawof, 0.25);
+  c.rawof = 1.5;
+  assert_eq(c.rawof, 1.5);
 }
 
 /// Create value literal of same class
