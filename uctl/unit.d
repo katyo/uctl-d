@@ -84,6 +84,18 @@
      - `H`
      - Henry
      - `mH`, `uH`, `nH`, `pH`
+   * - Force
+     - `N`
+     - Newton
+     - `KN`, `MN`, `mN`, `uN`
+   * - Mass
+     - `Kg`
+     - Kilogram
+     - `ug`, `mg`, `g`, `Mg`, `T`
+   * - Torque
+     - `Nm`
+     - Newton·meter
+     - `mNm`, `KNm`, `Ncm`, `Nmm`
    * - Power
      - `W`
      - Watt
@@ -424,6 +436,15 @@ alias Volume = UnitsClass!("Volume");
 alias Voltage = UnitsClass!("Voltage");
 /// Current units class
 alias Current = UnitsClass!("Current");
+
+/// Force units
+alias Force = UnitsClass!("Force");
+/// Mass units
+alias Mass = UnitsClass!("Mass");
+
+/// Torque units
+alias Torque = UnitsClass!("Torque");
+
 /// Power units class
 alias Power = UnitsClass!("Power");
 /// Energy units class
@@ -487,6 +508,25 @@ alias mA = Units!("MilliAmpere", Current, 1e-3);
 alias uA = Units!("MicroAmpere", Current, 1e-6);
 alias nA = Units!("NanoAmpere", Current, 1e-9);
 alias KA = Units!("KiloAmpere", Current, 1e3);
+
+alias N = Units!("Newton", Force);
+alias mN = Units!("MilliNewton", Force, 1e-3);
+alias uN = Units!("MicroNewton", Force, 1e-6);
+alias KN = Units!("KiloNewton", Force, 1e3);
+alias MN = Units!("MegaNewton", Force, 1e6);
+
+alias Kg = Units!("KiloGram", Mass);
+alias g = Units!("Gram", Mass, 1e-3);
+alias mg = Units!("MilliGram", Mass, 1e-6);
+alias ug = Units!("MicroGram", Mass, 1e-9);
+alias Mg = Units!("MegaGram", Mass, 1e3);
+alias T = Units!("Tonne", Mass, 1e3);
+
+alias Nm = Units!("Newton·Meter", Torque);
+alias mNm = Units!("MilliNewton·Meter", Torque, 1e-3);
+alias KNm = Units!("KiloNewton·Meter", Torque, 1e3);
+alias Ncm = Units!("Newton·CentiMeter", Torque, 1e-2);
+alias Nmm = Units!("Newton·MilliMeter", Torque, 1e-3);
 
 alias W = Units!("Watt", Power);
 alias mW = Units!("MilliWatt", Power, 1e-3);
