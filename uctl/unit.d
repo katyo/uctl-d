@@ -498,13 +498,13 @@ alias um2 = Units!("Square microMeter", Area, 1e-12);
 alias nm2 = Units!("Square nanoMeter", Area, 1e-18);
 alias Km2 = Units!("Square kiloMeter", Area, 1e6);
 
-alias m3 = Units!("Cubic Meter", Area);
-alias dm3 = Units!("Cubic deciMeter", Area, 1e-3);
-alias cm3 = Units!("Cubic centiMeter", Area, 1e-6);
-alias mm3 = Units!("Cubic milliMeter", Area, 1e-9);
-alias um3 = Units!("Cubic microMeter", Area, 1e-18);
-alias nm3 = Units!("Cubic nanoMeter", Area, 1e-27);
-alias Km3 = Units!("Cubic kiloMeter", Area, 1e9);
+alias m3 = Units!("Cubic Meter", Volume);
+alias dm3 = Units!("Cubic deciMeter", Volume, 1e-3);
+alias cm3 = Units!("Cubic centiMeter", Volume, 1e-6);
+alias mm3 = Units!("Cubic milliMeter", Volume, 1e-9);
+alias um3 = Units!("Cubic microMeter", Volume, 1e-18);
+alias nm3 = Units!("Cubic nanoMeter", Volume, 1e-27);
+alias Km3 = Units!("Cubic kiloMeter", Volume, 1e9);
 
 alias rev = Units!("Revolution", Angle);
 alias hrev = Units!("Half Revolution", Angle, 1.0/2.0);
