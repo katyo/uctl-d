@@ -512,6 +512,104 @@ alias qrev = Units!("Quarter Revolution", Angle, 1.0/4.0);
 alias deg = Units!("Degree", Angle, 1.0/360.0);
 alias rad = Units!("Radian", Angle, 1.0/(2.0*PI));
 
+alias m_sec = Units!("Meter/Second", LinearVel);
+alias dm_sec = Units!("DeciMeter/Second", LinearVel, 1e-1);
+alias cm_sec = Units!("CentiMeter/Second", LinearVel, 1e-2);
+alias mm_sec = Units!("MilliMeter/Second", LinearVel, 1e-3);
+alias um_sec = Units!("MicroMeter/Second", LinearVel, 1e-6);
+alias nm_sec = Units!("NanoMeter/Second", LinearVel, 1e-9);
+alias Km_sec = Units!("KiloMeter/Second", LinearVel, 1e3);
+
+alias m_min = Units!("Meter/Minute", LinearVel, 1e0/60);
+alias dm_min = Units!("DeciMeter/Minute", LinearVel, 1e-1/60);
+alias cm_min = Units!("CentiMeter/Minute", LinearVel, 1e-2/60);
+alias mm_min = Units!("MilliMeter/Minute", LinearVel, 1e-3/60);
+alias um_min = Units!("MicroMeter/Minute", LinearVel, 1e-6/60);
+alias nm_min = Units!("NanoMeter/Minute", LinearVel, 1e-9/60);
+alias Km_min = Units!("KiloMeter/Minute", LinearVel, 1e3/60);
+
+alias m_hour = Units!("Meter/Hour", LinearVel, 1e0/3600);
+alias dm_hour = Units!("DeciMeter/Hour", LinearVel, 1e-1/3600);
+alias cm_hour = Units!("CentiMeter/Hour", LinearVel, 1e-2/3600);
+alias mm_hour = Units!("MilliMeter/Hour", LinearVel, 1e-3/3600);
+alias um_hour = Units!("MicroMeter/Hour", LinearVel, 1e-6/3600);
+alias nm_hour = Units!("NanoMeter/Hour", LinearVel, 1e-9/3600);
+alias Km_hour = Units!("KiloMeter/Hour", LinearVel, 1e3/3600);
+
+alias rev_sec = Units!("Revolution/Second", AngularVel);
+alias hrev_sec = Units!("Half Revolution/Second", AngularVel, 1.0/2.0);
+alias qrev_sec = Units!("Quarter Revolution/Second", AngularVel, 1.0/4.0);
+alias deg_sec = Units!("Degree/Second", AngularVel, 1.0/360.0);
+alias rad_sec = Units!("Radian/Second", AngularVel, 1.0/(2.0*PI));
+
+alias rev_min = Units!("Revolution/Minute", AngularVel, 1e0/60);
+alias hrev_min = Units!("Half Revolution/Minute", AngularVel, 1.0/2.0/60);
+alias qrev_min = Units!("Quarter Revolution/Minute", AngularVel, 1.0/4.0/60);
+alias deg_min = Units!("Degree/Minute", AngularVel, 1.0/360.0/60);
+alias rad_min = Units!("Radian/Minute", AngularVel, 1.0/(2.0*PI)/60);
+
+alias rev_hour = Units!("Revolution/Hour", AngularVel, 1e0/3600);
+alias hrev_hour = Units!("Half Revolution/Hour", AngularVel, 1.0/2.0/3600);
+alias qrev_hour = Units!("Quarter Revolution/Hour", AngularVel, 1.0/4.0/3600);
+alias deg_hour = Units!("Degree/Hour", AngularVel, 1.0/360.0/3600);
+alias rad_hour = Units!("Radian/Hour", AngularVel, 1.0/(2.0*PI)/3600);
+
+alias m_sec2 = Units!("Meter/Second^2", LinearAccel);
+alias dm_sec2 = Units!("DeciMeter/Second^2", LinearAccel, 1e-1);
+alias cm_sec2 = Units!("CentiMeter/Second^2", LinearAccel, 1e-2);
+alias mm_sec2 = Units!("MilliMeter/Second^2", LinearAccel, 1e-3);
+alias um_sec2 = Units!("MicroMeter/Second^2", LinearAccel, 1e-6);
+alias nm_sec2 = Units!("NanoMeter/Second^2", LinearAccel, 1e-9);
+alias Km_sec2 = Units!("KiloMeter/Second^2", LinearAccel, 1e3);
+
+alias m_min2 = Units!("Meter/Minute^2", LinearAccel, 1e0/3600);
+alias dm_min2 = Units!("DeciMeter/Minute^2", LinearAccel, 1e-1/3600);
+alias cm_min2 = Units!("CentiMeter/Minute^2", LinearAccel, 1e-2/3600);
+alias mm_min2 = Units!("MilliMeter/Minute^2", LinearAccel, 1e-3/3600);
+alias um_min2 = Units!("MicroMeter/Minute^2", LinearAccel, 1e-6/3600);
+alias nm_min2 = Units!("NanoMeter/Minute^2", LinearAccel, 1e-9/3600);
+alias Km_min2 = Units!("KiloMeter/Minute^2", LinearAccel, 1e3/3600);
+
+alias rev_sec2 = Units!("Revolution/Second^2", AngularAccel);
+alias hrev_sec2 = Units!("Half Revolution/Second^2", AngularAccel, 1.0/2.0);
+alias qrev_sec2 = Units!("Quarter Revolution/Second^2", AngularAccel, 1.0/4.0);
+alias deg_sec2 = Units!("Degree/Second^2", AngularAccel, 1.0/360.0);
+alias rad_sec2 = Units!("Radian/Second^2", AngularAccel, 1.0/(2.0*PI));
+
+alias rev_min2 = Units!("Revolution/Minute^2", AngularAccel, 1e0/3600);
+alias hrev_min2 = Units!("Half Revolution/Minute^2", AngularAccel, 1.0/2.0/3600);
+alias qrev_min2 = Units!("Quarter Revolution/Minute^2", AngularAccel, 1.0/4.0/3600);
+alias deg_min2 = Units!("Degree/Minute^2", AngularAccel, 1.0/360.0/3600);
+alias rad_min2 = Units!("Radian/Minute^2", AngularAccel, 1.0/(2.0*PI)/3600);
+
+alias m_sec3 = Units!("Meter/Second^3", LinearJerk);
+alias dm_sec3 = Units!("DeciMeter/Second^3", LinearJerk, 1e-1);
+alias cm_sec3 = Units!("CentiMeter/Second^3", LinearJerk, 1e-2);
+alias mm_sec3 = Units!("MilliMeter/Second^3", LinearJerk, 1e-3);
+alias um_sec3 = Units!("MicroMeter/Second^3", LinearJerk, 1e-6);
+alias nm_sec3 = Units!("NanoMeter/Second^3", LinearJerk, 1e-9);
+alias Km_sec3 = Units!("KiloMeter/Second^3", LinearJerk, 1e3);
+
+alias m_min3 = Units!("Meter/Minute^3", LinearJerk, 1e0/216000);
+alias dm_min3 = Units!("DeciMeter/Minute^3", LinearJerk, 1e-1/216000);
+alias cm_min3 = Units!("CentiMeter/Minute^3", LinearJerk, 1e-2/216000);
+alias mm_min3 = Units!("MilliMeter/Minute^3", LinearJerk, 1e-3/216000);
+alias um_min3 = Units!("MicroMeter/Minute^3", LinearJerk, 1e-6/216000);
+alias nm_min3 = Units!("NanoMeter/Minute^3", LinearJerk, 1e-9/216000);
+alias Km_min3 = Units!("KiloMeter/Minute^3", LinearJerk, 1e3/216000);
+
+alias rev_sec3 = Units!("Revolution/Second^3", AngularJerk);
+alias hrev_sec3 = Units!("Half Revolution/Second^3", AngularJerk, 1.0/2.0);
+alias qrev_sec3 = Units!("Quarter Revolution/Second^3", AngularJerk, 1.0/4.0);
+alias deg_sec3 = Units!("Degree/Second^3", AngularJerk, 1.0/360.0);
+alias rad_sec3 = Units!("Radian/Second^3", AngularJerk, 1.0/(2.0*PI));
+
+alias rev_min3 = Units!("Revolution/Minute^3", AngularJerk, 1e0/216000);
+alias hrev_min3 = Units!("Half Revolution/Minute^3", AngularJerk, 1.0/2.0/216000);
+alias qrev_min3 = Units!("Quarter Revolution/Minute^3", AngularJerk, 1.0/4.0/216000);
+alias deg_min3 = Units!("Degree/Minute^3", AngularJerk, 1.0/360.0/216000);
+alias rad_min3 = Units!("Radian/Minute^3", AngularJerk, 1.0/(2.0*PI)/216000);
+
 alias V = Units!("Volt", Voltage);
 alias mV = Units!("MilliVolt", Voltage, 1e-3);
 alias uV = Units!("MicroVolt", Voltage, 1e-6);
@@ -631,6 +729,15 @@ nothrow @nogc unittest {
 
   assert_eq((fix!(-10, 10)(1.25)).as!m.to!mm, (fix!(-10_000, 10_000)(1_250.0)).as!mm);
   assert_eq(fix!(-10, 10)(1.25).as!m.to!cm, fix!(-1_000, 1_000)(125.0).as!cm);
+
+  assert_eq(5.0.as!Km_hour.to!m_min, 83.3333333333.as!m_min, 1e-10);
+  assert_eq(5.0.as!Km_hour.to!m_sec, 1.38888888888.as!m_sec, 1e-10);
+  assert_eq(20.0.as!m_min.to!Km_hour, 1.2.as!Km_hour);
+  assert_eq(20.0.as!mm_sec.to!m_hour, 72.0.as!m_hour);
+
+  assert_eq(5.0.as!rad_sec.to!deg_min, 17188.7338539246957.as!deg_min);
+  assert_eq(160.0.as!rev_min.to!rev_sec, 2.66666666666666652.as!rev_sec);
+  assert_eq(600.0.as!rev_min.to!rad_sec, 62.8318530717958694.as!rad_sec);
 }
 
 /// Arithmetic operations
