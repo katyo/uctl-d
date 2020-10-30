@@ -52,7 +52,6 @@ public import Simul = uctl.simul;
 public import Modul = uctl.modul;
 
 alias mk = uctl.filt.mk;
-alias mk = uctl.trans.mk;
 alias mk = uctl.regul.mk;
 alias mk = uctl.simul.mk;
 alias mk = uctl.modul.mk;
