@@ -455,6 +455,12 @@ auto to(U, T)(const T val) if (isUnits!U && hasUnits!(T, U.Class)) {
   }
 }
 
+/// Convert underlying raw value type
+pure nothrow @nogc @safe
+auto to(R, T)(const T val) if (!isUnits!R && !isUnitsClass!R && (isNumer!R || hasUnits!R) && hasUnits!T) {
+  return (cast(rawTypeOf!R) val.raw).as!(T.units);
+}
+
 /// Linear units class
 alias Length = UnitsClass!("Length");
 /// Angular units class
