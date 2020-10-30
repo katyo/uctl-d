@@ -84,13 +84,13 @@ module uctl.simul.thr;
 import std.traits: isInstanceOf;
 import std.math: E;
 import uctl.num: isNumer, asnum;
-import uctl.unit: hasUnits, to, Resistance, Ohm, Temperature, degK;
+import uctl.unit: hasUnits, as, to, Resistance, Ohm, Temperature, degK, rawTypeOf;
 import uctl.math.log: log;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
   import uctl.num: asfix, fix;
-  import uctl.unit: as, degC;
+  import uctl.unit: degC, KOhm;
 
   mixin unittests;
 }
@@ -165,16 +165,13 @@ struct Param(alias M, A, B, C) if (isModel!(M, SteinhartHart) && isNumer!(A, B, 
 
   static if (M.calcT) {
     /// Calculate temperature from resistance
-    const pure nothrow @nogc @safe
-    auto t(R)(const R r) if (isNumer!(R, A)) {
-      auto lnR = log(r);
-      return asnum!(1, R) / (a + b * lnR + c * lnR * lnR * lnR);
-    }
-
-    /// Calculate temperature from resistance
-    const pure nothrow @nogc @safe
-    auto t(R)(const R r) if (hasUnits!(R, Resistance) && isNumer!(R.raw_t, A)) {
-      return t(r.to!Ohm.raw).as!degK;
+    pure nothrow @nogc @safe
+    auto opCall(R)(const R r) const
+    if (hasUnits!(R, Resistance) && isNumer!(rawTypeOf!R, A)) {
+      const rr = r.to!Ohm.raw;
+      const lnR = log(rr);
+      const tr = asnum!(1, rawTypeOf!R) / (a + b * lnR + c * lnR * lnR * lnR);
+      return tr.as!degK;
     }
   }
 }
@@ -190,9 +187,9 @@ nothrow @nogc unittest {
   // a = -0.00400110693, b = 0.00077306258, c = -0.00000099773
   static immutable ntc100k = mk!(calcT!SteinhartHart)(-0.00400110693, 0.00077306258, -0.00000099773);
 
-  assert_eq(ntc100k.t(100e3), 23.0094033.as!degC.to!degK.raw, 1e-5);
-  assert_eq(ntc100k.t(24e3), 87.5718161.as!degC.to!degK.raw, 1e-6);
-  assert_eq(ntc100k.t(82e3), 29.8317295.as!degC.to!degK.raw, 1e-6);
+  assert_eq(ntc100k(100.0.as!KOhm), 23.0094033.as!degC.to!degK, 1e-5);
+  assert_eq(ntc100k(24.0.as!KOhm), 87.5718161.as!degC.to!degK, 1e-6);
+  assert_eq(ntc100k(82.0.as!KOhm), 29.8317295.as!degC.to!degK, 1e-6);
 }
 
 /// Test NTC 100K thermistor (fixed-point)
@@ -202,30 +199,25 @@ nothrow @nogc unittest {
                                                       asfix!(0.00077306258),
                                                       asfix!(-0.00000099773));
 
-  alias R = fix!(15e3, 150e3);
+  alias R = fix!(15, 150);
   alias T = fix!(230, 580);
 
-  assert_eq(ntc100k.t(R(100e3)), T(23.0094033.as!degC.to!degK.raw));
-  assert_eq(ntc100k.t(R(24e3)), T(87.5718161.as!degC.to!degK.raw));
-  assert_eq(ntc100k.t(R(82e3)), T(29.8317295.as!degC.to!degK.raw));
+  assert_eq(ntc100k(R(100).as!KOhm).to!degC, T(23.0094033).as!degC);
+  assert_eq(ntc100k(R(24).as!KOhm).to!degC, T(87.5718161).as!degC);
+  assert_eq(ntc100k(R(82).as!KOhm).to!degC, T(29.8317295).as!degC);
 }
 
 /// Thermistor parameters for simplified β-model
 struct Param(alias M, R, T, B) if (isModel!(M, Beta) &&
-                                   (isNumer!(R, T, B) || (hasUnits!(R, Resistance) &&
-                                                          hasUnits!(T, Temperature) &&
-                                                          isNumer!(R.raw_t, T.raw_t, B)))) {
+                                   hasUnits!(R, Resistance) &&
+                                   hasUnits!(T, Temperature) &&
+                                   isNumer!(rawTypeOf!R, rawTypeOf!T, B)) {
+  alias Rraw = typeof(R().to!Ohm.raw);
+  alias Traw = typeof(T().to!degK.raw);
+
   static if (M.calcT) {
-    static if (hasUnits!R) {
-      alias InvR = typeof(asnum!(1, R.raw_t) / R.raw_t());
-    } else {
-      alias InvR = typeof(asnum!(1, R) / R());
-    }
-    static if (hasUnits!T) {
-      alias InvT = typeof(asnum!(1, T.raw_t) / T.raw_t());
-    } else {
-      alias InvT = typeof(asnum!(1, T) / T());
-    }
+    alias InvR = typeof(asnum!(1, Rraw) / Rraw());
+    alias InvT = typeof(asnum!(1, Traw) / Traw());
     alias InvB = typeof(asnum!(1, B) / B());
 
     /// $(MATH \frac{1}{R_0}) value
@@ -237,10 +229,10 @@ struct Param(alias M, R, T, B) if (isModel!(M, Beta) &&
   }
 
   static if (M.calcR) {
-    alias BInvT = typeof(B() / T());
+    alias BInvT = typeof(B() / Traw());
 
     /// $(MATH R_0) value
-    R r0;
+    Rraw r0;
     /// $(MATH \frac{\beta}{T_0}) value
     BInvT beta_inv_t0;
     /// $(MATH \frac{1}{\beta}) value
@@ -250,92 +242,119 @@ struct Param(alias M, R, T, B) if (isModel!(M, Beta) &&
   /// Initialize thermistor parameters
   const pure nothrow @nogc @safe
   this(const R r0_, const T t0_, const B beta_) {
+    const _r0 = r0_.to!Ohm.raw;
+    const _t0 = t0_.to!degK.raw;
+
     static if (M.calcT) {
-      inv_r0 = asnum!(1, R) / r0_;
-      inv_t0 = asnum!(1, T) / t0_;
+      inv_r0 = asnum!(1, Rraw) / _r0;
+      inv_t0 = asnum!(1, Traw) / _t0;
       inv_beta = asnum!(1, B) / beta_;
     }
 
     static if (M.calcR) {
-      r0 = r0_;
-      beta_inv_t0 = beta_ / t0_;
+      r0 = _r0;
+      beta_inv_t0 = beta_ / _t0;
       beta = beta_;
     }
   }
 
   static if (M.calcT) {
     /// Calculate temperature from resistance
-    const pure nothrow @nogc @safe
-    auto t(R_)(const R_ r) if (isNumer!(R_, R)) {
-      return asnum!(1, R) / (inv_t0 + inv_beta * log(r * inv_r0));
-    }
+    pure nothrow @nogc @safe
+    auto opCall(R_)(const R_ r) const
+    if (hasUnits!(R_, Resistance) && isNumer!(rawTypeOf!R_, Rraw)) {
+      const rr = r.to!Ohm.raw;
+      const tr = asnum!(1, Traw) / (inv_t0 + inv_beta * log(rr * inv_r0));
 
-    /// Calculate temperature from resistance
-    const pure nothrow @nogc @safe
-    auto t(R_)(const R_ r) if (hasUnits!(R_, Resistance) && isNumer!(R_.raw_t, R)) {
-      return t(r.to!Ohm.raw).as!degK;
+      return tr.as!degK.to!(T.units);
     }
   }
 
   static if (M.calcR) {
     /// Calculate resistance from temperature
-    const pure nothrow @nogc @safe
-    auto r(T_)(const T_ t) if (isNumer!(T_, T)) {
-      return r0 * exp(beta / t - beta_inv_t0);
-    }
+    pure nothrow @nogc @safe
+    auto opCall(T_)(const T_ t) const
+    if (hasUnits!(T_, Temperature) && isNumer!(rawTypeOf!T_, Traw)) {
+      const tr = t.to!degK.raw;
+      const rr = r0 * exp(beta / tr - beta_inv_t0);
 
-    /// Calculate resistance from temperature
-    const pure nothrow @nogc @safe
-    auto r(T_)(const T_ t) if (hasUnits!(T_, Temperature) && isNumer!(T_.raw_t, T)) {
-      return r(t.to!degK).as!Ohm;
+      return rr.as!Ohm.to!(R.units);
     }
   }
 }
 
 /// Create parameters for simplified β-model of thermistor
 pure nothrow @nogc @safe Param!(M, R, T, B)
-mk(alias M, R, T, B)(const R r0, const T t0, const B beta) if (isModel!(M, Beta) && isNumer!(R, T, B)) {
+mk(alias M, R, T, B)(const R r0, const T t0, const B beta)
+if (isModel!(M, Beta) &&
+    hasUnits!(R, Resistance) &&
+    hasUnits!(T, Temperature) &&
+    isNumer!(rawTypeOf!R, rawTypeOf!T, B)) {
   return Param!(M, R, T, B)(r0, t0, beta);
 }
-
 
 /// Test NTC 100K thermistor (floating-point)
 nothrow @nogc unittest {
   // R0 = 100KΩ, T0 = 25°C, β = 3950
-  static immutable ntc100k = mk!(calcT!Beta)(100e3f, 25f.as!degC.to!degK.raw, 3950f);
+  static immutable ntc100k = mk!(calcT!Beta)(100.0.as!KOhm, 25.0.as!degC, 3950.0);
+
+  assert_eq(ntc100k.inv_r0, 1.00000000000000008e-05);
+  assert_eq(ntc100k.inv_t0, 0.00335401643468052988);
+  assert_eq(ntc100k.inv_beta, 0.000253164556962025332);
+
+  assert_eq(ntc100k(100.0.as!KOhm), 25.0.as!degC);
+  assert_eq(ntc100k(24.0.as!KOhm), 60.9940609679212571.as!degC);
+  assert_eq(ntc100k(82.0.as!KOhm), 29.5339875403824408.as!degC);
+}
+
+/// Test NTC 100K thermistor (floating-point)
+nothrow @nogc unittest {
+  // R0 = 100KΩ, T0 = 25°C, β = 3950
+  static immutable ntc100k = mk!(calcT!Beta)(100f.as!KOhm, 25f.as!degC, 3950f);
 
   assert_eq(ntc100k.inv_r0, 9.999999996e-6f);
   assert_eq(ntc100k.inv_t0, 0.003354016433f);
   assert_eq(ntc100k.inv_beta, 0.0002531645569f);
 
-  assert_eq(ntc100k.t(100e3f), 25.0f.as!degC.to!degK.raw);
-  assert_eq(ntc100k.t(24e3f), 60.9940613f.as!degC.to!degK.raw);
-  assert_eq(ntc100k.t(82e3f), 29.5339876f.as!degC.to!degK.raw);
+  assert_eq(ntc100k(100f.as!KOhm), 25.0f.as!degC);
+  assert_eq(ntc100k(24f.as!KOhm), 60.994049072f.as!degC);
+  assert_eq(ntc100k(82f.as!KOhm), 29.533996582f.as!degC);
 }
 
 /// Test NTC 100K thermistor (fixed-point)
 nothrow @nogc unittest {
   // R0 = 100KΩ, T0 = 25°C, β = 3950
-  static immutable ntc100k = mk!(calcT!Beta)(asfix!100e3, asfix!25.as!degC.to!degK.raw, asfix!3950);
+  static immutable ntc100k = mk!(calcT!Beta)(asfix!100.as!KOhm, asfix!25.as!degC, asfix!3950);
 
   assert_eq(ntc100k.inv_r0, asfix!9.999999996e-6);
   assert_eq(ntc100k.inv_t0, asfix!0.003354016433);
   assert_eq(ntc100k.inv_beta, asfix!0.0002531645569);
 
-  alias R = fix!(15e3, 150e3);
-  alias T = fix!(290, 350);
+  alias R = fix!(15, 150);
+  alias T = fix!(10, 100);
 
-  assert_eq(ntc100k.t(R(100e3)), T(25.0.as!degC.to!degK.raw));
-  assert_eq(ntc100k.t(R(24e3)), T(60.9940613.as!degC.to!degK.raw));
-  assert_eq(ntc100k.t(R(82e3)), T(29.5339876.as!degC.to!degK.raw));
+  assert_eq(ntc100k(100.0.as!KOhm.to!R), 25.0.as!degC.to!T);
+  assert_eq(ntc100k(24.0.as!KOhm.to!R), 60.99406123.as!degC.to!T);
+  assert_eq(ntc100k(82.0.as!KOhm.to!R), 29.53398752.as!degC.to!T);
 }
 
 /// Create parameters for simplified β-model of thermistor using two points $(MATH [R_x, T_x])
-template mk(alias M, R0, T0, R1, T1) if (isModel!(M, Beta) && isNumer!(R0, T0, R1, T1)) {
-  alias B = typeof(T0() * T1() * log(R1() / R0()) / (T0() - T1()));
+template mk(alias M, R0, T0, R1, T1) if (isModel!(M, Beta) &&
+                                         hasUnits!(R0, Resistance) && hasUnits!(R1, Resistance) &&
+                                         hasUnits!(T0, Temperature) && hasUnits!(T1, Temperature) &&
+                                         isNumer!(rawTypeOf!R0, rawTypeOf!T0, rawTypeOf!R1, rawTypeOf!T1)) {
+  alias T0raw = typeof(T0().to!degK.raw);
+  alias T1raw = typeof(T1().to!degK.raw);
+  alias R0raw = typeof(R0().to!Ohm.raw);
+  alias R1raw = typeof(R1().to!Ohm.raw);
+  alias B = typeof(T0raw() * T1raw() * log(R1raw() / R0raw()) / (T0raw() - T1raw()));
 
   Param!(M, R0, T0, B) mk(const R0 r0, const T0 t0, const R1 r1, const T1 t1) {
-    auto beta = t0 * t1 * log(r1 / r0) / (t0 - t1);
+    const t0_ = t0.to!degK.raw;
+    const t1_ = t1.to!degK.raw;
+    const r0_ = r0.to!Ohm.raw;
+    const r1_ = r1.to!Ohm.raw;
+    const beta = t0_ * t1_ * log(r1_ / r0_) / (t0_ - t1_);
 
     return Param!(M, R0, T0, B)(r0, t0, beta);
   }
@@ -344,32 +363,33 @@ template mk(alias M, R0, T0, R1, T1) if (isModel!(M, Beta) && isNumer!(R0, T0, R
 /// Test NTC 100K thermistor (floating-point)
 nothrow @nogc unittest {
   // Points: [100KΩ, 25°C], [24KΩ, 61°C]
-  static immutable ntc100k = mk!(calcT!Beta)(100e3f, 25f.as!degC.to!degK.raw, 24e3f, 61f.as!degC.to!degK.raw);
+  static immutable ntc100k = mk!(calcT!Beta)(100f.as!KOhm, 25f.as!degC, 24f.as!KOhm, 61f.as!degC);
 
   assert_eq(ntc100k.inv_r0, 1e-5f);
-  assert_eq(ntc100k.inv_t0, 0.00335402, 1e-6);
-  assert_eq(ntc100k.inv_beta, 0.000253202, 1e-6);
+  assert_eq(ntc100k.inv_t0, 0.003354016, 1e-9);
+  assert_eq(ntc100k.inv_beta, 0.000253202, 1e-9);
 
-  assert_eq(ntc100k.t(100e3f), 25f.as!degC.to!degK.raw);
-  assert_eq(ntc100k.t(24e3f), 61f.as!degC.to!degK.raw);
-  //assert_eq(ntc100k.t(82e3), 29.3844505.as!degC.to!degK.raw);
+  assert_eq(ntc100k(100f.as!KOhm), 25f.as!degC);
+  assert_eq(ntc100k(24f.as!KOhm), 61f.as!degC);
+  assert_eq(ntc100k(82f.as!KOhm), 29.534667969f.as!degC);
 }
 
 /// Test NTC 100K thermistor (fixed-point)
 nothrow @nogc unittest {
   // Points: [100KΩ, 24°C], [24KΩ, 80°C]
-  static immutable ntc100k = mk!(calcT!Beta)(asfix!100e3,
-                                             asfix!(25.as!degC.to!degK.raw),
-                                             asfix!24e3, asfix!(61.as!degC.to!degK.raw));
+  static immutable ntc100k = mk!(calcT!Beta)(asfix!100.as!KOhm,
+                                             asfix!25.as!degC,
+                                             asfix!24.as!KOhm,
+                                             asfix!61.as!degC);
 
   assert_eq(ntc100k.inv_r0, asfix!9.999999996e-6);
-  assert_eq(ntc100k.inv_t0, asfix!0.003355704697);
-  assert_eq(ntc100k.inv_beta, asfix!0.0002534430485);
+  assert_eq(ntc100k.inv_t0, asfix!0.003354016433);
+  assert_eq(ntc100k.inv_beta, asfix!0.0002532018273);
 
-  alias R = fix!(15e3, 150e3);
-  alias T = fix!(290, 350);
+  alias R = fix!(15, 150);
+  alias T = fix!(10, 100);
 
-  assert_eq(ntc100k.t(R(100e3)), T(25.as!degC.to!degK.raw));
-  assert_eq(ntc100k.t(R(24e3)), T(61.as!degC.to!degK.raw));
-  assert_eq(ntc100k.t(R(82e3)), T(29.3844505.as!degC.to!degK.raw));
+  assert_eq(ntc100k(100.0.as!KOhm.to!R), 25.0.as!degC.to!T);
+  assert_eq(ntc100k(24.0.as!KOhm.to!R), 61.as!degC.to!T);
+  assert_eq(ntc100k(82.0.as!KOhm.to!R), 29.53466511.as!degC.to!T);
 }
