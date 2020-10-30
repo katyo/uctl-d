@@ -137,6 +137,14 @@
    * - Temperature
      - `degF`
      - Fahrenheit degree
+   * - Thermal resistance
+     - `degK_W`
+     - Kelvin per Watt
+     - `degC_W`, `degF_W`
+   * - Thermal capacity
+     - `J_degK`
+     - Joule per Kelvin
+     - `J_degC`, `J_degF`
    * - Time
      - `sec`
      - Second
@@ -500,6 +508,12 @@ alias Inductance = UnitsClass!("Inductance");
 /// Temperature units class
 alias Temperature = UnitsClass!("Temperature");
 
+/// Thermal resistance
+alias ThermalResistance = UnitsClass!("Thermal Resistance");
+
+/// Thermal capacity
+alias ThermalCapacity = UnitsClass!("Thermal Capacity");
+
 /// Time units class
 alias Time = UnitsClass!("Time");
 
@@ -703,6 +717,20 @@ alias pH = Units!("PicoHenry", Inductance, 1e-12);
 alias degK = Units!("Kelvin", Temperature);
 alias degC = Units!("Celsius", Temperature, 1.0, 273.15);
 alias degF = Units!("Fahrenheit", Temperature, 5.0/9.0, 459.67);
+
+alias degK_W = Units!("Kelvin/Watt", ThermalResistance);
+alias degC_W = Units!("Celsius/Watt", ThermalResistance);
+alias degF_W = Units!("Fahrenheit/Watt", ThermalResistance, 5.0/9.0);
+alias degK_mW = Units!("Kelvin/MilliWatt", ThermalResistance, 1e3);
+alias degC_mW = Units!("Celsius/MilliWatt", ThermalResistance, 1e3);
+alias degF_mW = Units!("Fahrenheit/MilliWatt", ThermalResistance, 1e3*5.0/9.0);
+
+alias J_degK = Units!("Joule/Kelvin", ThermalCapacity);
+alias J_degC = Units!("Joule/Celsius", ThermalCapacity);
+alias J_degF = Units!("Joule/Fahrenheit", ThermalCapacity, 9.0/5.0);
+alias mJ_degK = Units!("MilliJoule/Kelvin", ThermalCapacity, 1e-3);
+alias mJ_degC = Units!("MilliJoule/Celsius", ThermalCapacity, 1e-3);
+alias mJ_degF = Units!("MilliJoule/Fahrenheit", ThermalCapacity, 1e-3*9.0/5.0);
 
 alias sec = Units!("Second", Time);
 alias msec = Units!("MilliSecond", Time, 1e-3);
