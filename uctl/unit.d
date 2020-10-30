@@ -64,6 +64,30 @@
    * - Angle
      - `qrev`
      - Quarter revolution (½π, 90°)
+   * - Linear velocity
+     - `m_sec`
+     - Meters per second
+     - `cm_sec`, `mm_sec`, `Km_sec`, `m_min`, `m_hour`, `Km_hour`
+   * - Angular velocity
+     - `rev_sec`
+     - Revolutions per second
+     - `rad_sec`, `deg_sec`, `hrev_sec`, `qrev_sec`, `rev_min`, `rev_hour`
+   * - Linear acceleration
+     - `m_sec2`
+     - Meters per square second
+     - `cm_sec2`, `mm_sec2`, `m_min2`
+   * - Angular acceleration
+     - `rev_sec2`
+     - Revolutions per square second
+     - `rad_sec2`, `deg_sec2`, `hrev_sec2`, `qrev_sec2`, `rev_min2`
+   * - Linear jerk
+     - `m_sec3`
+     - Meter per cubic second
+     - `cm_sec3`, `mm_sec3`, `m_min3`
+   * - Angular jerk
+     - `rev_sec3`
+     - Revolutions per cubic second
+     - `rad_sec3`, `deg_sec3`, `hrev_sec3`, `qrev_sec3`, `rev_min3`
    * - Voltage
      - `V`
      - Volt
