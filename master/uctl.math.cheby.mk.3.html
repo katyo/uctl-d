@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>mk (uctl.math.cheby.mk)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>mk</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.math.html">math</a> <a class="breadcrumb" href="uctl.math.cheby.html">cheby</a> </div><div><div class="documentation-comment synopsis"><div><p>Function approximation by fitting Chebyshev polynom in range</p></div></div></div><div class="annotated-prototype"><ol class="overloads"><li class="overload-option"><a href="uctl.math.cheby.mk.1.html"><span class="overload-signature"><span class="builtin-type">template</span> <span class="name">mk</span><span class="template-params">(alias C, alias F, real a, real b, uint D)</span></span></a></li><li class="overload-option"><a href="uctl.math.cheby.mk.2.html"><span class="overload-signature"><span class="builtin-type">template</span> <span class="name">mk</span><span class="template-params">(alias C, real a, real b, T, alias c)</span></span></a></li><li class="active-overload-option"><span class="overload-signature"><span class="builtin-type">template</span> <span class="name">mk</span><span class="template-params">(alias C, alias F, real a, real b, uint D, T)</span></span><div class="aggregate-prototype"><div class="attributes"></div><span class="builtin-type">template</span> mk (<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="C">C</span></span></div><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="F">F</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">real</span> <span class="name" data-ident="a">a</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">real</span> <span class="name" data-ident="b">b</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">uint</span> <span class="name" data-ident="D">D</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="T">T</span></span></div></div>) <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><div class="andand-left"><div class="andand-left"><div class="andand-left"><div class="andand-left">__traits(<span class="name" data-ident="isSame">isSame</span>, <span class="name" data-ident="C">C</span>, <a class="xref" href="uctl.math.cheby.Cheby.html" title="uctl.math.cheby.Cheby"><span class="name" data-ident="Cheby">Cheby</span></a>) &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="isCallable">isCallable</span>!<span class="name" data-ident="F">F</span></div> &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="Parameters">Parameters</span>!<span class="name" data-ident="F">F</span>.<span class="name" data-ident="length">length</span> == 1</div> &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="isNumer">isNumer</span>!(<span class="name" data-ident="Parameters">Parameters</span>!<span class="name" data-ident="F">F</span>[0])</div> &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="isNumer">isNumer</span>!(<span class="name" data-ident="ReturnType">ReturnType</span>!<span class="name" data-ident="F">F</span>)</div> &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="isNumer">isNumer</span>!<span class="name" data-ident="T">T</span></div></div>) {<div class="aggregate-member"><div class="attributes"></div><span class="builtin-type">enum</span> <span class="name">c</span>;</div>}</div></li></ol></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev sin fit (floating-point, 2rd)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">sin</span>;
+<span class="br">2 </span>
+<span class="br">3 </span><span class="kwrd">alias</span> <span class="hid">xsin</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">sin</span>, <span class="num">0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">2</span>, <span class="type">float</span>);
+<span class="br">4 </span>
+<span class="br">5 </span><span class="kwrd">enum</span> <span class="hid">pi</span> = <span class="type">float</span>(<span class="hid">PI</span>);
+<span class="br">6 </span>
+<span class="br">7 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="num">0f</span>), -<span class="num">0.016220979f</span>);
+<span class="br">8 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">6f</span>), <span class="num">0.512622118f</span>);
+<span class="br">9 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">4f</span>), <span class="num">0.707107008f</span>);
+<span class="br">10 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">3f</span>), <span class="num">0.854967356f</span>);
+<span class="br">11 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">2f</span>), <span class="num">1.010815024f</span>);
+<span class="br">12 </span>
+<span class="br">13 </span><span class="hid">assert_eq</span>(<span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">14 </span>                         <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">15 </span>          <span class="num">0.016220979f</span>);
+<span class="br">16 </span><span class="hid">assert_eq</span>(<span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">17 </span>                          <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">18 </span>          <span class="num">9.55991636146791279e-05f</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev sin fit (floating-point, 3th)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">sin</span>;
+<span class="br">2 </span>
+<span class="br">3 </span><span class="kwrd">alias</span> <span class="hid">xsin</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">sin</span>, <span class="num">0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">3</span>, <span class="type">float</span>);
+<span class="br">4 </span>
+<span class="br">5 </span><span class="kwrd">enum</span> <span class="hid">pi</span> = <span class="type">float</span>(<span class="hid">PI</span>);
+<span class="br">6 </span>
+<span class="br">7 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="num">0f</span>), -<span class="num">0.001130653f</span>);
+<span class="br">8 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">6f</span>), <span class="num">0.499727666f</span>);
+<span class="br">9 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">4f</span>), <span class="num">0.705733955f</span>);
+<span class="br">10 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">3f</span>), <span class="num">0.865723073f</span>);
+<span class="br">11 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">2f</span>), <span class="num">0.998442709f</span>);
+<span class="br">12 </span>
+<span class="br">13 </span><span class="hid">assert_eq</span>(<span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">14 </span>                         <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">15 </span>          <span class="num">0.001557291f</span>);
+<span class="br">16 </span><span class="hid">assert_eq</span>(<span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">17 </span>                          <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">18 </span>          <span class="num">9.41874418458610307e-07f</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev sin fit (floating-point, 4th)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">sin</span>;
+<span class="br">2 </span>
+<span class="br">3 </span><span class="kwrd">alias</span> <span class="hid">xsin</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">sin</span>, <span class="num">0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">4</span>, <span class="type">float</span>);
+<span class="br">4 </span>
+<span class="br">5 </span><span class="kwrd">enum</span> <span class="hid">pi</span> = <span class="type">float</span>(<span class="hid">PI</span>);
+<span class="br">6 </span>
+<span class="br">7 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="num">0f</span>), <span class="num">0.000121317f</span>);
+<span class="br">8 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">6f</span>), <span class="num">0.500111818f</span>);
+<span class="br">9 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">4f</span>), <span class="num">0.707106769f</span>);
+<span class="br">10 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">3f</span>), <span class="num">0.865923107f</span>);
+<span class="br">11 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">2f</span>), <span class="num">0.999908149f</span>);
+<span class="br">12 </span>
+<span class="br">13 </span><span class="hid">assert_eq</span>(<span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">14 </span>                         <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">15 </span>          <span class="num">0.000121317f</span>);
+<span class="br">16 </span><span class="hid">assert_eq</span>(<span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">17 </span>                          <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">18 </span>          <span class="num">5.8926024060212967e-09f</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev sin fit (floating-point, 5th)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">sin</span>;
+<span class="br">2 </span>
+<span class="br">3 </span><span class="kwrd">alias</span> <span class="hid">xsin</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">sin</span>, <span class="num">0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">5</span>, <span class="type">float</span>);
+<span class="br">4 </span>
+<span class="br">5 </span><span class="kwrd">enum</span> <span class="hid">pi</span> = <span class="type">float</span>(<span class="hid">PI</span>);
+<span class="br">6 </span>
+<span class="br">7 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="num">0f</span>), <span class="num">6.989e-06f</span>);
+<span class="br">8 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">6f</span>), <span class="num">0.500003159f</span>);
+<span class="br">9 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">4f</span>), <span class="num">0.707099676f</span>);
+<span class="br">10 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">3f</span>), <span class="num">0.866028726f</span>);
+<span class="br">11 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">2f</span>), <span class="num">1.000008345f</span>);
+<span class="br">12 </span>
+<span class="br">13 </span><span class="hid">assert_eq</span>(<span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">14 </span>                         <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">15 </span>          <span class="num">0.000008345f</span>);
+<span class="br">16 </span><span class="hid">assert_eq</span>(<span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">17 </span>                          <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">18 </span>          <span class="num">2.55523293496429105e-11f</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev sin fit (fixed-point, 2nd)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">sin</span>;
+<span class="br">2 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">num</span>: <span class="hid">fix</span>;
+<span class="br">3 </span>
+<span class="br">4 </span><span class="kwrd">alias</span> <span class="hid">X</span> = <span class="hid">fix</span>!(<span class="num">0</span>, <span class="hid">PI</span>);
+<span class="br">5 </span><span class="kwrd">alias</span> <span class="hid">Y</span> = <span class="hid">fix</span>!(-<span class="num">3.67252</span>, <span class="num">4.74355</span>);
+<span class="br">6 </span>
+<span class="br">7 </span><span class="kwrd">alias</span> <span class="hid">xsin</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">sin</span>, <span class="num">0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">2</span>, <span class="hid">X</span>);
+<span class="br">8 </span>
+<span class="br">9 </span><span class="kwrd">enum</span> <span class="hid">pi</span> = <span class="hid">PI</span>;
+<span class="br">10 </span>
+<span class="br">11 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="num">0</span>)), <span class="hid">Y</span>(-<span class="num">0.01622100174</span>));
+<span class="br">12 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">6f</span>)), <span class="hid">Y</span>(<span class="num">0.5126221105</span>));
+<span class="br">13 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">4f</span>)), <span class="hid">Y</span>(<span class="num">0.7071070001</span>));
+<span class="br">14 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">3f</span>)), <span class="hid">Y</span>(<span class="num">0.85496744</span>));
+<span class="br">15 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">2f</span>)), <span class="hid">Y</span>(<span class="num">1.010814998</span>));
+<span class="br">16 </span>
+<span class="br">17 </span><span class="hid">assert_eq</span>(<span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">18 </span>                         <span class="kwrd">function</span> (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="kwrd">cast</span>(<span class="type">double</span>) <span class="hid">xsin</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">19 </span>          <span class="num">0.0162210017442703247</span>);
+<span class="br">20 </span><span class="hid">assert_eq</span>(<span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">21 </span>                          <span class="kwrd">function</span> (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="kwrd">cast</span>(<span class="type">double</span>) <span class="hid">xsin</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">22 </span>          <span class="num">9.56006554951649217e-05</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev sin fit (fixed-point, 5th)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">sin</span>;
+<span class="br">2 </span><span class="kwrd">import</span> <span class="hid">uctl</span>.<span class="hid">num</span>: <span class="hid">fix</span>;
+<span class="br">3 </span>
+<span class="br">4 </span><span class="kwrd">alias</span> <span class="hid">X</span> = <span class="hid">fix</span>!(<span class="num">0</span>, <span class="hid">PI</span>);
+<span class="br">5 </span><span class="kwrd">alias</span> <span class="hid">Y</span> = <span class="hid">fix</span>!(-<span class="num">3.67252</span>, <span class="num">4.74355</span>);
+<span class="br">6 </span>
+<span class="br">7 </span><span class="kwrd">alias</span> <span class="hid">xsin</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">sin</span>, <span class="num">0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">5</span>, <span class="hid">X</span>);
+<span class="br">8 </span>
+<span class="br">9 </span><span class="kwrd">enum</span> <span class="hid">pi</span> = <span class="hid">PI</span>;
+<span class="br">10 </span>
+<span class="br">11 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="num">0</span>)), <span class="hid">Y</span>(<span class="num">6.981194019e-06</span>));
+<span class="br">12 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">6f</span>)), <span class="hid">Y</span>(<span class="num">0.5000031851</span>));
+<span class="br">13 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">4f</span>)), <span class="hid">Y</span>(<span class="num">0.7070996426</span>));
+<span class="br">14 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">3f</span>)), <span class="hid">Y</span>(<span class="num">0.8660286553</span>));
+<span class="br">15 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">X</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">2f</span>)), <span class="hid">Y</span>(<span class="num">1.0000083</span>));
+<span class="br">16 </span>
+<span class="br">17 </span><span class="hid">assert_eq</span>(<span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">18 </span>                         <span class="kwrd">function</span> (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="kwrd">cast</span>(<span class="type">double</span>) <span class="hid">xsin</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">19 </span>          <span class="num">8.29994678497314453e-06</span>);
+<span class="br">20 </span><span class="hid">assert_eq</span>(<span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">21 </span>                          <span class="kwrd">function</span> (<span class="type">double</span> <span class="hid">x</span>) =&gt; <span class="kwrd">cast</span>(<span class="type">double</span>) <span class="hid">xsin</span>(<span class="kwrd">cast</span>(<span class="hid">X</span>) <span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">22 </span>          <span class="num">2.54778471053421005e-11</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev exp2 fit (floating-point, 2nd)</p></div><pre class="d_code highlighted"><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">exp2</span>;
+
+<span class="kwrd">alias</span> <span class="hid">xexp2</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">exp2</span>, -<span class="num">1</span>, <span class="num">1</span>, <span class="num">2</span>, <span class="type">float</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">xexp2</span>(-<span class="num">1f</span>), <span class="num">0.511991978</span>);
+<span class="hid">assert_eq</span>(<span class="hid">xexp2</span>(<span class="num">1f</span>), <span class="num">1.983056068</span>);
+
+<span class="kwrd">enum</span> <span class="hid">max_err</span> = <span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="kwrd">cast</span>(<span class="type">float</span>) <span class="hid">exp2</span>(<span class="hid">x</span>),
+                              <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xexp2</span>(<span class="hid">x</span>))(-<span class="num">1.0</span>, <span class="num">1.0</span>, <span class="num">64</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>, <span class="num">0.016944</span>);
+<span class="kwrd">enum</span> <span class="hid">mean_err</span> = <span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">exp2</span>(<span class="hid">x</span>),
+                                <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xexp2</span>(<span class="hid">x</span>))(-<span class="num">1.0</span>, <span class="num">1.0</span>, <span class="num">64</span>);
+<span class="hid">assert_eq</span>(<span class="hid">mean_err</span>, <span class="num">0.000101418698020560213</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev exp2 fit (floating-point, 3rd)</p></div><pre class="d_code highlighted"><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">exp2</span>;
+
+<span class="kwrd">alias</span> <span class="hid">xexp2</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">exp2</span>, -<span class="num">1</span>, <span class="num">1</span>, <span class="num">3</span>, <span class="type">float</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">xexp2</span>(-<span class="num">1f</span>), <span class="num">0.498930305</span>);
+<span class="hid">assert_eq</span>(<span class="hid">xexp2</span>(<span class="num">1f</span>), <span class="num">1.998589635</span>);
+
+<span class="kwrd">enum</span> <span class="hid">max_err</span> = <span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="kwrd">cast</span>(<span class="type">float</span>) <span class="hid">exp2</span>(<span class="hid">x</span>),
+                              <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xexp2</span>(<span class="hid">x</span>))(-<span class="num">1.0</span>, <span class="num">1.0</span>, <span class="num">64</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>, <span class="num">0.001410300</span>);
+<span class="kwrd">enum</span> <span class="hid">mean_err</span> = <span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">exp2</span>(<span class="hid">x</span>),
+                                <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xexp2</span>(<span class="hid">x</span>))(-<span class="num">1.0</span>, <span class="num">1.0</span>, <span class="num">64</span>);
+<span class="hid">assert_eq</span>(<span class="hid">mean_err</span>, <span class="num">7.63618342454793614e-07</span>);</pre></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev exp2 fit (floating-point, 5th)</p></div><pre class="d_code highlighted"><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">exp2</span>;
+
+<span class="kwrd">alias</span> <span class="hid">xexp2</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="hid">exp2</span>, -<span class="num">1</span>, <span class="num">1</span>, <span class="num">5</span>, <span class="type">float</span>);
+
+<span class="hid">assert_eq</span>(<span class="hid">xexp2</span>(-<span class="num">1f</span>), <span class="num">0.499996930f</span>);
+<span class="hid">assert_eq</span>(<span class="hid">xexp2</span>(<span class="num">1f</span>), <span class="num">1.999995828f</span>);
+
+<span class="kwrd">enum</span> <span class="hid">max_err</span> = <span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="kwrd">cast</span>(<span class="type">float</span>) <span class="hid">exp2</span>(<span class="hid">x</span>),
+                              <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xexp2</span>(<span class="hid">x</span>))(-<span class="num">1.0</span>, <span class="num">1.0</span>, <span class="num">64</span>);
+<span class="hid">assert_eq</span>(<span class="hid">max_err</span>, <span class="num">0.000006702f</span>);
+<span class="kwrd">enum</span> <span class="hid">mean_err</span> = <span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">exp2</span>(<span class="hid">x</span>),
+                                <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xexp2</span>(<span class="hid">x</span>))(-<span class="num">1.0</span>, <span class="num">1.0</span>, <span class="num">64</span>);
+<span class="hid">assert_eq</span>(<span class="hid">mean_err</span>, <span class="num">1.45588105599773291e-11</span>);</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.math.html">math</a> <a class="parent" href="uctl.math.cheby.html">cheby</a> 
+		<span class="type-separator">structs</span><ul><li><a class="struct" href="uctl.math.cheby.Cheby.html">Cheby</a></li></ul><span class="type-separator">templates</span><ul><li><a class="template current" href="uctl.math.cheby.mk.1.html">mk</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>

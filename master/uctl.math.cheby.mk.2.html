@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>mk (uctl.math.cheby.mk)</title>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link href="style.css" rel="stylesheet" />
+        <script src="script.js" type="text/javascript"></script>
+
+	
+	<link href="search-results.html" rel="prefetch" />
+<link href="katex.min.css" rel="stylesheet" /></head>
+<body>
+	<div id="page-header">
+		<div id="logotype">
+		<span>uctl documentation</span>
+		<nav>
+			<a href="http://github.com/katyo/uctl-d">uctl-d</a>
+		</nav>
+		</div>
+
+		<form action="search-docs.html" id="search">
+			<input name="searchTerm" placeholder="Find a symbol name..." type="search" />
+			<input type="submit" value="Go" />
+		</form>
+	</div>
+	<div id="page-body">
+		<div id="page-content">
+		<h1>mk</h1><div class="breadcrumbs"><a class="breadcrumb" href="uctl.html">uctl</a> <a class="breadcrumb" href="uctl.math.html">math</a> <a class="breadcrumb" href="uctl.math.cheby.html">cheby</a> </div><div><div class="documentation-comment synopsis"><div><p>Function approximation using Chebyshev polynom coeeficients in range</p></div></div></div><div class="annotated-prototype"><ol class="overloads"><li class="overload-option"><a href="uctl.math.cheby.mk.1.html"><span class="overload-signature"><span class="builtin-type">template</span> <span class="name">mk</span><span class="template-params">(alias C, alias F, real a, real b, uint D)</span></span></a></li><li class="active-overload-option"><span class="overload-signature"><span class="builtin-type">template</span> <span class="name">mk</span><span class="template-params">(alias C, real a, real b, T, alias c)</span></span><div class="aggregate-prototype"><div class="attributes"></div><span class="builtin-type">template</span> mk (<div class="parameters-list toplevel"><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="C">C</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">real</span> <span class="name" data-ident="a">a</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="builtin-type">real</span> <span class="name" data-ident="b">b</span></span></div><div class="template-parameter-item parameter-item">	<span><span class="name" data-ident="T">T</span></span></div><div class="template-parameter-item parameter-item">	<span><a class="lang-feature" href="http://dpldocs.info/template-alias-parameter">alias</a> <span class="name" data-ident="c">c</span></span></div></div>) <a class="lang-feature" href="http://dpldocs.info/template-constraints">if</a> (<div class="template-constraint-expression"><div class="andand-left"><div class="andand-left"><div class="andand-left"><div class="andand-left">__traits(<span class="name" data-ident="isSame">isSame</span>, <span class="name" data-ident="C">C</span>, <a class="xref" href="uctl.math.cheby.Cheby.html" title="uctl.math.cheby.Cheby"><span class="name" data-ident="Cheby">Cheby</span></a>) &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="isNumer">isNumer</span>!<span class="name" data-ident="T">T</span></div> &amp;&amp; </div><div class="andand-right">!<a class="lang-feature" href="http://dpldocs.info/is-expression">is</a>(<span class="name" data-ident="c">c</span>)</div> &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="isArray">isArray</span>!(<a class="lang-feature" href="http://dpldocs.info/typeof-expression">typeof</a>(<span class="name" data-ident="c">c</span>))</div> &amp;&amp; </div><div class="andand-right"><span class="name" data-ident="isNumer">isNumer</span>!(<span class="name" data-ident="ElementType">ElementType</span>!(<a class="lang-feature" href="http://dpldocs.info/typeof-expression">typeof</a>(<span class="name" data-ident="c">c</span>)))</div></div>) {}</div></li><li class="overload-option"><a href="uctl.math.cheby.mk.3.html"><span class="overload-signature"><span class="builtin-type">template</span> <span class="name">mk</span><span class="template-params">(alias C, alias F, real a, real b, uint D, T)</span></span></a></li></ol></div><div><h2 id="examples"><a class="header-anchor" href="#examples">Examples</a></h2><div class="documentation-comment"><div></div></div><div class="unittest-example-holder"><div class="documentation-comment"><p>Test Chebyshev sin with predefined coefficients (floating-point, 2rd)</p></div><pre class="d_code highlighted with-line-wrappers"><span class="br">1 </span><span class="kwrd">import</span> <span class="hid">std</span>.<span class="hid">math</span>: <span class="hid">sin</span>;
+<span class="br">2 </span>
+<span class="br">3 </span><span class="kwrd">alias</span> <span class="hid">xsin</span> = <span class="hid">mk</span>!(<span class="hid">Cheby</span>, <span class="num">0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="type">float</span>, [<span class="num">0.602201760</span>, <span class="num">0.513518274</span>, -<span class="num">0.104905032</span>]);
+<span class="br">4 </span>
+<span class="br">5 </span><span class="kwrd">enum</span> <span class="hid">pi</span> = <span class="type">float</span>(<span class="hid">PI</span>);
+<span class="br">6 </span>
+<span class="br">7 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="num">0f</span>), -<span class="num">0.016220979f</span>);
+<span class="br">8 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">6f</span>), <span class="num">0.512622118f</span>);
+<span class="br">9 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">4f</span>), <span class="num">0.707107008f</span>);
+<span class="br">10 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">3f</span>), <span class="num">0.854967356f</span>);
+<span class="br">11 </span><span class="hid">assert_eq</span>(<span class="hid">xsin</span>(<span class="hid">pi</span>*<span class="num">1f</span>/<span class="num">2f</span>), <span class="num">1.010815024f</span>);
+<span class="br">12 </span>
+<span class="br">13 </span><span class="hid">assert_eq</span>(<span class="hid">max_abs_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">14 </span>                         <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">15 </span>          <span class="num">0.016220979f</span>);
+<span class="br">16 </span><span class="hid">assert_eq</span>(<span class="hid">mean_sqr_error</span>!(<span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">sin</span>(<span class="hid">x</span>),
+<span class="br">17 </span>                          <span class="kwrd">function</span> (<span class="type">float</span> <span class="hid">x</span>) =&gt; <span class="hid">xsin</span>(<span class="hid">x</span>))(<span class="num">0.0</span>, <span class="hid">PI</span>*<span class="num">0.5</span>, <span class="num">64</span>),
+<span class="br">18 </span>          <span class="num">9.55991636146791279e-05f</span>);</pre></div></div></div>
+		<div id="page-nav"><a class="parent" href="uctl.html">uctl</a> <a class="parent" href="uctl.math.html">math</a> <a class="parent" href="uctl.math.cheby.html">cheby</a> 
+		<span class="type-separator">structs</span><ul><li><a class="struct" href="uctl.math.cheby.Cheby.html">Cheby</a></li></ul><span class="type-separator">templates</span><ul><li><a class="template current" href="uctl.math.cheby.mk.1.html">mk</a></li></ul></div>
+	</div>
+	<div id="page-footer">Page generated by <a href="https://github.com/adamdruppe/adrdox">adrdox</a></div>
+<script onload="document.querySelectorAll('span.raw-tex-math').forEach(function(e){e.outerHTML=katex.renderToString(e.innerText)})" src="katex.min.js" type="text/javascript"></script></body>
+</html>
