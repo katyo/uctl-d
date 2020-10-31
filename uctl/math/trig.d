@@ -20,7 +20,7 @@
    * + 5th
      + ~0.0002)
 
-   ![Approximation erros](trig_errs.svg)
+   ![Approximation errors](trig_errs.svg)
 
    #### 2nd-order (quadratic) interpolation
 

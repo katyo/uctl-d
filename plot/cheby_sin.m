@@ -9,7 +9,7 @@ place = [1 3 5 7
 
 for i = 1:length(orders)
   order = orders(i);
-  data = str2num(eval_d(fileread('trig_errs.d'),
+  data = str2num(eval_d(fileread('cheby_sin.d'),
                         'uint size', size,
                         'uint order', order,
                         'double a', range(1),
@@ -31,4 +31,4 @@ for i = 1:length(orders)
   title(['Error for ' int2str(order) '-order sinus']);
 endfor
 
-print -dsvg -color '-S640,1280' trig_errs.svg
+print -dsvg -color '-S640,800' cheby_sin.svg

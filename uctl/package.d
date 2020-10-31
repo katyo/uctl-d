@@ -51,6 +51,7 @@ public import Regul = uctl.regul;
 public import Simul = uctl.simul;
 public import Modul = uctl.modul;
 
+alias mk = uctl.math.mk;
 alias mk = uctl.filt.mk;
 alias mk = uctl.regul.mk;
 alias mk = uctl.simul.mk;

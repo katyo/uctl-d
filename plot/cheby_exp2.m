@@ -1,6 +1,6 @@
 size = 100;
 orders = [2 3 4 5];
-range = [0 pi/2];
+range = [-1 1];
 
 cols = 2;
 rows = length(orders);
@@ -9,7 +9,7 @@ place = [1 3 5 7
 
 for i = 1:length(orders)
   order = orders(i);
-  data = str2num(eval_d(fileread('trig_errs.d'),
+  data = str2num(eval_d(fileread('cheby_exp2.d'),
                         'uint size', size,
                         'uint order', order,
                         'double a', range(1),
@@ -23,12 +23,12 @@ for i = 1:length(orders)
   plot(x, y, '-; approx.;',
        x, yr, '-; refer.;');
   axis(range);
-  title(['Polynomial ' int2str(order) '-order sinus']);
+  title(['Polynomial ' int2str(order) '-order exp2']);
 
   subplot(rows, cols, place(2, i));
   plot(x, e);
   axis(range);
-  title(['Error for ' int2str(order) '-order sinus']);
+  title(['Error for ' int2str(order) '-order exp2']);
 endfor
 
-print -dsvg -color '-S640,1280' trig_errs.svg
+print -dsvg -color '-S640,800' cheby_exp2.svg

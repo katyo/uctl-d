@@ -6,6 +6,7 @@ MODULES += \
   uctl.math.trig \
   uctl.math.log \
   uctl.math.util \
+  uctl.math.cheby \
   uctl.util.package \
   uctl.util.adj \
   uctl.util.dl \
@@ -38,6 +39,10 @@ MODULES += \
 PLOTS += \
   trig_errs \
   win_funcs \
+  cheby_sin \
+  cheby_exp2 \
+  cheby_log2 \
+  cheby_sqrt \
   filt_ema \
   sim_htr \
   sim_pid_htr \
