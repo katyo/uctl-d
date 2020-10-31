@@ -28,8 +28,8 @@ auto log2(T)(const T x) if (isNumer!T) {
     static assert(T.rmin > 0,
                   "Logarithm is negative infinity for values which can be zero. Argument has type " ~ T.stringof);
 
-    enum auto Rrmin = std_log2(T.rmin);
-    enum auto Rrmax = std_log2(T.rmax);
+    enum Rrmin = std_log2(T.rmin);
+    enum Rrmax = std_log2(T.rmax);
 
     alias R = fix!(Rrmin, Rrmax);
 
@@ -94,9 +94,9 @@ auto log2(T)(const T x) if (isNumer!T) {
     T b = 0.5;
 
     static if (is(T == float)) {
-      enum uint prec = 24;
+      enum prec = 24;
     } else {
-      enum uint prec = 52;
+      enum prec = 52;
     }
 
     foreach (i; 0 .. prec) {
@@ -168,7 +168,7 @@ nothrow @nogc unittest {
    See_Also: [log2], [log10].
 */
 auto log(T)(const T x) if (isNumer!T) {
-  enum auto inv_log2_e = asnum!(1.0 / LOG2E, T);
+  enum inv_log2_e = asnum!(1.0 / LOG2E, T);
 
   return log2(x) * inv_log2_e;
 }
@@ -179,7 +179,7 @@ auto log(T)(const T x) if (isNumer!T) {
    See_Also: [log2], [log].
 */
 auto log10(T)(const T x) if (isNumer!T) {
-  enum auto inv_log2_10 = asnum!(1.0 / LOG2T, T);
+  enum inv_log2_10 = asnum!(1.0 / LOG2T, T);
 
   return log2(x) * inv_log2_10;
 }
