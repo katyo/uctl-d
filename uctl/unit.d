@@ -93,9 +93,17 @@
      - Volt
      - `mV`, `uV`, `nV`, `KV`, `MV`
    * - Current
-     - A
+     - `A`
      - Ampere
      - `mA`, `uA`, `nA`, `KA`
+   * - Magnetic induction
+     - `Tl`
+     - Tesla
+     - `mTl`, `uTl`, `nTl`, `KTl`
+   * - Magnetic flux
+     - `Wb`
+     - Weber
+     - `mWb`, `uWb`, `nWb`, `KWb`
    * - Resistance
      - `Ohm`
      - Ohm
@@ -491,6 +499,11 @@ alias Voltage = UnitsClass!("Voltage");
 /// Current units class
 alias Current = UnitsClass!("Current");
 
+/// Magnetic induction (flux density)
+alias MagneticInduction = UnitsClass!("Magnetic Induction");
+/// Magnetic flux
+alias MagneticFlux = UnitsClass!("Magnetic Flux");
+
 /// Force units
 alias Force = UnitsClass!("Force");
 /// Mass units
@@ -666,6 +679,18 @@ alias mA = Units!("MilliAmpere", Current, 1e-3);
 alias uA = Units!("MicroAmpere", Current, 1e-6);
 alias nA = Units!("NanoAmpere", Current, 1e-9);
 alias KA = Units!("KiloAmpere", Current, 1e3);
+
+alias Tl = Units!("Tesla", MagneticInduction);
+alias mTl = Units!("MilliTesla", MagneticInduction, 1e-3);
+alias uTl = Units!("MicroTesla", MagneticInduction, 1e-6);
+alias nTl = Units!("NanoTesla", MagneticInduction, 1e-9);
+alias KTl = Units!("KiloTesla", MagneticInduction, 1e3);
+
+alias Wb = Units!("Weber", MagneticFlux);
+alias mWb = Units!("MilliWeber", MagneticFlux, 1e-3);
+alias uWb = Units!("MicroWeber", MagneticFlux, 1e-6);
+alias nWb = Units!("NanoWeber", MagneticFlux, 1e-9);
+alias KWb = Units!("KiloWeber", MagneticFlux, 1e3);
 
 alias N = Units!("Newton", Force);
 alias mN = Units!("MilliNewton", Force, 1e-3);
