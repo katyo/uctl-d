@@ -22,6 +22,9 @@
    #### Square root approximation
 
    ![sqrt approximation errors](cheby_sqrt.svg)
+
+   See_Also:
+   [Chebyshev polynomials](https://en.wikipedia.org/wiki/Chebyshev_polynomials) wikipedia article.
  */
 module uctl.math.cheby;
 
