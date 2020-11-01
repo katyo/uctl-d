@@ -26,7 +26,7 @@ ylabel("T, Nm");
 ##title("Load torque");
 
 subplot(3,1,2);
-plot(t, w*30/pi);
+plot(t, w);
 ##xlabel("t, S");
 ylabel("w, RPM");
 ##title("Rotation speed");

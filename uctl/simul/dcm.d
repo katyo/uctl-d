@@ -62,11 +62,13 @@
  */
 module uctl.simul.dcm;
 
-import std.traits: isInstanceOf;
-import uctl.num: isNumer, asnum;
+import std.traits: isInstanceOf, Unqual;
+import uctl.unit: isTiming, asTiming, sec, hasUnits, as, to, rawTypeOf, rawof, Resistance, Ohm, Inductance, H, MagneticFlux, Wb, InertiaMoment, Kgm2, Torque, Nm, AngularVel, rad_sec, Voltage, V, Current, A;
+import uctl.num: isNumer, asnum, typeOf;
 
 version(unittest) {
   import uctl.test: assert_eq, unittests;
+  import uctl.unit: usec, mOhm, uH, mWb, gcm2, mNm;
   import uctl.num: fix, asfix;
 
   mixin unittests;
@@ -96,44 +98,53 @@ version(unittest) {
      - 8.7
    )
 */
-struct Param(real dt_, R_, L_, F_, J_) if (isNumer!(R_, L_, F_, J_)) {
-  alias R = R_;
-  alias L = L_;
-  alias F = F_;
-  alias J = J_;
+struct Param(alias s_, R_, L_, F_, J_) if (isTiming!s_ &&
+                                           hasUnits!(R_, Resistance) &&
+                                           hasUnits!(L_, Inductance) &&
+                                           hasUnits!(F_, MagneticFlux) &&
+                                           hasUnits!(J_, InertiaMoment) &&
+                                           isNumer!(rawTypeOf!R_, rawTypeOf!L_,
+                                                    rawTypeOf!F_, rawTypeOf!J_)) {
+  alias R = Unqual!R_;
+  alias L = Unqual!L_;
+  alias F = Unqual!F_;
+  alias J = Unqual!J_;
+
+  alias R_Ohm = typeof(R().to!Ohm.raw);
+  alias L_H = typeof(L().to!H.raw);
+  alias F_Wb = typeof(F().to!Wb.raw);
+  alias J_Kgm2 = typeof(J().to!Kgm2.raw);
 
   /// Sampling time
-  enum rdt = dt_;
-  /// Sampling time
-  enum dt = asnum!(dt_, R);
+  enum dt_sec = asTiming!(s_, sec, R_Ohm).raw;
 
-  alias DtInvL = typeof(dt / L());
-  alias DtInvJ = typeof(dt / J());
+  alias Dt_sec_L_H = typeof(dt_sec / L_H());
+  alias Dt_sec_J_Kgm2 = typeof(dt_sec / J_Kgm2());
 
   /// Rotor resistance, $(I Ohm)
-  R Rr;
+  R_Ohm rotor_R_Ohm;
   /// dt/Lr, $(I S/H)
-  DtInvL dt_inv_Lr;
+  Dt_sec_L_H dt_rotor_L_H;
   /// Stator flux, $(I Wb)
-  F Fs;
+  F_Wb stator_F_Wb;
   /// d/Jr, $(I S/(Kg⋅m$(SUPERSCRIPT 2)))
-  DtInvJ dt_inv_Jr;
+  Dt_sec_J_Kgm2 dt_rotor_J_Kgm2;
 
   /**
      Initialize motor parameters
 
      Params:
-     Rr_ = Rotor resistance, $(I Ohm)
-     Lr_ = Rotor inductance, $(I H)
-     Fs_ = Stator flux, $(I Wb)
-     Jr_ = Rotor inertia, $(I Kg⋅m$(SUPERSCRIPT 2))
+     rotor_R = Rotor resistance, $(I Ohm)
+     rotor_L = Rotor inductance, $(I H)
+     stator_F = Stator flux, $(I Wb)
+     rotor_J = Rotor inertia, $(I Kg⋅m$(SUPERSCRIPT 2))
   */
   const pure nothrow @nogc @safe
-  this(const R Rr_, const L Lr_, const F Fs_, const J Jr_) {
-    Rr = Rr_;
-    dt_inv_Lr = dt / Lr_;
-    Fs = Fs_;
-    dt_inv_Jr = dt / Jr_;
+  this(const R rotor_R, const L rotor_L, const F stator_F, const J rotor_J) {
+    rotor_R_Ohm = rotor_R.to!Ohm.raw;
+    dt_rotor_L_H = dt_sec / rotor_L.to!H.raw;
+    stator_F_Wb = stator_F.to!Wb.raw;
+    dt_rotor_J_Kgm2 = dt_sec / rotor_J.to!Kgm2.raw;
   }
 }
 
@@ -141,63 +152,67 @@ struct Param(real dt_, R_, L_, F_, J_) if (isNumer!(R_, L_, F_, J_)) {
    Create motor parameters
 
    Params:
-   dt = Sampling time
+   s = Sampling time or frequency
    R = Rotor resistance type
    L = Rotor inductance type
    F = Stator flux type
    J = Rotor inertia type
-   Rr = Rotor resistance
-   Lr = Rotor inductance
-   Fs = Stator flux
-   Jr = Rotor inertia
+   rotor_R = Rotor resistance
+   rotor_L = Rotor inductance
+   stator_F = Stator flux
+   rotor_J = Rotor inertia
 */
-pure nothrow @nogc @safe Param!(dt, R, L, F, J)
-mk(alias P, real dt, R, L, F, J)(R Rr, L Lr, F Fs, J Jr) if (__traits(isSame, Param, P) && isNumer!(R, L, F, J)) {
-  return Param!(dt, R, L, F, J)(Rr, Lr, Fs, Jr);
+pure nothrow @nogc @safe Param!(s, R, L, F, J)
+mk(alias P, alias s, R, L, F, J)(R rotor_R, L rotor_L, F stator_F, J rotor_J)
+if (__traits(isSame, Param, P) && isTiming!s &&
+    hasUnits!(R, Resistance) &&
+    hasUnits!(L, Inductance) &&
+    hasUnits!(F, MagneticFlux) &&
+    hasUnits!(J, InertiaMoment) &&
+    isNumer!(rawTypeOf!R, rawTypeOf!L,
+             rawTypeOf!F, rawTypeOf!J)) {
+  return Param!(s, R, L, F, J)(rotor_R, rotor_L, stator_F, rotor_J);
 }
 
 /// Test motor parameters (floating-point)
 nothrow @nogc unittest {
-  enum auto dt = 0.0001;
+  enum dt = 100f.as!usec;
 
-  static immutable auto param = mk!(Param, dt)(124e-3f, 42e-6f, 8.5e-3f, 8.71e-6f);
-  assert(is(typeof(param) == immutable Param!(dt, float, float, float, float)));
+  static immutable param = mk!(Param, dt)(124f.as!mOhm, 42f.as!uH, 8.5f.as!mWb, 87.1f.as!gcm2);
 
-  assert_eq(param.Rr, 124e-3f);
-  assert_eq(param.dt_inv_Lr, 2.38095238f);
-  assert_eq(param.Fs, 8.5e-3f);
-  assert_eq(param.dt_inv_Jr, 11.481056f);
+  assert_eq(param.rotor_R_Ohm, 124e-3f);
+  assert_eq(param.dt_rotor_L_H, 2.38095238f);
+  assert_eq(param.stator_F_Wb, 8.5e-3f);
+  assert_eq(param.dt_rotor_J_Kgm2, 11.481056f);
 }
 
 /// Test motor parameters (fixed-point)
 nothrow @nogc unittest {
-  enum auto dt = 0.0001;
+  enum dt = 100f.as!usec;
 
-  static immutable auto param = mk!(Param, dt)(asfix!124e-3, asfix!42e-6, asfix!8.5e-3, asfix!8.71e-6);
-  //assert(is(typeof(param) == immutable Param!(dt, fix!124e-3, fix!(dt/42e-6), fix!8.5e-3, fix!(dt/8.71e-6))));
+  static immutable param = mk!(Param, dt)(asfix!124.as!mOhm, asfix!42.as!uH, asfix!8.5.as!mWb, asfix!87.1.as!gcm2);
 
-  assert_eq(param.Rr, asfix!124e-3);
-  assert_eq(param.dt_inv_Lr, asfix!2.380952379);
-  assert_eq(param.Fs, asfix!8.5e-3);
-  assert_eq(param.dt_inv_Jr, asfix!11.48105624);
+  assert_eq(param.rotor_R_Ohm, asfix!124e-3);
+  assert_eq(param.dt_rotor_L_H, asfix!2.380952381);
+  assert_eq(param.stator_F_Wb, asfix!8.5e-3);
+  assert_eq(param.dt_rotor_J_Kgm2, asfix!11.48105626);
 }
 
 /// Test motor parameters (fixed-point)
 nothrow @nogc unittest {
-  alias R = fix!(0, 200e-3);
-  alias L = fix!(1e-9, 100e-6);
-  alias F = fix!(0, 20e-3);
-  alias J = fix!(1e-9, 20e-6);
+  alias R = fix!(0, 200);
+  alias L = fix!(1e-3, 100);
+  alias F = fix!(0, 20);
+  alias J = fix!(1e-3, 200);
 
-  enum auto dt = 0.0001;
+  enum dt = 100f.as!usec;
 
-  static immutable auto param = mk!(Param, dt)(R(124e-3), L(42e-6), F(8.5e-3), J(8.71e-6));
-  assert(is(typeof(param) == immutable Param!(dt, R, L, F, J)));
+  static immutable param = mk!(Param, dt)(124f.as!mOhm.to!R, 42f.as!uH.to!L, 8.5f.as!mWb.to!F, 87.1f.as!gcm2.to!J);
 
-  assert_eq(param.Rr, R(124e-3));
-  assert_eq(param.dt_inv_Lr, param.DtInvL(2.38092041));
-  assert_eq(param.Fs, F(8.5e-3));
-  assert_eq(param.dt_inv_Jr, param.DtInvJ(11.48101807));
+  assert_eq(param.rotor_R_Ohm, param.R_Ohm(124e-3));
+  assert_eq(param.dt_rotor_L_H, param.Dt_sec_L_H(2.38092041));
+  assert_eq(param.stator_F_Wb, param.F_Wb(8.5e-3));
+  assert_eq(param.dt_rotor_J_Kgm2, param.Dt_sec_J_Kgm2(11.48101807));
 }
 
 /// Check for parameters
@@ -217,82 +232,122 @@ template isParam(X...) if (X.length == 1) {
    U_ = Rotor voltage type, $(I V)
    W_ = Rotor speed type, $(I rad/S)
 */
-struct State(alias P_, U_, W_) if (isParam!P_ && isNumer!(P_.R, U_, W_)) {
-  static if (is(P_)) {
-    alias P = P_;
-  } else {
-    alias P = typeof(P_);
-  }
-  alias U = U_;
-  alias W = W_;
-  alias I = typeof(U() / P.R());
-  alias T = typeof(I() * P.F());
-  alias E = typeof(W() * P.F());
+struct State(alias P_, U_, W_) if (isParam!P_ &&
+                                   hasUnits!(U_, Voltage) &&
+                                   hasUnits!(W_, AngularVel) &&
+                                   isNumer!(P_.R_Ohm, rawTypeOf!U_, rawTypeOf!W_)) {
+  alias P = typeOf!P_;
+
+  alias U = Unqual!U_;
+  alias W = Unqual!W_;
+
+  alias U_V = Unqual!(typeof(U().to!V.raw));
+  alias W_rad_sec = Unqual!(typeof(W().to!rad_sec.raw));
+
+  alias I_A = typeof(U_V() / P.R_Ohm());
+  alias T_Nm = typeof(I_A() * P.F_Wb());
+  alias E_V = typeof(W_rad_sec() * P.F_Wb());
+
+  alias I = typeof(I_A().as!A);
+  alias T = typeof(T_Nm().as!Nm);
+  alias E = typeof(E_V().as!V);
 
   /// Rotor current, $(I A)
-  I Ir = 0.0;
+  I_A rotor_I_A = 0.0;
   /// Electro-magnetic torque, $(I Kg⋅m$(SUPERSCRIPT 2))
-  T Te = 0.0;
+  T_Nm rotor_T_Nm = 0.0;
   /// Back EMF, $(I V)
-  E Eb = 0.0;
+  E_V back_E_V = 0.0;
   /// Rotor speed, $(I rad/S)
-  W wr = 0.0;
+  W_rad_sec rotor_W_rad_sec = 0.0;
+
+  /// Get rotor current
+  pure nothrow @nogc @safe
+  auto rotor_I() const {
+    return rotor_I_A.as!A;
+  }
+
+  /// Get rotor torque
+  pure nothrow @nogc @safe
+  auto rotor_T() const {
+    return rotor_T_Nm.as!Nm;
+  }
+
+  /// Get back EMF
+  pure nothrow @nogc @safe
+  auto back_E() const {
+    return back_E_V.as!V;
+  }
+
+  /// Get rotor speed
+  pure nothrow @nogc @safe
+  auto rotor_W() const {
+    return rotor_W_rad_sec.as!rad_sec;
+  }
 
   /**
      Initialize state
-   */
-  const pure nothrow @nogc @safe
-  this(const I Ir_, const T Te_, const E Eb_, const W wr_) {
-    Ir = Ir_;
-    Te = Te_;
-    Eb = Eb_;
-    wr = wr_;
+  */
+  pure nothrow @nogc @safe
+  this(const I rotor_I, const T rotor_T, const E back_E, const W rotor_W) const {
+    rotor_I_A = rotor_I.to!A.raw;
+    rotor_T_Nm = rotor_T.to!Nm.raw;
+    back_E_V = back_E.to!V.raw;
+    rotor_W_rad_sec = rotor_W.to!rad_sec.raw;
   }
 
   /**
      Apply simulation step
   */
-  W opCall(ref const P param, const U Us, const T Tl) {
-    Ir += (Us - Eb - param.Rr * Ir) * param.dt_inv_Lr;
-    Te = Ir * param.Fs;
-    wr += (Te - Tl) * param.dt_inv_Jr; // [N m S Kg^-1 m^-2] => [Kg S^-2 m^2 S Kg^-1 m^-2] => [S^-1]
-    if (wr < cast(W) 0.0) {
-      wr = cast(W) 0.0;
+  pure nothrow @nogc @safe
+  W opCall(Us, Tl)(ref const P param, const Us supply_U, const Tl load_T)
+  if (hasUnits!(Us, Voltage) && hasUnits!(Tl, Torque) &&
+      isNumer!(U_V, rawTypeOf!Us, rawTypeOf!Tl)) {
+    const supply_U_V = supply_U.to!V.raw;
+    const load_T_Nm = load_T.to!Nm.raw;
+
+    rotor_I_A += (supply_U_V - back_E_V - param.rotor_R_Ohm * rotor_I_A) * param.dt_rotor_L_H;
+    rotor_T_Nm = rotor_I_A * param.stator_F_Wb;
+    rotor_W_rad_sec += (rotor_T_Nm - load_T_Nm) * param.dt_rotor_J_Kgm2; // [N m S Kg^-1 m^-2] => [Kg S^-2 m^2 S Kg^-1 m^-2] => [S^-1]
+    if (rotor_W_rad_sec < cast(W_rad_sec) 0.0) {
+      rotor_W_rad_sec = cast(W_rad_sec) 0.0;
     }
-    Eb = wr * param.Fs;
-    return wr;
+    back_E_V = rotor_W_rad_sec * param.stator_F_Wb;
+    return rotor_W_rad_sec.as!rad_sec.to!(W.units);
   }
 }
 
 /// Test motor state (floating-point)
 nothrow @nogc unittest {
-  enum auto dt = 0.0001;
+  alias U = typeof(0f.as!V);
+  alias W = typeof(0f.as!rad_sec);
 
-  static immutable auto param = mk!(Param, dt)(124e-3f, 42e-6f, 8.5e-3f, 8.71e-6f);
-  static auto state = State!(param, float, float)();
+  enum dt = 100f.as!usec;
 
-  assert_eq(state(param, 0.0, 124e-4), 0.0);
-  assert_eq(state(param, 13.56, 124e-4), 3.008364737, 1e-6);
-  assert_eq(state(param, 13.56, 124e-4), 8.231302261, 1e-6);
-  assert_eq(state(param, 13.56, 13.6e-3), 14.99089372, 1e-5);
-  assert_eq(state(param, 12.0, 13.6e-3), 22.46734637, 1e-5);
+  static immutable param = mk!(Param, dt)(124f.as!mOhm, 42f.as!uH, 8.5f.as!mWb, 87.1f.as!gcm2);
+  static state = State!(param, U, W)();
+
+  assert_eq(state(param, 0.0.as!V, 12.4.as!mNm), 0.0.as!rad_sec);
+  assert_eq(state(param, 13.56.as!V, 12.4.as!mNm), 3.008364737.as!rad_sec, 1e-6);
+  assert_eq(state(param, 13.56.as!V, 12.4.as!mNm), 8.231302261.as!rad_sec, 1e-6);
+  assert_eq(state(param, 13.56.as!V, 13.6.as!mNm), 14.99089372.as!rad_sec, 1e-5);
+  assert_eq(state(param, 12.0.as!V, 13.6.as!mNm), 22.46734637.as!rad_sec, 1e-5);
 }
 
 /// Test motor state (fixed-point)
 nothrow @nogc unittest {
-  alias U = fix!(0, 20);
-  alias W = fix!(0, 100);
+  alias U = typeof(fix!(0, 20)().as!V);
+  alias W = typeof(fix!(0, 100)().as!rad_sec);
+  alias T = typeof(fix!(0, 20)().as!mNm);
 
-  enum auto dt = 0.0001;
+  enum dt = 100f.as!usec;
 
-  static immutable auto param = mk!(Param, dt)(asfix!124e-3, asfix!42e-6, asfix!8.5e-3, asfix!8.71e-6);
-  static auto state = State!(param, U, W)();
+  static immutable param = mk!(Param, dt)(asfix!124.as!mOhm, asfix!42.as!uH, asfix!8.5.as!mWb, asfix!87.1.as!gcm2);
+  static state = State!(param, U, W)();
 
-  alias T = state.T;
-
-  assert_eq(state(param, U(0.0), T(124e-3)), W(0.0));
-  assert_eq(state(param, U(13.56), T(124e-4)), W(3.008364737));
-  assert_eq(state(param, U(13.56), T(124e-4)), W(8.231302261));
-  assert_eq(state(param, U(13.56), T(13.6e-3)), W(14.99089372));
-  assert_eq(state(param, U(12.0), T(13.6e-3)), W(22.46734637));
+  assert_eq(state(param, 0.0.as!V.to!U, 12.4.as!mNm.to!T), 0.0.as!rad_sec.to!W);
+  assert_eq(state(param, 13.56.as!V.to!U, 12.4.as!mNm.to!T), 3.008364737.as!rad_sec.to!W);
+  assert_eq(state(param, 13.56.as!V.to!U, 12.4.as!mNm.to!T), 8.231302261.as!rad_sec.to!W);
+  assert_eq(state(param, 13.56.as!V.to!U, 13.6.as!mNm.to!T), 14.99089372.as!rad_sec.to!W);
+  assert_eq(state(param, 12.0.as!V.to!U, 13.6.as!mNm.to!T), 22.46734637.as!rad_sec.to!W);
 }
