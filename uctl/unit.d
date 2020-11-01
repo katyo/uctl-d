@@ -128,6 +128,10 @@
      - `Nm`
      - Newton·meter
      - `mNm`, `KNm`, `Ncm`, `Nmm`
+   * - Moment of inertia
+     - `Kgm2`
+     - Kilogram·square meter
+     - `Kgcm2`, `Kgmm2`, `gm2`, `gcm2`, `gmm2`, `mgm2`, `ugm2`
    * - Power
      - `W`
      - Watt
@@ -512,6 +516,9 @@ alias Mass = UnitsClass!("Mass");
 /// Torque units
 alias Torque = UnitsClass!("Torque");
 
+/// Moment of inertia
+alias InertiaMoment = UnitsClass!("Inertia Moment");
+
 /// Power units class
 alias Power = UnitsClass!("Power");
 /// Energy units class
@@ -710,6 +717,15 @@ alias mNm = Units!("MilliNewton·Meter", Torque, 1e-3);
 alias KNm = Units!("KiloNewton·Meter", Torque, 1e3);
 alias Ncm = Units!("Newton·CentiMeter", Torque, 1e-2);
 alias Nmm = Units!("Newton·MilliMeter", Torque, 1e-3);
+
+alias Kgm2 = Units!("KiloGram·Meter^2", InertiaMoment);
+alias Kgcm2 = Units!("KiloGram·CentiMeter^2", InertiaMoment, 1e-4);
+alias Kgmm2 = Units!("KiloGram·MilliMeter^2", InertiaMoment, 1e-6);
+alias gm2 = Units!("Gram·Meter^2", InertiaMoment, 1e-3);
+alias mgm2 = Units!("MilliGram·Meter^2", InertiaMoment, 1e-6);
+alias ugm2 = Units!("MicroGram·Meter^2", InertiaMoment, 1e-9);
+alias gcm2 = Units!("Gram·CentiMeter^2", InertiaMoment, 1e-7);
+alias gmm2 = Units!("Gram·MilliMeter^2", InertiaMoment, 1e-9);
 
 alias W = Units!("Watt", Power);
 alias mW = Units!("MilliWatt", Power, 1e-3);
